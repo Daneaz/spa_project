@@ -10,25 +10,25 @@ let logger = require('../../services/logger');
 
 /* GET user list. */
 router.get('/users', async (reqe, res, next) => {
-    let user = await User.findById(res.locals.user.id).populate('Role');
-    if (!user.Role.UserMgt.List) { next(createError(403)); return; }
+    let user = await User.findById(res.locals.user.id).populate('role');
+    if (!user.role.userMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
     let rawUsers = await User.find({ "delFlag": false }).lean()
-        .populate("Role")
+        .populate("role")
         .select({
             "username": 1,
             "email": 1,
             "mobile": 1,
             "displayName": 1,
-            "Role.name": 1,
+            "role.name": 1,
         });
     //fillter & process data for api
     let users = rawUsers.map((i) => {
-        delete i.Role.createdAt;
-        delete i.Role.updatedAt;
-        delete i.Role.delFlag;
-        delete i.Role.__v;
+        delete i.role.createdAt;
+        delete i.role.updatedAt;
+        delete i.role.delFlag;
+        delete i.role.__v;
         return i;
     });
 
@@ -37,18 +37,18 @@ router.get('/users', async (reqe, res, next) => {
 
 /* GET user details by id. */
 router.get('/users/:id', async (reqe, res, next) => {
-    let user = await User.findById(res.locals.user.id).populate('Role');
-    if (!user.Role.UserMgt.Edit) { next(createError(403)); return; }
+    let user = await User.findById(res.locals.user.id).populate('role');
+    if (!user.role.userMgt.edit) { next(createError(403)); return; }
 
     //get raw data from data
     let sUser = await User.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
-        .populate("Role", "name")
+        .populate("role", "name")
         .select({
             "username": 1,
             "email": 1,
             "mobile": 1,
             "displayName": 1,
-            "Role.name": 1,
+            "role.name": 1,
         });
 
     res.send(sUser);
@@ -81,8 +81,8 @@ router.get('/roleexists', async (reqe, res, next) => {
 router.post('/users', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Create) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.create) { next(createError(403)); return; }
 
         let rawNewUser = reqe.body;
 
@@ -97,8 +97,8 @@ router.post('/users', async (reqe, res, next) => {
         //load fields by biz logic
         newUser.password = auth.hash(rawNewUser.password);
 
-        let sRole = await UserRole.findOne({ "name": rawNewUser.Role.name, "delFlag": false });
-        newUser.Role = sRole._id;
+        let sRole = await UserRole.findOne({ "name": rawNewUser.role.name, "delFlag": false });
+        newUser.role = sRole._id;
 
 
         //save user 
@@ -115,8 +115,8 @@ router.post('/users', async (reqe, res, next) => {
 router.patch('/users/:id', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Edit) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.edit) { next(createError(403)); return; }
 
         let rawNewUser = reqe.body;
 
@@ -131,9 +131,9 @@ router.patch('/users/:id', async (reqe, res, next) => {
 
         //load fields by biz logic
         if (rawNewUser.Password) { sUser.password = auth.hash(rawNewUser.Password); }
-        if (rawNewUser.Role.name) {
-            let sRole = await UserRole.findOne({ "name": rawNewUser.Role.name, "delFlag": false });
-            sUser.Role = sRole._id;
+        if (rawNewUser.role.name) {
+            let sRole = await UserRole.findOne({ "name": rawNewUser.role.name, "delFlag": false });
+            sUser.role = sRole._id;
         }
 
         //save user 
@@ -150,8 +150,8 @@ router.patch('/users/:id', async (reqe, res, next) => {
 router.delete('/users', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Delete) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.delete) { next(createError(403)); return; }
 
         //save user 
         let deleteId = [];
@@ -172,8 +172,8 @@ router.delete('/users', async (reqe, res, next) => {
 /* GET role list. */
 router.get('/roles', async (reqe, res, next) => {
 
-    let user = await User.findById(res.locals.user.id).populate('Role');
-    if (!user.Role.UserMgt.List) { next(createError(403)); return; }
+    let user = await User.findById(res.locals.user.id).populate('role');
+    if (!user.role.userMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
     let rawRoles = await UserRole.find({ "delFlag": false }).lean()
@@ -187,8 +187,8 @@ router.get('/roles', async (reqe, res, next) => {
 
 /* GET role details by id. */
 router.get('/roles/:id', async (reqe, res, next) => {
-    let user = await User.findById(res.locals.user.id).populate('Role');
-    if (!user.Role.UserMgt.Edit) { next(createError(403)); return; }
+    let user = await User.findById(res.locals.user.id).populate('role');
+    if (!user.role.userMgt.edit) { next(createError(403)); return; }
 
     //get raw data from data
     let sUserRole = await UserRole.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
@@ -201,8 +201,8 @@ router.get('/roles/:id', async (reqe, res, next) => {
 router.post('/roles', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Create) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.create) { next(createError(403)); return; }
 
         let rawNewRole = reqe.body;
 
@@ -217,7 +217,7 @@ router.post('/roles', async (reqe, res, next) => {
 
         //save role 
         let doc = await newRole.save();
-        let rsObj = { ok: "User Role has been created.", id: doc._id };
+        let rsObj = { ok: "User role has been created.", id: doc._id };
         logger.audit("User Mgt", "Create", doc._id, user.id, `A new user role has been created by ${user.displayName}`);
         res.json(rsObj);
 
@@ -229,8 +229,8 @@ router.post('/roles', async (reqe, res, next) => {
 router.patch('/roles/:id', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Edit) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.edit) { next(createError(403)); return; }
 
         let rawNewRole = reqe.body;
         //load main fields
@@ -238,7 +238,7 @@ router.patch('/roles/:id', async (reqe, res, next) => {
         sRole.updatedBy = user._id;
 
         sRole.name = rawNewRole.name || sRole.name;
-        sRole.UserMgt = rawNewRole.UserMgt || sRole.UserMgt;
+        sRole.userMgt = rawNewRole.userMgt || sRole.userMgt;
         sRole.MasterData = rawNewRole.MasterData || sRole.MasterData;
         sRole.Room = rawNewRole.Room || sRole.Room;
         sRole.Blackout = rawNewRole.Blackout || sRole.Blackout;
@@ -259,8 +259,8 @@ router.patch('/roles/:id', async (reqe, res, next) => {
 router.delete('/roles/:id', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Delete) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.delete) { next(createError(403)); return; }
 
         //save role 
         let delObj = { updatedBy: user._id, delFlag: true };

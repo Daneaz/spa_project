@@ -76,8 +76,8 @@ class NewStaff extends React.Component {
                                 if (!this.state.selectedOption)
                                     throw new Error('Please select a role')
                                 else {
-                                    values.Role = {};
-                                    values.Role.name = this.state.selectedOption.value;
+                                    values.role = {};
+                                    values.role.name = this.state.selectedOption.value;
                                 }
                                 const respObj = await fetchAPI('POST', 'userMgt/users', values);
 

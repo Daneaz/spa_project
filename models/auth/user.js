@@ -12,7 +12,7 @@ var UserSchema = new Schema({
     email       : { type: String, lowercase: true, required: true },
     mobile      : { type: String, lowercase: true },
     displayName : { type: String, required: true },
-    Role        : { type: Schema.Types.ObjectId, ref: 'UserRole', required: true },
+    role        : { type: Schema.Types.ObjectId, ref: 'UserRole', required: true },
     delFlag     : { type: Boolean, index: true, default: false }
 }, { timestamps: true });
 //UserSchema.path('updatedAt').index({ expires: 120 });

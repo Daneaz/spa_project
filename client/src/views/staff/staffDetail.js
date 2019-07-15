@@ -73,8 +73,8 @@ class ClientDetail extends React.Component {
                                 if (!this.state.selectedOption)
                                     throw new Error('Please select a role')
                                 else {
-                                    values.Role = {};
-                                    values.Role.name = this.state.selectedOption.value;
+                                    values.role = {};
+                                    values.role.name = this.state.selectedOption.value;
                                 }
                                 const respObj = await fetchAPI('PATCH', `userMgt/clients/${this.props.location.state.data[0]}`, values);
 

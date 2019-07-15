@@ -27,9 +27,9 @@ router.post('/login', async (reqe, res, next) => {
                     id          : userObj._id,
                     username   : userObj.username,
                     displayName : userObj.displayName,
-                    Role        : {
-                        id      : userObj.Role._id,
-                        name    : userObj.Role.name
+                    role        : {
+                        id      : userObj.role._id,
+                        name    : userObj.role.name
                     },
                     IP          : ip
                 }
@@ -39,10 +39,10 @@ router.post('/login', async (reqe, res, next) => {
                 let token = auth.issueJwtCookie(userData, res);
 
                 //clear up data
-                delete userObj.Role.createdAt;
-                delete userObj.Role.updatedAt;
-                delete userObj.Role.delFlag;
-                delete userObj.Role.__v;
+                delete userObj.role.createdAt;
+                delete userObj.role.updatedAt;
+                delete userObj.role.delFlag;
+                delete userObj.role.__v;
 
                 var rsJson = {
                     "ok"    : `User has logined from ${ip}`,

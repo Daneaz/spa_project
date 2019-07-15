@@ -110,7 +110,7 @@ exports.getUserByLogin = async (username, password) => {
         let passCode = hash(password);
         let user = await User.findOne({"username": username, "password" : passCode, "delFlag" : false}).lean({ virtuals: true })
                                 .select({"password": 0, "delFlag": 0, "createdAt": 0, "updatedAt": 0, "__v": 0})
-                                .populate('Role');
+                                .populate('role');
         return user;
     } catch (exception) {
         throw new Error(exception.message);

@@ -8,17 +8,17 @@ var Schema = mongoose.Schema;
 
 var UserRoleSchema = new Schema({
     name        : { type: String, unique: true, required: true },
-    UserMgt     : {
-        List    : { type: Boolean, index: true, default: false },
-        Create  : { type: Boolean, index: true, default: false },
-        Edit    : { type: Boolean, index: true, default: false },
-        Delete  : { type: Boolean, index: true, default: false }
+    userMgt     : {
+        list    : { type: Boolean, index: true, default: false },
+        create  : { type: Boolean, index: true, default: false },
+        edit    : { type: Boolean, index: true, default: false },
+        delete  : { type: Boolean, index: true, default: false }
     },
-    MasterData  : {
-        List    : { type: Boolean, index: true, default: false },
-        Create  : { type: Boolean, index: true, default: false },
-        Edit    : { type: Boolean, index: true, default: false },
-        Delete  : { type: Boolean, index: true, default: false }
+    serviceMgt  : {
+        list    : { type: Boolean, index: true, default: false },
+        create  : { type: Boolean, index: true, default: false },
+        edit    : { type: Boolean, index: true, default: false },
+        delete  : { type: Boolean, index: true, default: false }
     },
     Room        : {
         List    : { type: Boolean, index: true, default: false },

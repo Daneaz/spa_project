@@ -61,7 +61,7 @@ const columns = [
     }
   },
   {
-    name: "Role.name",
+    name: "role.name",
     label: "Role",
     options: {
       filter: true,

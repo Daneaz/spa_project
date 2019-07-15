@@ -9,8 +9,8 @@ let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 
 router.get('/clients', async (reqe, res, next) => {
-    let user = await User.findById(res.locals.user.id).populate('Role');
-    if (!user.Role.UserMgt.List) { next(createError(403)); return; }
+    let user = await User.findById(res.locals.user.id).populate('role');
+    if (!user.role.userMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
     let rawClients = await Client.find({ "delFlag": false }).lean()
@@ -28,8 +28,8 @@ router.get('/clients', async (reqe, res, next) => {
 router.post('/clients', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Create) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.create) { next(createError(403)); return; }
 
         let rawNewClient = reqe.body;
 
@@ -56,8 +56,8 @@ router.post('/clients', async (reqe, res, next) => {
 
 /* GET client details by username. */
 router.get('/clients/:id', async (reqe, res, next) => {
-    let user = await User.findById(res.locals.user.id).populate('Role');
-    if (!user.Role.UserMgt.Edit) { next(createError(403)); return; }
+    let user = await User.findById(res.locals.user.id).populate('role');
+    if (!user.role.userMgt.edit) { next(createError(403)); return; }
 
     //get raw data from data
     let client = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
@@ -75,8 +75,8 @@ router.get('/clients/:id', async (reqe, res, next) => {
 router.patch('/clients/:id', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Edit) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.edit) { next(createError(403)); return; }
 
         let rawNewClient = reqe.body;
 
@@ -106,8 +106,8 @@ router.patch('/clients/:id', async (reqe, res, next) => {
 router.delete('/clients', async (reqe, res, next) => {
     try {
 
-        let user = await User.findById(res.locals.user.id).populate('Role');
-        if (!user.Role.UserMgt.Delete) { next(createError(403)); return; }
+        let user = await User.findById(res.locals.user.id).populate('role');
+        if (!user.role.userMgt.delete) { next(createError(403)); return; }
 
         //save user 
         let deleteId = [];

@@ -12,7 +12,7 @@ export const setUser = (userObj) => { setLocalStorage('user', JSON.stringify(use
 export const getUser = () => {
     try {
         const userObj = JSON.parse(getLocalStorage('user'));
-        if (userObj._id && userObj.username && userObj.displayName && userObj.Role && getToken()) { return userObj } else { return null }
+        if (userObj._id && userObj.username && userObj.displayName && userObj.role && getToken()) { return userObj } else { return null }
     } catch{ return null }
 };
 export const getAvatarLetter = (fullText) => { 

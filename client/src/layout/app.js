@@ -99,7 +99,7 @@ function NavMenu(props) {
     return (
         <div>
             <div className={props.classes.toolbar}>
-                <img src={logo} alt="Logo" style={{ width: 180, marginTop: 12, marginBottom: 8, marginLeft: 15 }} />
+                <img src={logo} alt="Logo" style={{ width: 180, marginTop: 12, marginBottom: 8, marginLeft: 30 }} />
             </div>
             <Divider />
             <List>
