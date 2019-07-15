@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "outputCapture" : "std" ,
+            "name": "Launch",
+            "program": "${workspaceFolder}/bin/www",
+            "env"           : {
+                "PORT"          : "3030",
+                // "MongoDB_ConnectionString" : "mongodb://13.251.30.223:27017/mrmDB",
+                "MongoDB_ConnectionString" : "mongodb://localhost:27017/spaDB",
+                "Secret"        : "D2C4F54C83213ABF391C11DD4EESD",
+                "DeviceSecret"  : "1DD4F39ES34CC4121CFAB3E2158DD",
+                "SecretKey"     : "t6v8y$B&E)H@McQvCjWnZr4u7x!z%C*F",
+                "LogFolder"     : "log/"
+            }
+        }
+    ]
+}
