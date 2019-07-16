@@ -14,11 +14,7 @@ var indexRouter = require('./routes/index');
 var apiAuthRouter = require('./routes/apis/auth');
 var apiUserMgtRouter = require('./routes/apis/userMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
-
-var deviceRouter = require('./routes/apis/device');
-
-var apiMasterDataRouter = require('./routes/apis/masterData');
-var roomRouter = require('./routes/apis/room');
+var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
 
 var app = express();
 
@@ -43,13 +39,13 @@ app.locals.ver = pjson.version;
 //routing
 app.use('/api', indexRouter);
 app.use(`/api/auth`, apiAuthRouter);
-app.use(`/api/device`, deviceRouter);
+
 // check jwt if invalid
 app.use(auth.checkJwt);
 app.use('/api/userMgt', apiUserMgtRouter);
 app.use('/api/clientMgt', apiClientMgtRouter);
-app.use('/api/masterData', apiMasterDataRouter);
-app.use('/api/rooms', roomRouter);
+app.use('/api/serviceMgt', apiServiceMgtRouter);
+
 
 
 // catch 404 and forward to error handler

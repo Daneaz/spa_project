@@ -11,18 +11,17 @@ let logger = require('../../services/logger');
 /* GET service list. */
 router.get('/services', async (reqe, res, next) => {
     let user = await User.findById(res.locals.user.id).populate('role');
-    if (!user.role.ServiceMgt.List) { next(createError(403)); return; }
+    if (!user.role.serviceMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
     let services = await Service.find({ "delFlag": false }).lean()
-        .populate("User")
+        .populate("user")
         .select({
             "name": 1,
             "duration": 1,
             "price": 1,
-            "Staff": 1,
+            "user": 1,
         });
-
     res.send(services);
 });
 
@@ -53,3 +52,4 @@ router.post('/services', async (reqe, res, next) => {
 
 });
 
+module.exports = router;

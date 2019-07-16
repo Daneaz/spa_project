@@ -5,6 +5,9 @@ import {
 } from '@material-ui/core';
 import AppLayout from '../../layout/app'
 import MUIDataTable from "mui-datatables";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import AddIcon from "@material-ui/icons/Add";
 import Swal from 'sweetalert2';
 import { fetchAPI } from '../../utils';
 
@@ -117,22 +120,21 @@ class Client extends React.Component {
     return (
       <AppLayout title="Clients" {...this.props} >
         <Grid container justify="flex-end" spacing={32} >
-          <div className={classes.row}>
-            <Button
-              color="primary"
-              size="small"
-              variant="outlined"
-              onClick={this.handleAddClient}
-            >
-              New Client
-              </Button>
-          </div>
           <Grid item xs={12}>
             <MUIDataTable
               title="Client List"
               data={this.state.clientList}
               columns={columns}
               options={{
+                customToolbar: () => {
+                  return (
+                    <Tooltip title={"Add Client"}>
+                      <IconButton onClick={this.handleAddClient}>
+                        <AddIcon />
+                      </IconButton>
+                    </Tooltip>
+                  );
+                },
                 onRowClick: rowData => {
                   this.handleRowClick(rowData);
                 },

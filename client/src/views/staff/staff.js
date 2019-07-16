@@ -6,7 +6,9 @@ import {
 import Swal from 'sweetalert2';
 import AppLayout from '../../layout/app'
 import MUIDataTable from "mui-datatables";
-
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import AddIcon from "@material-ui/icons/Add";
 import { fetchAPI } from '../../utils';
 
 const styles = theme => ({
@@ -119,22 +121,21 @@ class Staff extends React.Component {
     return (
       <AppLayout title="Staff List" {...this.props} >
         <Grid container justify="flex-end" spacing={32} >
-          <div className={classes.row}>
-            <Button
-              color="primary"
-              size="small"
-              variant="outlined"
-              onClick={this.handleAddStaff}
-            >
-              New Staff
-              </Button>
-          </div>
           <Grid item xs={12}>
             <MUIDataTable
               title="Client List"
               data={this.state.userList}
               columns={columns}
               options={{
+                customToolbar: () => {
+                  return (
+                    <Tooltip title={"Add Staff"}>
+                      <IconButton onClick={this.handleAddStaff}>
+                        <AddIcon />
+                      </IconButton>
+                    </Tooltip>
+                  );
+                },
                 onRowClick: rowData => {
                   this.handleRowClick(rowData);
                 },
