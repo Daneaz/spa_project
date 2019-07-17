@@ -27,7 +27,7 @@ class ClientDetail extends React.Component {
     render() {
         const { classes } = this.props;
         return (
-            <AppLayout title="Client Details" {...this.props} >
+            <AppLayout title="Staff Details" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
                     <Typography>
                         <h3>
@@ -36,7 +36,7 @@ class ClientDetail extends React.Component {
                     </Typography>
                     <CssBaseline />
                     <Formik
-                        initialValues={{ username: this.props.location.state.data[0], displayName:this.props.location.state.data[1], mobile: this.props.location.state.data[3], email: this.props.location.state.data[2] }}
+                        initialValues={{ username: this.props.location.state.data.username, displayName: this.props.location.state.data.displayName, mobile: this.props.location.state.data.mobile, email: this.props.location.state.data.email }}
                         validate={values => {
                             const errors = {};
                             if (!values.username) { errors.username = 'Please enter username' }
@@ -48,7 +48,7 @@ class ClientDetail extends React.Component {
                         }}
                         onSubmit={async (values, { setSubmitting }) => {
                             try {
-                                const respObj = await fetchAPI('PATCH', `clientMgt/clients/${this.props.location.state.data[0]}`, values);
+                                const respObj = await fetchAPI('PATCH', `clientMgt/clients/${this.props.location.state.data._id}`, values);
 
                                 if (respObj && respObj.ok) {
                                     window.history.back();

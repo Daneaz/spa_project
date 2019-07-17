@@ -45,7 +45,7 @@ router.post('/login', async (reqe, res, next) => {
                 delete userObj.role.__v;
 
                 var rsJson = {
-                    "ok"    : `User has logined from ${ip}`,
+                    "ok"    : `Staff has logined from ${ip}`,
                     "token" : token,
                     "user"  : userObj
                 };

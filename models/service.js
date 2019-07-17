@@ -10,8 +10,8 @@ var ServiceSchema = new Schema({
     name: { type: String, unique: true, required: true },
     duration: { type: Number },
     price: { type: Number },
-    user: [
-        { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    staff: [
+        { type: Schema.Types.ObjectId, ref: 'Staff', required: true }
     ],
     delFlag: { type: Boolean, index: true, default: false },
 }, { timestamps: true });

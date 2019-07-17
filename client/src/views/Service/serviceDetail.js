@@ -1,5 +1,5 @@
 import React from 'react';
-import Select from 'react-select';
+import Picky from 'react-picky';
 import { withStyles } from '@material-ui/styles';
 import {
     Typography, Button, CssBaseline, Container, LinearProgress
@@ -27,60 +27,72 @@ const styles = theme => ({
 });
 
 class ClientDetail extends React.Component {
-    state = {
-        selectedOption: { value: this.props.location.state.data.role.name, label: this.props.location.state.data.role.name },
-        roleList: [],
-    };
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            staffList: [],
+            arrayValue: [],
+        };
+        this.selectMultipleOption = this.selectMultipleOption.bind(this);
+    }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/roles');
-        this.setState({ roleList: response });
+        const response = await fetchAPI('GET', 'staffMgt/staffs');
+        if (this.props.location.state.data.staff === "All Staff") {
+            this.setState({ arrayValue: response });
+        } else {
+            const service = await fetchAPI('GET', `serviceMgt/services/${this.props.location.state.data._id}`);
+            this.setState({ arrayValue: service.staff });
+        }
+        this.setState({ staffList: response });
+    }
+
+    selectMultipleOption(value) {
+        this.setState({ arrayValue: value });
     }
 
     handleChange = selectedOption => {
         this.setState({ selectedOption });
     };
 
-
     render() {
         const { classes } = this.props;
-        const { selectedOption } = this.state;
-        let options = this.state.roleList.map(function (role) {
-            return { value: role.name, label: role.name };
-        })
+
         return (
-            <AppLayout title="Staff Details" {...this.props} >
+            <AppLayout title="Service Details" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
                     <Typography>
                         <h3>
-                            Personal Infomation
+                            Service Details
                         </h3>
                     </Typography>
                     <CssBaseline />
                     <Formik
-                        initialValues={{ username: this.props.location.state.data.username, displayName: this.props.location.state.data.displayName, mobile: this.props.location.state.data.mobile, email: this.props.location.state.data.email }}
+                        initialValues={{ name: this.props.location.state.data.name, price: this.props.location.state.data.price, duration: this.props.location.state.data.duration }}
                         validate={values => {
                             const errors = {};
-                            if (!values.username) { errors.username = 'Please enter username' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
-                            if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.email) { errors.email = 'Please enter email address' }
-                            if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
+                            if (!values.name) { errors.name = 'Please enter service name' }
                             return errors;
                         }}
-                        onSubmit={async (values, { setSubmitting }) => {
+                        onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                if (!this.state.selectedOption)
-                                    throw new Error('Please select a role')
+                                let rawStaffList = this.state.arrayValue;
+                                if (!rawStaffList)
+                                    throw new Error('Please select a staff')
                                 else {
-                                    values.role = {};
-                                    values.role.name = this.state.selectedOption.value;
+                                    let staffList = [];
+                                    for (let i = 0; i < rawStaffList.length; i++) {
+                                        staffList.push(rawStaffList[i]._id)
+                                    }
+                                    values.staff = staffList;
                                 }
-                                const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
+                                const respObj = await fetchAPI('POST', 'serviceMgt/services', values);
 
                                 if (respObj && respObj.ok) {
+
                                     window.history.back();
-                                } else { throw new Error('Update failed') }
+                                } else { throw new Error('Fail to add service') }
                             } catch (err) {
                                 Swal.fire({
                                     type: 'error', text: 'Please try again.',
@@ -93,37 +105,32 @@ class ClientDetail extends React.Component {
                             <Form>
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth autoFocus
-                                    name="username" label="Username" disabled
+                                    name="name" label="Service Name"
                                 />
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="password" label="New Passowrd" type="password"
+                                    name="price" label="Price ($)" type="number"
                                 />
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="confirmPassoword" label="Confirm Password" type="password"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="displayName" label="Display Name"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="mobile" label="Mobile" type="number"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="email" label="Email"
+                                    name="duration" label="Duration (min)" type="number"
                                 />
                                 <Typography>
-                                    <h5>
-                                        Role
-                                    </h5>
+                                    <h4>
+                                        Select staff who perform this service.
+                                    </h4>
                                 </Typography>
-                                <Select className={classes.select}
-                                    onChange={this.handleChange}
-                                    options={options}
-                                    value={selectedOption}
+                                <Picky
+                                    value={this.state.arrayValue}
+                                    options={this.state.staffList}
+                                    onChange={this.selectMultipleOption}
+                                    numberDisplayed={10}
+                                    valueKey="_id"
+                                    labelKey="displayName"
+                                    multiple={true}
+                                    includeSelectAll={true}
+                                    includeFilter={true}
+                                    dropdownHeight={600}
                                 />
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}

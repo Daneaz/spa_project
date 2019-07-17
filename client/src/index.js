@@ -14,10 +14,15 @@ import Calendar from './views/calendar';
 import Client from './views/Client/client';
 import NewClient from './views/Client/newClient';
 import ClientDetail from './views/Client/clientDetail'
-import Staff from './views/staff/staff';
-import NewStaff from './views/staff/newStaff';
-import StaffDetail from './views/staff/staffDetail';
-import Service from './views/service';
+
+import Staff from './views/Staff/staff';
+import NewStaff from './views/Staff/newStaff';
+import StaffDetail from './views/Staff/staffDetail';
+
+import Service from './views/Service/service';
+import NewService from './views/Service/newService';
+import ServiceDetail from './views/Service/serviceDetail';
+
 import Message from './views/message';
 import Report from './views/report';
 
@@ -57,15 +62,23 @@ function Routers() {
                     <PrivateRoute exact path="/" component={Dashboard} />
                     <PrivateRoute exact path="/dashboard" component={Dashboard} />
                     <PrivateRoute exact path="/calendar" component={Calendar} />
-                    <PrivateRoute exact path="/client" component={Client} />
-                    <PrivateRoute exact path="/staff" component={Staff} />
-                    <PrivateRoute exact path="/service" component={Service} />
+
                     <PrivateRoute exact path="/message" component={Message} />
                     <PrivateRoute exact path="/report" component={Report} />
+
+                    <PrivateRoute exact path="/client" component={Client} />
                     <PrivateRoute exact path="/newclient" component={NewClient} />
-                    <PrivateRoute exact path="/newstaff" component={NewStaff} />
                     <PrivateRoute exact path="/clientdetail" component={ClientDetail} />
+
+                    <PrivateRoute exact path="/staff" component={Staff} />
+                    <PrivateRoute exact path="/newstaff" component={NewStaff} />
                     <PrivateRoute exact path="/staffdetail" component={StaffDetail} />
+
+                    <PrivateRoute exact path="/service" component={Service} />
+                    <PrivateRoute exact path="/newservice" component={NewService} />
+                    <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
+
+                    
                     <Route component={ErrorPage} />
                 </Switch>
             </Router>

@@ -79,7 +79,7 @@ class Staff extends React.Component {
   }
 
   async componentDidMount() {
-    const response = await fetchAPI('GET', 'userMgt/users');
+    const response = await fetchAPI('GET', 'staffMgt/staffs');
     this.setState({ userList: response });
   }
 
@@ -88,12 +88,12 @@ class Staff extends React.Component {
     history.push('/newstaff');
   }
 
-  handleRowClick = (data) => {
+  handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
       pathname: "/staffdetail",
       state: {
-        data: data
+        data: this.state.userList[rowMeta.dataIndex]
       }
     });
   }
@@ -103,7 +103,7 @@ class Staff extends React.Component {
       const deleteObjList = rowsDeleted.map((row) => {
         return this.state.userList[row.dataIndex]
       });
-      const response = await fetchAPI('DELETE', 'userMgt/users', deleteObjList);
+      const response = await fetchAPI('DELETE', 'staffMgt/staffs', deleteObjList);
       if (response && response.ok) {
         alert("Clients are deleted");
       } else { throw new Error('Delete failed') }
@@ -136,8 +136,8 @@ class Staff extends React.Component {
                     </Tooltip>
                   );
                 },
-                onRowClick: rowData => {
-                  this.handleRowClick(rowData);
+                onRowClick: (rowData, rowMeta) => {
+                  this.handleRowClick(rowMeta);
                 },
                 onRowsDelete: rowsDeleted => {
                   this.handleRowDelete(rowsDeleted.data);

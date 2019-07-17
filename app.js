@@ -12,7 +12,7 @@ let logger = require('./services/logger');
 
 var indexRouter = require('./routes/index');
 var apiAuthRouter = require('./routes/apis/auth');
-var apiUserMgtRouter = require('./routes/apis/userMgt');
+var apiUserMgtRouter = require('./routes/apis/staffMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
 var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
 
@@ -42,7 +42,7 @@ app.use(`/api/auth`, apiAuthRouter);
 
 // check jwt if invalid
 app.use(auth.checkJwt);
-app.use('/api/userMgt', apiUserMgtRouter);
+app.use('/api/staffMgt', apiUserMgtRouter);
 app.use('/api/clientMgt', apiClientMgtRouter);
 app.use('/api/serviceMgt', apiServiceMgtRouter);
 

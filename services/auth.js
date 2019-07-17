@@ -7,8 +7,8 @@ let jwt = require('jsonwebtoken');
 let zlib = require('zlib');
 let cookie = require('cookie');
 
-let User = require('../models/auth/user');
-let UserRole = require('../models/auth/userrole');
+let Staff = require('../models/auth/staff');
+let StaffRole = require('../models/auth/staffrole');
 
 //** hash data thought SHA256 */
 function hash(data) {
@@ -108,7 +108,7 @@ exports.issueJwtCookie = (userObj, res) => {
 exports.getUserByLogin = async (username, password) => {
     try {
         let passCode = hash(password);
-        let user = await User.findOne({"username": username, "password" : passCode, "delFlag" : false}).lean({ virtuals: true })
+        let user = await Staff.findOne({"username": username, "password" : passCode, "delFlag" : false}).lean({ virtuals: true })
                                 .select({"password": 0, "delFlag": 0, "createdAt": 0, "updatedAt": 0, "__v": 0})
                                 .populate('role');
         return user;

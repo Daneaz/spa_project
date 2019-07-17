@@ -1,5 +1,6 @@
 import React from 'react';
-import Select from 'react-select';
+import Picky from 'react-picky';
+import 'react-picky/dist/picky.css';
 import { withStyles } from '@material-ui/styles';
 import {
     Typography, Button, CssBaseline, Container, LinearProgress
@@ -29,62 +30,61 @@ const styles = theme => ({
 
 class NewStaff extends React.Component {
 
-    state = {
-        selectedOption: {value:"Manager", label:"Manager"},
-        roleList: [],
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            staffList: [],
+            arrayValue: []
+        };
+        this.selectMultipleOption = this.selectMultipleOption.bind(this);
+    }
 
-    handleChange = selectedOption => {
-        this.setState({ selectedOption });
-    };
+    selectMultipleOption(value) {
+        this.setState({ arrayValue: value });
+    }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/roles');
-        this.setState({ roleList: response });
+        const response = await fetchAPI('GET', 'staffMgt/staffs');
+        this.setState({ staffList: response });
     }
 
     render() {
         const { classes } = this.props;
-        const { selectedOption } = this.state;
-        let options = this.state.roleList.map(function (role) {
-            return { value: role.name, label: role.name };
-        })
+
         return (
-            <AppLayout title="New Staff" {...this.props} >
+            <AppLayout title="New Service" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
                     <Typography>
                         <h3>
-                            Personal Infomation
+                            Service Details
                         </h3>
                     </Typography>
                     <CssBaseline />
                     <Formik
-                        initialValues={{ username: '', password: '', confirmPassoword: '', mobile: '', email: '', selectedOption: '' }}
+                        initialValues={{ name: '', price: '', duration: '' }}
                         validate={values => {
                             const errors = {};
-                            if (!values.username) { errors.username = 'Please enter username' }
-                            if (!values.password) { errors.password = 'Please enter password' }
-                            if (!values.confirmPassoword) { errors.confirmPassoword = 'Please enter password' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
-                            if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.email) { errors.email = 'Please enter email address' }
-                            if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
+                            if (!values.name) { errors.name = 'Please enter service name' }
                             return errors;
                         }}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                if (!this.state.selectedOption)
-                                    throw new Error('Please select a role')
+                                let rawStaffList = this.state.arrayValue;
+                                if (!rawStaffList)
+                                    throw new Error('Please select a staff')
                                 else {
-                                    values.role = {};
-                                    values.role.name = this.state.selectedOption.value;
+                                    let staffList = [];
+                                    for (let i = 0; i < rawStaffList.length; i++) {
+                                        staffList.push(rawStaffList[i]._id)
+                                    }
+                                    values.staff = staffList;
                                 }
-                                const respObj = await fetchAPI('POST', 'staffMgt/staffs', values);
+                                const respObj = await fetchAPI('POST', 'serviceMgt/services', values);
 
                                 if (respObj && respObj.ok) {
 
                                     window.history.back();
-                                } else { throw new Error('Register failed') }
+                                } else { throw new Error('Fail to add service') }
                             } catch (err) {
                                 Swal.fire({
                                     type: 'error', text: 'Please try again.',
@@ -97,37 +97,32 @@ class NewStaff extends React.Component {
                             <Form>
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth autoFocus
-                                    name="username" label="Username"
+                                    name="name" label="Service Name"
                                 />
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="password" label="Password" type="password"
+                                    name="price" label="Price ($)" type="number"
                                 />
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="confirmPassoword" label="Confirm Password" type="password"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="displayName" label="Display Name"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="mobile" label="Mobile" type="number"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="email" label="Email"
+                                    name="duration" label="Duration (min)" type="number"
                                 />
                                 <Typography>
-                                    <h5>
-                                        Role
-                                    </h5>
+                                    <h4>
+                                        Select staff who perform this service.
+                                    </h4>
                                 </Typography>
-                                <Select className={classes.select}
-                                    onChange={this.handleChange}
-                                    options={options}
-                                    value={selectedOption}
+                                <Picky
+                                    value={this.state.arrayValue}
+                                    options={this.state.staffList}
+                                    onChange={this.selectMultipleOption}
+                                    numberDisplayed={10}
+                                    valueKey="_id"
+                                    labelKey="displayName"
+                                    multiple={true}
+                                    includeSelectAll={true}
+                                    includeFilter={true}
+                                    dropdownHeight={600}
                                 />
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}

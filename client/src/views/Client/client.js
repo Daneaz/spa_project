@@ -88,12 +88,12 @@ class Client extends React.Component {
     history.push('/newclient');
   }
 
-  handleRowClick = (data) => {
+  handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
       pathname: "/clientdetail",
       state: {
-        data: data
+        data: this.state.clientList[rowMeta.dataIndex]
       }
     });
   }
@@ -135,8 +135,8 @@ class Client extends React.Component {
                     </Tooltip>
                   );
                 },
-                onRowClick: rowData => {
-                  this.handleRowClick(rowData);
+                onRowClick: (rowData, rowMeta) => {
+                  this.handleRowClick(rowMeta);
                 },
                 onRowsDelete: rowsDeleted => {
                   this.handleRowDelete(rowsDeleted.data);
