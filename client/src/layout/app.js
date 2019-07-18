@@ -14,11 +14,13 @@ import {
     Spa as SpaIcon,
     Dashboard as DashboardIcon,
     CalendarToday as CalendarIcon,
-    WorkOutline as StaffIcon,
+    Work as StaffIcon,
+    WorkOff as WorkOffIcon,
     BarChart as BarChartIcon,
     People as PeopleIcon,
     Message as MessageIcon,
     AccountCircle as AccountCircleIcon,
+    Settings as SettingsIcon,
 } from '@material-ui/icons';
 import { removeToken, removeUser, getAvatarLetter } from '../utils';
 import logo from '../logo.png';
@@ -168,6 +170,22 @@ function NavMenu(props) {
                         primary="Staffs"
                     />
                 </ListItem>
+
+                <ListItem
+                    activeClassName={props.classes.activeListItem}
+                    className={props.classes.listItem}
+                    component={NavLink}
+                    to="/workoff"
+                >
+                    <ListItemIcon className={props.classes.listItemIcon}>
+                        <WorkOffIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                        classes={{ primary: props.classes.listItemText }}
+                        primary="Work Off"
+                    />
+                </ListItem>
+                
                 <ListItem
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}
@@ -208,9 +226,25 @@ function NavMenu(props) {
                     </ListItemIcon>
                     <ListItemText
                         classes={{ primary: props.classes.listItemText }}
-                        primary="Report"
+                        primary="Reports"
                     />
                 </ListItem>
+
+                <ListItem
+                    activeClassName={props.classes.activeListItem}
+                    className={props.classes.listItem}
+                    component={NavLink}
+                    to="/setting"
+                >
+                    <ListItemIcon className={props.classes.listItemIcon}>
+                        <SettingsIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                        classes={{ primary: props.classes.listItemText }}
+                        primary="Settings"
+                    />
+                </ListItem>
+                
             </List>
         </div>
     );
@@ -265,7 +299,6 @@ class AppLayout extends React.Component {
 
         return (
             <div className={classes.root}>
-                {/* <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" /> */}
                 <CssBaseline />
                 <AppBar position="fixed" className={classes.appBar} >
                     <Toolbar>

@@ -8,7 +8,7 @@ import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import AddIcon from "@material-ui/icons/Add";
-
+import Swal from 'sweetalert2';
 import { fetchAPI } from '../../utils';
 import AppLayout from '../../layout/app'
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -111,6 +111,24 @@ class Service extends React.Component {
         data: this.state.serviceList[rowMeta.dataIndex]
       }
     });
+  }
+
+  async handleRowDelete(rowsDeleted) {
+    try {
+      const deleteObjList = rowsDeleted.map((row) => {
+        return this.state.serviceList[row.dataIndex]
+      });
+      const response = await fetchAPI('DELETE', 'serviceMgt/services', deleteObjList);
+      if (response && response.ok) {
+        alert("Clients are deleted");
+      } else { throw new Error('Delete failed') }
+    }
+    catch (err) {
+      Swal.fire({
+        type: 'error',
+        title: err.message
+      })
+    }
   }
 
   render() {

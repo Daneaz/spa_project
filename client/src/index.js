@@ -25,7 +25,8 @@ import ServiceDetail from './views/Service/serviceDetail';
 
 import Message from './views/message';
 import Report from './views/report';
-
+import Setting from './views/setting';
+import WorkOff  from './views/workOff';
 
 
 
@@ -74,11 +75,13 @@ function Routers() {
                     <PrivateRoute exact path="/newstaff" component={NewStaff} />
                     <PrivateRoute exact path="/staffdetail" component={StaffDetail} />
 
+                    <PrivateRoute exact path="/workoff" component={WorkOff} />
+
                     <PrivateRoute exact path="/service" component={Service} />
                     <PrivateRoute exact path="/newservice" component={NewService} />
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
 
-                    
+                    <PrivateRoute exact path="/setting" component={Setting} />
                     <Route component={ErrorPage} />
                 </Switch>
             </Router>

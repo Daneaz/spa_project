@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress
+    Typography, Button, CssBaseline, Container, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
@@ -10,6 +10,9 @@ import { TextField } from 'formik-material-ui';
 import { fetchAPI, setToken, setUser, removeToken, removeUser } from '../../utils';
 import Swal from 'sweetalert2';
 import AppLayout from '../../layout/app'
+import InfiniteCalendar, { Calendar, defaultMultipleDateInterpolation, withMultipleDates } from 'react-infinite-calendar';
+import 'react-infinite-calendar/styles.css'
+
 
 const styles = theme => ({
     container: {
@@ -32,15 +35,36 @@ class NewStaff extends React.Component {
     state = {
         selectedOption: {value:"Manager", label:"Manager"},
         roleList: [],
-    };
-
-    handleChange = selectedOption => {
-        this.setState({ selectedOption });
+        selectedDates: [],
+        open: false,
     };
 
     async componentDidMount() {
         const response = await fetchAPI('GET', 'staffMgt/roles');
         this.setState({ roleList: response });
+    }
+
+    handleChange = selectedOption => {
+        this.setState({ selectedOption });
+    };
+
+    handleMultiSelectDates(selectedDate) {
+        let selectedDates = defaultMultipleDateInterpolation(selectedDate, this.state.selectedDates)
+        this.setState({
+            selectedDates: selectedDates
+        })
+    }
+
+    handleClickOpen = () => {
+        this.setState({ open: true });
+    };
+
+    handleOpen = () => {
+        this.setState({ open: false });
+    }
+
+    handleClose = () => {
+        this.setState({ open: false });
     }
 
     render() {
@@ -129,6 +153,31 @@ class NewStaff extends React.Component {
                                     options={options}
                                     value={selectedOption}
                                 />
+                                <Typography>
+                                    <h5>
+                                        Off Days
+                                    </h5>
+                                </Typography>
+                                <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
+                                    Please Select Off Days...
+                                </Button>
+                                <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
+                                    <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+                                    <DialogContent>
+                                        <InfiniteCalendar
+                                            Component={withMultipleDates(Calendar)}
+                                            selected={this.state.selectedDates}
+                                            minDate={new Date()}
+                                            interpolateSelection={defaultMultipleDateInterpolation}
+                                            onSelect={(selectedDate) => { this.handleMultiSelectDates(selectedDate) }}
+                                        />
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={this.handleClose} color="primary">
+                                            Done
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >

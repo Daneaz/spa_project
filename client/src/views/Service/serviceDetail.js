@@ -87,7 +87,7 @@ class ClientDetail extends React.Component {
                                     }
                                     values.staff = staffList;
                                 }
-                                const respObj = await fetchAPI('POST', 'serviceMgt/services', values);
+                                const respObj = await fetchAPI('PATCH', `serviceMgt/services/${this.props.location.state.data._id}`, values);
 
                                 if (respObj && respObj.ok) {
 
