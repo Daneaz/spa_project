@@ -10,9 +10,15 @@ var StaffSchema = new Schema({
     username   : { type: String, lowercase: true, unique: true, required: true },
     password    : { type: String, required: true },
     email       : { type: String, lowercase: true, required: true },
-    mobile      : { type: String, lowercase: true },
+    mobile      : { type: Number, lowercase: true },
     displayName : { type: String, required: true },
     role        : { type: Schema.Types.ObjectId, ref: 'StaffRole', required: true },
+    offDays     : [
+        { type: Number }
+    ],
+    leaveDays   : [
+        { type: Date }
+    ],
     delFlag     : { type: Boolean, index: true, default: false }
 }, { timestamps: true });
 //UserSchema.path('updatedAt').index({ expires: 120 });

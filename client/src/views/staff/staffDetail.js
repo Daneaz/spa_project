@@ -31,41 +31,74 @@ class ClientDetail extends React.Component {
     state = {
         selectedOption: { value: this.props.location.state.data.role.name, label: this.props.location.state.data.role.name },
         roleList: [],
-        selectedDates: [],
-        open: false,
+        selectedLeaves: this.props.location.state.data.leaveDays,
+        selectedOff: [],
+        offDays: this.props.location.state.data.offDays,
+        leaveOpen: false,
+        offOpen: false,
     };
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/roles');
-        this.setState({ roleList: response });
+        const roles = await fetchAPI('GET', 'staffMgt/roles');
+        this.setState({
+            roleList: roles,
+        });
     }
 
     handleChange = selectedOption => {
         this.setState({ selectedOption });
     };
 
-    handleMultiSelectDates(selectedDate) {
-        let selectedDates = defaultMultipleDateInterpolation(selectedDate, this.state.selectedDates)
+    handleLeaveSelection(selectedDate) {
+        let selectedLeave = defaultMultipleDateInterpolation(selectedDate, this.state.selectedLeaves)
         this.setState({
-            selectedDates: selectedDates
+            selectedLeaves: selectedLeave
         })
     }
 
-    handleClickOpen = () => {
-        this.setState({ open: true });
-    };
-
-    handleOpen = () => {
-        this.setState({ open: false });
+    handleOffSelection(selectedDate) {
+        let selectedOff = defaultMultipleDateInterpolation(selectedDate, this.state.selectedOff)
+        selectedOff.map(day => {
+            return this.state.offDays.push(day.getDay());
+        })
+        this.setState({
+            selectedOff: selectedOff
+        })
     }
 
-    handleClose = () => {
-        this.setState({ open: false });
+    handleLeaveClickOpen = () => {
+        this.setState({ leaveOpen: true });
+    };
+
+    handleLeaveOpen = () => {
+        this.setState({ leaveOpen: false });
+    }
+
+    handleLeaveClose = () => {
+        this.setState({ leaveOpen: false });
+    }
+
+    handleOffClickOpen = () => {
+        this.setState({ offOpen: true });
+    };
+
+    handleOffOpen = () => {
+        this.setState({ offOpen: false });
+    }
+
+    handleOffClose = () => {
+        this.setState({ offOpen: false });
+    }
+
+    handleOffReset = () => {
+        this.setState({
+            offDays: [],
+            selectedOff: [],
+        });
     }
 
     render() {
         const { classes } = this.props;
-        const { selectedOption } = this.state;
         let options = this.state.roleList.map(function (role) {
             return { value: role.name, label: role.name };
         })
@@ -96,6 +129,8 @@ class ClientDetail extends React.Component {
                                 else {
                                     values.role = {};
                                     values.role.name = this.state.selectedOption.value;
+                                    values.offDays = this.state.offDays;
+                                    values.leaveDays = this.state.selectedLeaves;
                                 }
                                 const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
 
@@ -144,34 +179,66 @@ class ClientDetail extends React.Component {
                                 <Select className={classes.select}
                                     onChange={this.handleChange}
                                     options={options}
-                                    value={selectedOption}
+                                    value={this.state.selectedOption}
                                 />
 
                                 <Typography>
                                     <h5>
-                                        Off Days
+                                        On Leave
                                     </h5>
                                 </Typography>
-                                <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
-                                    Please Select Off Days...
+                                <Button variant="outlined" color="primary" onClick={this.handleLeaveClickOpen}>
+                                    Please Select Leave Days...
                                 </Button>
-                                <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
-                                    <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+                                <Dialog open={this.state.leaveOpen} onClose={this.handleLeaveClose} aria-labelledby="form-dialog-title">
+                                    <DialogTitle id="form-dialog-title">Leave</DialogTitle>
                                     <DialogContent>
-                                        <InfiniteCalendar
+                                        <InfiniteCalendar id="leaveCalendar"
                                             Component={withMultipleDates(Calendar)}
-                                            selected={this.state.selectedDates}
+                                            selected={this.state.selectedLeaves}
                                             minDate={new Date()}
+                                            disabledDays={this.state.offDays}
                                             interpolateSelection={defaultMultipleDateInterpolation}
-                                            onSelect={(selectedDate) => { this.handleMultiSelectDates(selectedDate) }}
+                                            onSelect={(selectedDate) => { this.handleLeaveSelection(selectedDate) }}
                                         />
                                     </DialogContent>
                                     <DialogActions>
-                                        <Button onClick={this.handleClose} color="primary">
+                                        <Button onClick={this.handleLeaveClose} color="primary">
                                             Done
                                         </Button>
                                     </DialogActions>
                                 </Dialog>
+
+                                <Typography>
+                                    <h5>
+                                        Weekly Off Day
+                                    </h5>
+                                </Typography>
+                                <Button variant="outlined" color="primary" onClick={this.handleOffClickOpen}>
+                                    Please Select Off Days...
+                                </Button>
+                                <Dialog open={this.state.offOpen} onClose={this.handleOffClose} aria-labelledby="form-dialog-title">
+                                    <DialogTitle id="form-dialog-title">Off</DialogTitle>
+                                    <DialogContent>
+                                        <InfiniteCalendar id="offDayCalendar"
+                                            Component={withMultipleDates(Calendar)}
+                                            selected={this.state.selectedLeaves}
+                                            interpolateSelection={defaultMultipleDateInterpolation}
+                                            minDate={new Date()}
+                                            disabledDays={this.state.offDays}
+                                            onSelect={(selectedDate) => { this.handleOffSelection(selectedDate) }}
+                                        />
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={this.handleOffReset} color="secondary">
+                                            Reset
+                                        </Button>
+                                        <Button onClick={this.handleOffClose} color="primary">
+                                            Done
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >

@@ -15,7 +15,7 @@ import {
     Dashboard as DashboardIcon,
     CalendarToday as CalendarIcon,
     Work as StaffIcon,
-    WorkOff as WorkOffIcon,
+    Schedule as ScheduleIcon,
     BarChart as BarChartIcon,
     People as PeopleIcon,
     Message as MessageIcon,
@@ -175,14 +175,14 @@ function NavMenu(props) {
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}
                     component={NavLink}
-                    to="/workoff"
+                    to="/schedule"
                 >
                     <ListItemIcon className={props.classes.listItemIcon}>
-                        <WorkOffIcon />
+                        <ScheduleIcon />
                     </ListItemIcon>
                     <ListItemText
                         classes={{ primary: props.classes.listItemText }}
-                        primary="Work Off"
+                        primary="Staff Schedule"
                     />
                 </ListItem>
                 

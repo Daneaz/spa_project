@@ -26,7 +26,7 @@ import ServiceDetail from './views/Service/serviceDetail';
 import Message from './views/message';
 import Report from './views/report';
 import Setting from './views/setting';
-import WorkOff  from './views/workOff';
+import Schedule  from './views/Schedule/Schedule';
 
 
 
@@ -75,7 +75,7 @@ function Routers() {
                     <PrivateRoute exact path="/newstaff" component={NewStaff} />
                     <PrivateRoute exact path="/staffdetail" component={StaffDetail} />
 
-                    <PrivateRoute exact path="/workoff" component={WorkOff} />
+                    <PrivateRoute exact path="/schedule" component={Schedule} />
 
                     <PrivateRoute exact path="/service" component={Service} />
                     <PrivateRoute exact path="/newservice" component={NewService} />

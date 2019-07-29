@@ -8,13 +8,13 @@ let Staff = require('../../models/auth/staff');
 let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 
-/* GET user list. */
+/* GET staff list. */
 router.get('/staffs', async (reqe, res, next) => {
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.list) { next(createError(403)); return; }
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
-    let rawUsers = await Staff.find({ "delFlag": false }).lean()
+    let rawStaffs = await Staff.find({ "delFlag": false }).lean()
         .populate("role")
         .select({
             "username": 1,
@@ -22,6 +22,8 @@ router.get('/staffs', async (reqe, res, next) => {
             "mobile": 1,
             "displayName": 1,
             "role.name": 1,
+            "offDays": 1,
+            "leaveDays":1, 
         });
     //fillter & process data for api
     // let staffs = rawUsers.map((i) => {
@@ -32,12 +34,12 @@ router.get('/staffs', async (reqe, res, next) => {
     //     return i;
     // });
 
-    res.send(rawUsers);
+    res.send(rawStaffs);
 });
-/* GET user list. */
+/* GET staff list. */
 router.get('/totalstaffs', async (reqe, res, next) => {
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.list) { next(createError(403)); return; }
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
     let totalstaffs = await Staff.count({ "delFlag": false });
@@ -53,13 +55,13 @@ router.get('/totalstaffs', async (reqe, res, next) => {
     res.send({total:totalstaffs});
 });
 
-/* GET user details by id. */
+/* GET staff details by id. */
 router.get('/staffs/:id', async (reqe, res, next) => {
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.edit) { next(createError(403)); return; }
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
 
     //get raw data from data
-    let sUser = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
+    let rawStaff = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
         .populate("role", "name")
         .select({
             "username": 1,
@@ -67,18 +69,20 @@ router.get('/staffs/:id', async (reqe, res, next) => {
             "mobile": 1,
             "displayName": 1,
             "role.name": 1,
+            "offDays": 1,
+            "leaveDays":1, 
         });
 
-    res.send(sUser);
+    res.send(rawStaff);
 });
 
-/* GET check user name exist. */
+/* GET check staff name exist. */
 router.get('/loginexists', async (reqe, res, next) => {
 
     let rs = 'true';
     try {
-        let sUser = await Staff.findOne({ "username": reqe.query.login }).lean().select({ "username": 1 });
-        if (sUser == null) { rs = 'false' }
+        let staff = await Staff.findOne({ "username": reqe.query.login }).lean().select({ "username": 1 });
+        if (staff == null) { rs = 'false' }
     } catch (err) { }
 
     res.send(rs);
@@ -88,8 +92,8 @@ router.get('/roleexists', async (reqe, res, next) => {
 
     let rs = 'true';
     try {
-        let sRole = await StaffRole.findOne({ "name": reqe.query.name }).lean().select({ "name": 1 });
-        if (sRole == null) { rs = 'false' }
+        let role = await StaffRole.findOne({ "name": reqe.query.name }).lean().select({ "name": 1 });
+        if (role == null) { rs = 'false' }
     } catch (err) { }
 
     res.send(rs);
@@ -99,33 +103,33 @@ router.get('/roleexists', async (reqe, res, next) => {
 router.post('/staffs', async (reqe, res, next) => {
     try {
 
-        let user = await Staff.findById(res.locals.user.id).populate('role');
-        if (!user.role.staffMgt.create) { next(createError(403)); return; }
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.create) { next(createError(403)); return; }
 
-        let rawNewUser = reqe.body;
+        let rawNewStaff = reqe.body;
 
-        let sUser = await Staff.findOne({ "username": rawNewUser.username }).lean().select({ "username": 1 });
-        if (sUser != null) { throw new Error('login name is already taken.') }
+        let sStaff = await Staff.findOne({ "username": rawNewStaff.username }).lean().select({ "username": 1 });
+        if (sStaff != null) { throw new Error('login name is already taken.') }
 
         //load main fields
-        let newUser = new Staff(rawNewUser);
-        newUser.createdBy = user._id;
-        newUser.updatedBy = user._id;
+        let newStaff = new Staff(rawNewStaff);
+        newStaff.createdBy = staff._id;
+        newStaff.updatedBy = staff._id;
 
         //load fields by biz logic
-        newUser.password = auth.hash(rawNewUser.password);
+        newStaff.password = auth.hash(rawNewStaff.password);
 
-        let sRole = await StaffRole.findOne({ "name": rawNewUser.role.name, "delFlag": false });
-        newUser.role = sRole._id;
+        let sRole = await StaffRole.findOne({ "name": rawNewStaff.role.name, "delFlag": false });
+        newStaff.role = sRole._id;
 
 
         //save user 
-        let doc = await newUser.save();
+        let doc = await newStaff.save();
         let rsObj = { ok: "Staff has been created.", id: doc._id };
-        logger.audit("Staff Mgt", "Create", doc._id, user.id, `A new user has been created by ${user.displayName}`);
+        logger.audit("Staff Mgt", "Create", doc._id, staff.id, `A new staff has been created by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create user, ${err.message}` }) }
+    } catch (err) { res.status(400).json({ error: `Cannot create staff, ${err.message}` }) }
 
 });
 
@@ -133,34 +137,37 @@ router.post('/staffs', async (reqe, res, next) => {
 router.patch('/staffs/:id', async (reqe, res, next) => {
     try {
 
-        let user = await Staff.findById(res.locals.user.id).populate('role');
-        if (!user.role.staffMgt.edit) { next(createError(403)); return; }
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
 
-        let rawNewUser = reqe.body;
+        let rawNewStaff = reqe.body;
 
         //load data from db
-        let sUser = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false });
+        let sStaff = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false });
 
-        sUser.updatedBy = user._id;
-        sUser.username = rawNewUser.username || sUser.username;
-        sUser.email = rawNewUser.email || sUser.email;
-        sUser.displayName = rawNewUser.displayName || sUser.displayName;
-        sUser.mobile = rawNewUser.mobile || sUser.mobile;
+        sStaff.updatedBy = staff._id;
+        sStaff.username = rawNewStaff.username || sStaff.username;
+        sStaff.email = rawNewStaff.email || sStaff.email;
+        sStaff.displayName = rawNewStaff.displayName || sStaff.displayName;
+        sStaff.mobile = rawNewStaff.mobile || sStaff.mobile;
+        sStaff.offDays = rawNewStaff.offDays || sStaff.offDays;
+        sStaff.leaveDays = rawNewStaff.leaveDays || sStaff.leaveDays;
+
 
         //load fields by biz logic
-        if (rawNewUser.Password) { sUser.password = auth.hash(rawNewUser.Password); }
-        if (rawNewUser.role.name) {
-            let sRole = await StaffRole.findOne({ "name": rawNewUser.role.name, "delFlag": false });
-            sUser.role = sRole._id;
+        if (rawNewStaff.Password) { sStaff.password = auth.hash(rawNewStaff.Password); }
+        if (rawNewStaff.role.name) {
+            let sRole = await StaffRole.findOne({ "name": rawNewStaff.role.name, "delFlag": false });
+            sStaff.role = sRole._id;
         }
 
         //save user 
-        let doc = await sUser.save();
+        let doc = await sStaff.save();
         let rsObj = { ok: "Staff has been updated.", id: doc._id };
-        logger.audit("Staff Mgt", "Update", doc._id, user.id, `Staff has been updated by ${user.displayName}`);
+        logger.audit("Staff Mgt", "Update", doc._id, staff.id, `Staff has been updated by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot update user, ${err.message}` }); }
+    } catch (err) { res.status(400).json({ error: `Cannot update staff, ${err.message}` }); }
 
 });
 

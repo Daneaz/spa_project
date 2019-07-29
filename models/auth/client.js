@@ -10,7 +10,7 @@ var ClientSchema = new Schema({
     username   : { type: String, lowercase: true, unique: true, required: true },
     password    : { type: String, required: true },
     email       : { type: String, lowercase: true, required: true },
-    mobile      : { type: String, lowercase: true },
+    mobile      : { type: Number, lowercase: true },
     displayName : { type: String, required: true },
     delFlag     : { type: Boolean, index: true, default: false }
 }, { timestamps: true });

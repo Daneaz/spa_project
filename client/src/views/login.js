@@ -46,7 +46,7 @@ class Login extends React.Component {
         <div className={classes.paper}>
           <Box m={3}><img src={logo} alt="Logo" style={{ width: 320 }} /></Box>
           <Typography component="h1" variant="h5">
-            Meeting Room Booking
+            Spa Management System 
         </Typography>
           <Formik
             initialValues={{ username: '', password: '' }}
