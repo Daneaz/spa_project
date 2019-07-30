@@ -4,12 +4,9 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from "moment";
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import "react-big-calendar/lib/css/react-big-calendar.css";
-
-import { Formik, Field, Form } from 'formik';
-import { TextField } from 'formik-material-ui';
-import Swal from 'sweetalert2';
+import { withStyles } from '@material-ui/styles';
 import {
-  Button, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress
+  Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, Input, MenuItem, FormControl, Select,
 } from '@material-ui/core';
 import AppLayout from '../layout/app'
 import { fetchAPI } from '../utils';
@@ -17,12 +14,25 @@ import { fetchAPI } from '../utils';
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar)
 
+const styles = theme => ({
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+});
+
 class CalendarView extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = {
       eventOpen: false,
+      staffList: [],
+      selectedStaff: {},
       events: [
         {
           id: 0,
@@ -33,19 +43,24 @@ class CalendarView extends React.Component {
           resourceId: "1",
         }
       ],
-      resourceMap: []
+      newEvent: {},
     }
-
-    this.moveEvent = this.moveEvent.bind(this)
-    this.newEvent = this.newEvent.bind(this)
   }
 
   async componentDidMount() {
-    const staffList = await fetchAPI('GET', 'staffMgt/staffs');
-    let resourceList = staffList.map(function (staff) {
-      return { resourceId: staff._id, resourceTitle: staff.displayName };
-    })
-    this.setState({ resourceMap: resourceList });
+    const staffList = await fetchAPI('GET', 'staffMgt/workingStaff');
+    this.setState({
+      staffList: staffList,
+    });
+  }
+
+  handleChange = event => {
+    this.setState({ selectedStaff: event.target.value });
+  };
+
+  handleEventConfirm = () => {
+    this.setState({ eventOpen: false });
+    this.handleSelectService(this.state.newEvent)
   }
 
   handleEventClose = () => {
@@ -68,8 +83,15 @@ class CalendarView extends React.Component {
     //alert(`${event.title} was resized to ${start}-${end}`)
   }
 
-  newEvent(event) {
-    this.setState({ eventOpen: true });
+  newEvent = newEvent => {
+    this.setState({ 
+      eventOpen: true,
+      newEvent: newEvent,
+    });
+  }
+
+
+  async handleSelectService(event) {
     let idList = this.state.events.map(a => a.id)
     let newId = Math.max(...idList) + 1
     let hour = {
@@ -83,6 +105,19 @@ class CalendarView extends React.Component {
     this.setState({
       events: this.state.events.concat([hour]),
     })
+  }
+  
+  deleteEvent = event => {
+    const r = window.confirm("Would you like to remove this event?")
+    if (r === true) {
+
+      this.setState((prevState, props) => {
+        const events = [...prevState.events]
+        const idx = events.indexOf(event)
+        events.splice(idx, 1);
+        return { events };
+      });
+    }
   }
 
   moveEvent = ({ event, start, end, resourceId, isAllDay: droppedOnAllDaySlot }) => {
@@ -108,6 +143,7 @@ class CalendarView extends React.Component {
   };
 
   render() {
+    const { classes } = this.props;
     return (
       <AppLayout title="Calendar" {...this.props} >
         <DragAndDropCalendar
@@ -118,90 +154,54 @@ class CalendarView extends React.Component {
           onEventDrop={this.moveEvent}
           onEventResize={this.resizeEvent}
           onSelectSlot={this.newEvent}
+          onSelectEvent={this.deleteEvent}
           // onDragStart={console.log}
           defaultView={Views.DAY}
           views={['day', 'week']}
           defaultDate={new Date()}
           step={15}
           timeslots={4}
-          resources={this.state.resourceMap}
-          resourceIdAccessor="resourceId"
-          resourceTitleAccessor="resourceTitle"
-
+          resources={this.state.staffList}
+          resourceIdAccessor="_id"
+          resourceTitleAccessor="displayName"
         // style={{ height: "100vh" }}
         />
-        <Dialog open={this.state.eventOpen} onClose={this.handleEventClose} aria-labelledby="form-dialog-title">
-          <DialogTitle id="form-dialog-title">New Appointment</DialogTitle>
+        <Dialog disableBackdropClick disableEscapeKeyDown open={this.state.eventOpen} onClose={this.handleEventClose}>
+          <DialogTitle>Fill the form</DialogTitle>
           <DialogContent>
-          <Formik
-                        initialValues={{ username: '', password: '', confirmPassoword: '', mobile: '', email: '', }}
-                        validate={values => {
-                            const errors = {};
-                            if (!values.username) { errors.username = 'Please enter username' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
-                            if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.email) { errors.email = 'Please enter email address' }
-                            if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
-                            return errors;
-                        }}
-                        onSubmit={async (values, { setSubmitting }) => {
-                            try {
-                                if (!this.state.selectedOption)
-                                    throw new Error('Please select a role')
-                                else {
-                                    values.role = {};
-                                    values.role.name = this.state.selectedOption.value;
-                                    values.offDays = this.state.offDays;
-                                    values.leaveDays = this.state.selectedLeaves;
-                                }
-                                const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
-
-                                if (respObj && respObj.ok) {
-                                    window.history.back();
-                                } else { throw new Error('Update failed') }
-                            } catch (err) {
-                                Swal.fire({
-                                    type: 'error', text: 'Please try again.',
-                                    title: err.message
-                                })
-                            }
-                            setSubmitting(false);
-                        }}
-                        render={({ submitForm, isSubmitting, values, setFieldValue, errors, setErrors }) => (
-                            <Form>
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth autoFocus
-                                    name="username" label="Username" disabled
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="password" label="New Passowrd" type="password"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="confirmPassoword" label="Confirm Password" type="password"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="displayName" label="Display Name"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="mobile" label="Mobile" type="number"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="email" label="Email"
-                                />
-                                {isSubmitting && <LinearProgress />}
-                            </Form>
-                        )}
-                    />
+            <form className={classes.container}>
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="age-native-simple">Age</InputLabel>
+                <Select
+                  value={this.state.selectedStaff}
+                  onChange={this.handleChange}
+                  input={<Input id="age-native-simple" />}
+                >
+                  {this.state.staffList.map(staff => (
+                    <MenuItem key={staff._id} value={staff.displayName}>
+                      {staff.displayName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              {/* <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="age-native-simple">Age</InputLabel>
+                <Select
+                  native
+                  value={this.state.age}
+                  onChange={this.handleChange('age')}
+                  input={<Input id="age-native-simple" />}
+                />
+              </FormControl> */}
+            </form>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleEventClose} color="primary">
-              Done
-            </Button>
+            <Button onClick={this.handleEventClose} color="secondary">
+              Cancel
+          </Button>
+            <Button onClick={this.handleEventConfirm} color="primary">
+              Ok
+          </Button>
           </DialogActions>
         </Dialog>
       </AppLayout>
@@ -211,4 +211,4 @@ class CalendarView extends React.Component {
   }
 }
 
-export default CalendarView;
+export default withStyles(styles)(CalendarView);

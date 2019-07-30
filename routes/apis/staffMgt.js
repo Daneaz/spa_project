@@ -23,7 +23,7 @@ router.get('/staffs', async (reqe, res, next) => {
             "displayName": 1,
             "role.name": 1,
             "offDays": 1,
-            "leaveDays":1, 
+            "leaveDays": 1,
         });
     //fillter & process data for api
     // let staffs = rawUsers.map((i) => {
@@ -36,6 +36,29 @@ router.get('/staffs', async (reqe, res, next) => {
 
     res.send(rawStaffs);
 });
+
+router.get('/workingStaff', async (reqe, res, next) => {
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+
+    let roleId = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
+
+    //get raw data from data
+    let rawStaffs = await Staff.find({ "delFlag": false, role: roleId.id }).lean()
+        .populate("role")
+        .select({
+            "username": 1,
+            "email": 1,
+            "mobile": 1,
+            "displayName": 1,
+            "role.name": 1,
+            "offDays": 1,
+            "leaveDays": 1,
+        });
+
+    res.send(rawStaffs);
+});
+
 /* GET staff list. */
 router.get('/totalstaffs', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
@@ -52,7 +75,7 @@ router.get('/totalstaffs', async (reqe, res, next) => {
     //     return i;
     // });
 
-    res.send({total:totalstaffs});
+    res.send({ total: totalstaffs });
 });
 
 /* GET staff details by id. */
@@ -70,7 +93,7 @@ router.get('/staffs/:id', async (reqe, res, next) => {
             "displayName": 1,
             "role.name": 1,
             "offDays": 1,
-            "leaveDays":1, 
+            "leaveDays": 1,
         });
 
     res.send(rawStaff);
@@ -181,13 +204,13 @@ router.delete('/staffs', async (reqe, res, next) => {
         //save user 
         let deleteId = [];
         let delObj = { updatedBy: user._id, delFlag: true };
-        reqe.body.forEach(async function(deleteObj) {
+        reqe.body.forEach(async function (deleteObj) {
             let doc = await Staff.findOneAndUpdate({ "_id": deleteObj._id, "delFlag": false }, delObj);
             deleteId.push(doc._id);
             logger.audit("Staff Mgt", "Delete", doc._id, user.id, `Staff has been deleted by ${user.displayName}`);
         });
-        
-        let rsObj = { ok: "Staff has been deleted.", id: deleteId};
+
+        let rsObj = { ok: "Staff has been deleted.", id: deleteId };
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot delete Staff, ${err.message}` }) }
