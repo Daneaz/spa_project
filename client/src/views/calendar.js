@@ -21,7 +21,7 @@ const styles = theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 250,
   },
 });
 
@@ -32,7 +32,9 @@ class CalendarView extends React.Component {
     this.state = {
       eventOpen: false,
       staffList: [],
+      serviceList: [],
       selectedStaff: {},
+      selectedService: {},
       events: [
         {
           id: 0,
@@ -49,22 +51,34 @@ class CalendarView extends React.Component {
 
   async componentDidMount() {
     const staffList = await fetchAPI('GET', 'staffMgt/workingStaff');
+    const serviceList = await fetchAPI('GET', 'serviceMgt/services');
     this.setState({
       staffList: staffList,
+      serviceList: serviceList,
     });
   }
 
-  handleChange = event => {
+  handleSelectStaffChange = (event) => {
     this.setState({ selectedStaff: event.target.value });
   };
 
+  handleSelectServiceChange = (event) => {
+    this.setState({ selectedService: event.target.value });
+  };
+
   handleEventConfirm = () => {
-    this.setState({ eventOpen: false });
+    this.setState({
+      eventOpen: false,
+    });
     this.handleSelectService(this.state.newEvent)
   }
 
   handleEventClose = () => {
-    this.setState({ eventOpen: false });
+    this.setState({
+      eventOpen: false,
+      selectedStaff: {},
+      selectedService: {},
+    });
   }
 
   resizeEvent = ({ event, start, end }) => {
@@ -84,29 +98,40 @@ class CalendarView extends React.Component {
   }
 
   newEvent = newEvent => {
-    this.setState({ 
-      eventOpen: true,
-      newEvent: newEvent,
-    });
+    for (let i = 0; i < this.state.staffList.length; i++) {
+      if (this.state.staffList[i]._id === newEvent.resourceId) {
+        this.setState({
+          eventOpen: true,
+          newEvent: newEvent,
+          selectedStaff: this.state.staffList[i]._id,
+        });
+      }
+    }
   }
 
 
   async handleSelectService(event) {
     let idList = this.state.events.map(a => a.id)
     let newId = Math.max(...idList) + 1
+    let serviceName;
+    for(let service of this.state.serviceList) {
+      if (service._id === this.state.selectedService) {
+        serviceName = service.name;
+      }
+    }
     let hour = {
       id: newId,
-      title: 'New Event',
+      title: serviceName,
       allDay: event.slots.length == 1,
       start: event.start,
       end: event.end,
-      resourceId: event.resourceId,
+      resourceId: this.state.selectedStaff,
     }
     this.setState({
       events: this.state.events.concat([hour]),
     })
   }
-  
+
   deleteEvent = event => {
     const r = window.confirm("Would you like to remove this event?")
     if (r === true) {
@@ -167,32 +192,37 @@ class CalendarView extends React.Component {
         // style={{ height: "100vh" }}
         />
         <Dialog disableBackdropClick disableEscapeKeyDown open={this.state.eventOpen} onClose={this.handleEventClose}>
-          <DialogTitle>Fill the form</DialogTitle>
+          <DialogTitle>New Appointment</DialogTitle>
           <DialogContent>
             <form className={classes.container}>
               <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="age-native-simple">Age</InputLabel>
+                <InputLabel htmlFor="age-native-simple">Staff Name</InputLabel>
                 <Select
                   value={this.state.selectedStaff}
-                  onChange={this.handleChange}
+                  onChange={this.handleSelectStaffChange}
                   input={<Input id="age-native-simple" />}
                 >
                   {this.state.staffList.map(staff => (
-                    <MenuItem key={staff._id} value={staff.displayName}>
+                    <MenuItem value={staff._id}>
                       {staff.displayName}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              {/* <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="age-native-simple">Age</InputLabel>
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="age-native-simple">Service Type</InputLabel>
                 <Select
-                  native
-                  value={this.state.age}
-                  onChange={this.handleChange('age')}
+                  value={this.state.selectedService}
+                  onChange={this.handleSelectServiceChange}
                   input={<Input id="age-native-simple" />}
-                />
-              </FormControl> */}
+                >
+                  {this.state.serviceList.map(service => (
+                    <MenuItem value={service._id}>
+                      {service.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </form>
           </DialogContent>
           <DialogActions>

@@ -47,7 +47,7 @@ router.post('/services', async (reqe, res, next) => {
     try {
 
         let staff = await Staff.findById(res.locals.user.id).populate('role');
-        if (!staff.role.staffMgt.create) { next(createError(403)); return; }
+        if (!staff.role.serviceMgt.create) { next(createError(403)); return; }
 
         let rawNewService = reqe.body;
 
@@ -72,7 +72,7 @@ router.patch('/services/:id', async (reqe, res, next) => {
     try {
 
         let staff = await Staff.findById(res.locals.user.id).populate('role');
-        if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
+        if (!staff.role.serviceMgt.edit) { next(createError(403)); return; }
 
         let rawNewStaff = reqe.body;
 
@@ -100,7 +100,7 @@ router.delete('/services', async (reqe, res, next) => {
     try {
 
         let user = await Staff.findById(res.locals.user.id).populate('role');
-        if (!user.role.staffMgt.delete) { next(createError(403)); return; }
+        if (!user.role.serviceMgt.delete) { next(createError(403)); return; }
 
         //save service
         let deleteId = [];

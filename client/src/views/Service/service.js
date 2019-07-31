@@ -63,9 +63,9 @@ class Service extends React.Component {
 
   constructor() {
     super();
-    this.state = { 
+    this.state = {
       serviceList: [],
-      displayServiceList: [] 
+      displayServiceList: []
     };
   }
 
@@ -81,21 +81,23 @@ class Service extends React.Component {
 
   async componentDidMount() {
     let displayService = await fetchAPI('GET', 'serviceMgt/services');
+    let staffs = await fetchAPI('GET', 'staffMgt/totalstaffs');
     let services = displayService;
-    for (let i = 0; i < displayService.length; i++) {
-      let tempStaffs = "";
-      let staffs = await fetchAPI('GET', 'staffMgt/totalstaffs');
-      if (displayService[i].staff.length === staffs.total)
+    let tempStaffs = "";
+    displayService.map(service => {
+      if (service.staff.length === staffs.total) {
         tempStaffs = "All Staff";
-      else {
-        for (let j = 0; j < displayService[i].staff.length; j++) {
-          tempStaffs += displayService[i].staff[j].displayName + ", ";
-        }
+      } else {
+        service.staff.map(staff => {
+          tempStaffs += staff.displayName + ',';
+        });
       }
-      displayService[i].staff = tempStaffs;
-    }
-    this.setState({ serviceList: services });
-    this.setState({ displayServiceList: displayService });
+      service.staff = tempStaffs;
+    });
+    this.setState({
+      serviceList: services,
+      displayServiceList: displayService
+    });
   }
 
   handleAddStaff = () => {
@@ -153,7 +155,7 @@ class Service extends React.Component {
                       </Tooltip>
                     );
                   },
-                  onRowClick: (rowData,rowMeta)=> {
+                  onRowClick: (rowData, rowMeta) => {
                     this.handleRowClick(rowMeta);
                   },
                   onRowsDelete: rowsDeleted => {
