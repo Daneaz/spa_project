@@ -16,7 +16,7 @@ var apiAuthRouter = require('./routes/apis/auth');
 var apiUserMgtRouter = require('./routes/apis/staffMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
 var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
-
+var apiBookingMgtRouter = require('./routes/apis/bookingMgt');
 var app = express();
 
 //setup express
@@ -46,6 +46,7 @@ app.use(auth.checkJwt);
 app.use('/api/staffMgt', apiUserMgtRouter);
 app.use('/api/clientMgt', apiClientMgtRouter);
 app.use('/api/serviceMgt', apiServiceMgtRouter);
+app.use('/api/bookingMgt', apiBookingMgtRouter);
 
 
 

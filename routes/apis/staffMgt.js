@@ -8,7 +8,7 @@ let Staff = require('../../models/auth/staff');
 let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 
-/* GET staff list. */
+/* GET all role all staff list. */
 router.get('/staffs', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.list) { next(createError(403)); return; }
@@ -36,7 +36,7 @@ router.get('/staffs', async (reqe, res, next) => {
 
     res.send(rawStaffs);
 });
-
+/* GET working staff list. */
 router.get('/workingStaff', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.list) { next(createError(403)); return; }
@@ -59,7 +59,7 @@ router.get('/workingStaff', async (reqe, res, next) => {
     res.send(rawStaffs);
 });
 
-/* GET staff list. */
+/* GET total staff number. */
 router.get('/totalstaffs', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.list) { next(createError(403)); return; }

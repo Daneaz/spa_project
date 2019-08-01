@@ -83,8 +83,9 @@ class Service extends React.Component {
     let displayService = await fetchAPI('GET', 'serviceMgt/services');
     let staffs = await fetchAPI('GET', 'staffMgt/totalstaffs');
     let services = displayService;
-    let tempStaffs = "";
+
     displayService.map(service => {
+      let tempStaffs = "";
       if (service.staff.length === staffs.total) {
         tempStaffs = "All Staff";
       } else {

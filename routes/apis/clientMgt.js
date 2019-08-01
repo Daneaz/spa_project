@@ -9,8 +9,8 @@ let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 
 router.get('/clients', async (reqe, res, next) => {
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.list) { next(createError(403)); return; }
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
     let rawClients = await Client.find({ "delFlag": false }).lean()
@@ -28,8 +28,8 @@ router.get('/clients', async (reqe, res, next) => {
 router.post('/clients', async (reqe, res, next) => {
     try {
 
-        let user = await Staff.findById(res.locals.user.id).populate('role');
-        if (!user.role.staffMgt.create) { next(createError(403)); return; }
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.create) { next(createError(403)); return; }
 
         let rawNewClient = reqe.body;
 
@@ -38,8 +38,8 @@ router.post('/clients', async (reqe, res, next) => {
 
         //load main fields
         let newClient = new Client(rawNewClient);
-        newClient.createdBy = user._id;
-        newClient.updatedBy = user._id;
+        newClient.createdBy = staff._id;
+        newClient.updatedBy = staff._id;
 
         //load fields by biz logic
         newClient.password = auth.hash(rawNewClient.password);
@@ -47,7 +47,7 @@ router.post('/clients', async (reqe, res, next) => {
         //save client 
         let doc = await newClient.save();
         let rsObj = { ok: "Client has been created.", id: doc._id };
-        logger.audit("Client Mgt", "Create", doc._id, user.id, `A new client has been created by ${user.displayName}`);
+        logger.audit("Client Mgt", "Create", doc._id, staff.id, `A new client has been created by ${staff.displayName}`);
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
@@ -56,8 +56,8 @@ router.post('/clients', async (reqe, res, next) => {
 
 /* GET client details by username. */
 router.get('/clients/:id', async (reqe, res, next) => {
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.edit) { next(createError(403)); return; }
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
 
     //get raw data from data
     let client = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
@@ -75,15 +75,15 @@ router.get('/clients/:id', async (reqe, res, next) => {
 router.patch('/clients/:id', async (reqe, res, next) => {
     try {
 
-        let user = await Staff.findById(res.locals.user.id).populate('role');
-        if (!user.role.staffMgt.edit) { next(createError(403)); return; }
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
 
         let rawNewClient = reqe.body;
 
         //load data from db
         let newClient = await Client.findOne({ "_id": reqe.params.id, "delFlag": false });
 
-        newClient.updatedBy = user._id;
+        newClient.updatedBy = staff._id;
         newClient.username = rawNewClient.username || newClient.username;
         newClient.email = rawNewClient.email || newClient.email;
         newClient.displayName = rawNewClient.displayName || newClient.displayName;
@@ -95,7 +95,7 @@ router.patch('/clients/:id', async (reqe, res, next) => {
         //save user 
         let doc = await newClient.save();
         let rsObj = { ok: "Client has been updated.", id: doc._id };
-        logger.audit("Client Mgt", "Update", doc._id, user.id, `Client has been updated by ${user.displayName}`);
+        logger.audit("Client Mgt", "Update", doc._id, staff.id, `Client has been updated by ${staff.displayName}`);
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot update user, ${err.message}` }); }
@@ -106,16 +106,16 @@ router.patch('/clients/:id', async (reqe, res, next) => {
 router.delete('/clients', async (reqe, res, next) => {
     try {
 
-        let user = await Staff.findById(res.locals.user.id).populate('role');
-        if (!user.role.staffMgt.delete) { next(createError(403)); return; }
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.delete) { next(createError(403)); return; }
 
         //save user 
         let deleteId = [];
-        let delObj = { updatedBy: user._id, delFlag: true };
+        let delObj = { updatedBy: staff._id, delFlag: true };
         reqe.body.forEach(async function(deleteObj) {
             let doc = await Client.findOneAndUpdate({ "_id": deleteObj._id, "delFlag": false }, delObj);
             deleteId.push(doc._id);
-            logger.audit("Client Mgt", "Delete", doc._id, user.id, `Client has been deleted by ${user.displayName}`);
+            logger.audit("Client Mgt", "Delete", doc._id, staff.id, `Client has been deleted by ${staff.displayName}`);
         });
         
         let rsObj = { ok: "Client has been deleted.", id: deleteId};
