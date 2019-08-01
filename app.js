@@ -6,7 +6,8 @@ var morgan = require('morgan');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cronJob = require('cron').CronJob;
-
+const dotenv = require('dotenv');
+dotenv.config();
 let auth = require('./services/auth');
 let logger = require('./services/logger');
 
