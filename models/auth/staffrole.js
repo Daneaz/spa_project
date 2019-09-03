@@ -1,5 +1,5 @@
 /**
- * User Role Data Model
+ * Staff Role Data Model
  */
 
 var mongoose = require('mongoose');

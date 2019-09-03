@@ -8,6 +8,7 @@ let Client = require('../../models/auth/client');
 let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 
+/* GET client list. */
 router.get('/clients', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.list) { next(createError(403)); return; }
@@ -25,6 +26,7 @@ router.get('/clients', async (reqe, res, next) => {
     res.send(rawClients);
 });
 
+/* Create client . */
 router.post('/clients', async (reqe, res, next) => {
     try {
 
@@ -54,7 +56,7 @@ router.post('/clients', async (reqe, res, next) => {
 
 });
 
-/* GET client details by username. */
+/* GET client details by id. */
 router.get('/clients/:id', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.edit) { next(createError(403)); return; }

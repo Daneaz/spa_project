@@ -28,6 +28,8 @@ import Report from './views/report';
 import Setting from './views/setting';
 import Schedule  from './views/Schedule/Schedule';
 
+import FacialLoign from './views/Kiosk/facialLogin';
+import Register from './views/Kiosk/register';
 
 
 function PrivateRoute({ component: Component, ...rest }) {
@@ -80,6 +82,9 @@ function Routers() {
                     <PrivateRoute exact path="/service" component={Service} />
                     <PrivateRoute exact path="/newservice" component={NewService} />
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
+
+                    <PrivateRoute exact path="/faciallogin" component={FacialLoign} />
+                    <PrivateRoute exact path="/register" component={Register} />
 
                     <PrivateRoute exact path="/setting" component={Setting} />
                     <Route component={ErrorPage} />
