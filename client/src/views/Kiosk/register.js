@@ -1,9 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Fab, Hidden
+    Typography,
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
 
 const styles = theme => ({
     fab: {
@@ -16,7 +15,7 @@ const styles = theme => ({
     },
 });
 
-class FacialLogin extends React.Component {
+class Register extends React.Component {
 
     render() {
         const { classes } = this.props;
@@ -30,4 +29,4 @@ class FacialLogin extends React.Component {
     }
 }
 
-export default withStyles(styles)(FacialLogin);
+export default withStyles(styles)(Register);

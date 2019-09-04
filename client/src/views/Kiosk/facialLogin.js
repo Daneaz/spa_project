@@ -1,9 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Fab, Hidden
+    Typography,
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
 
 const styles = theme => ({
     fab: {

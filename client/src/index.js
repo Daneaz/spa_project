@@ -28,7 +28,8 @@ import Report from './views/report';
 import Setting from './views/setting';
 import Schedule  from './views/Schedule/Schedule';
 
-import FacialLoign from './views/Kiosk/facialLogin';
+import Start from './views/Kiosk/start';
+import FacialLogin from './views/Kiosk/facialLogin';
 import Register from './views/Kiosk/register';
 
 
@@ -83,8 +84,9 @@ function Routers() {
                     <PrivateRoute exact path="/newservice" component={NewService} />
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
 
-                    <PrivateRoute exact path="/faciallogin" component={FacialLoign} />
-                    <PrivateRoute exact path="/register" component={Register} />
+                    <Route exact path="/start" component={Start} />
+                    <Route exact path="/faciallogin" component={FacialLogin} />
+                    <Route exact path="/register" component={Register} />
 
                     <PrivateRoute exact path="/setting" component={Setting} />
                     <Route component={ErrorPage} />
