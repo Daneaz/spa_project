@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress
+    Typography, Fab, Hidden, Button, CssBaseline, Container, LinearProgress
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
@@ -21,62 +21,51 @@ const styles = theme => ({
     cancel: {
         margin: theme.spacing(0, 0, 0),
     },
-    select: {
-        margin: theme.spacing(2, 0, 0),
-    },
 });
-
 const genderOptions = [
     { value: "M", label: 'M' },
     { value: "F", label: 'F' },
 ];
-
-class NewClient extends React.Component {
+class UpdateClient extends React.Component {
 
     state = {
-        gender: genderOptions[0],
-    }
-
-    handleCancel() {
-        window.history.back();
+        gender: { value: this.props.location.state.data.gender, label: this.props.location.state.data.gender },
     }
 
     handleGenderSelection = (gender) => {
         this.setState({ gender });
     }
+
     render() {
         const { classes } = this.props;
         return (
-            <AppLayout title="New Client" {...this.props} >
+            <AppLayout title="Staff Details" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
                     <Typography>
                         <h3>
-                            New Client Onboard
+                            Update Client Details
                         </h3>
                     </Typography>
                     <CssBaseline />
                     <Formik
-                        initialValues={{ mobile: '', password: '', confirmPassoword: '', email: '', displayName:'', nric:'' }}
+                        initialValues={{ mobile: this.props.location.state.data.mobile, displayName: this.props.location.state.data.displayName, email: this.props.location.state.data.email, nric: this.props.location.state.data.nric }}
                         validate={values => {
                             const errors = {};
                             if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.password) { errors.password = 'Please enter password' }
-                            if (!values.confirmPassoword) { errors.confirmPassoword = 'Please enter password' }
                             if (!values.displayName) { errors.displayName = 'Please enter password' }
                             if (!values.email) { errors.email = 'Please enter email address' }
                             if (!values.nric) {errors.nric = 'Please enter NRIC'}
                             if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
                             return errors;
                         }}
-                        onSubmit={async (values, { setSubmitting, setErrors }) => {
+                        onSubmit={async (values, { setSubmitting }) => {
                             try {
                                 values.gender = this.state.gender.value
-                                const respObj = await fetchAPI('POST', 'clientMgt/clients', values);
+                                const respObj = await fetchAPI('PATCH', `clientMgt/clients/${this.props.location.state.data._id}`, values);
 
                                 if (respObj && respObj.ok) {
-
                                     window.history.back();
-                                } else { throw new Error('Register failed') }
+                                } else { throw new Error('Update failed') }
                             } catch (err) {
                                 Swal.fire({
                                     type: 'error', text: 'Please try again.',
@@ -93,7 +82,7 @@ class NewClient extends React.Component {
                                 />
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="password" label="Password" type="password"
+                                    name="password" label="New Passowrd" type="password"
                                 />
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
@@ -103,10 +92,12 @@ class NewClient extends React.Component {
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="displayName" label="Display Name"
                                 />
+
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="email" label="Email"
                                 />
+
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="nric" label="NRIC"
@@ -121,11 +112,11 @@ class NewClient extends React.Component {
                                     options={genderOptions}
                                     value={this.state.gender}
                                 />
-                                
+
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >
-                                    Register
+                                    Update
                                 </Button>
                                 <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
                                     onClick={() => { window.history.back(); }}
@@ -142,4 +133,4 @@ class NewClient extends React.Component {
     }
 }
 
-export default withStyles(styles)(NewClient);
+export default withStyles(styles)(UpdateClient);

@@ -31,18 +31,18 @@ const styles = theme => ({
 
 const columns = [
   {
-    name: "username",
-    label: "Userame",
-    options: {
-      filter: false,
-      sort: true,
-    }
-  },
-  {
     name: "displayName",
     label: "Display Name",
     options: {
       filter: true,
+      sort: true,
+    }
+  },
+  {
+    name: "mobile",
+    label: "Mobile",
+    options: {
+      filter: false,
       sort: true,
     }
   },
@@ -55,8 +55,24 @@ const columns = [
     }
   },
   {
-    name: "mobile",
-    label: "Mobile",
+    name: "credit",
+    label: "Credit",
+    options: {
+      filter: false,
+      sort: true,
+    }
+  },
+  {
+    name: "gender",
+    label: "Gender",
+    options: {
+      filter: false,
+      sort: true,
+    }
+  },
+  {
+    name: "nric",
+    label: "NRIC",
     options: {
       filter: false,
       sort: true,

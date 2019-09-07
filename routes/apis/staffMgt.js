@@ -8,6 +8,71 @@ let Staff = require('../../models/auth/staff');
 let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 
+/* Init the defalt values */
+const init = async () => {
+
+    try {
+        let roleClient = new StaffRole({
+            name: "Manager",
+            staffMgt: {
+                list: true,
+                create: true,
+                edit: true,
+                delete: true
+            },
+            serviceMgt: {
+                list: true,
+                create: true,
+                edit: true,
+                delete: true
+            },
+            bookingMgt: {
+                list: true,
+                create: true,
+                edit: true,
+                delete: true
+            },
+        });
+        await roleClient.save();
+
+        let roleStaff = new StaffRole({
+            name: "Staff",
+            serviceMgt: {
+                list: true,
+                create: true,
+                edit: true,
+                delete: true
+            }
+        });
+        await roleStaff.save();
+
+    } catch (err) {
+        console.log(`StaffRole table init error ${err.message}`);
+    }
+
+    try {
+        let role = await StaffRole.findOne({ "name": "Manager", "delFlag": false });
+        let checkStaff = await Staff.findOne({ "mobile": 97985397 }).lean().select({ "mobile": 1 });
+        if (checkStaff != null) { throw new Error('mobile is already taken.') }
+        let staff = new Staff(
+            {
+                username: "admin",
+                password: "admin",
+                mobile: 97985397,
+                email: "admin@gmail.com",
+                displayName: "Eugene",
+                role: role._id
+            });
+        staff.password = auth.hash("admin");
+        await staff.save();
+
+    } catch (err) {
+        console.log(`Staff table init error ${err.message}`);
+    }
+}
+init();
+
+
 /* GET all role all staff list. */
 router.get('/staffs', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
@@ -41,10 +106,10 @@ router.get('/workingStaff', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-    let roleId = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
+    let role = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
 
     //get raw data from data
-    let rawStaffs = await Staff.find({ "delFlag": false, role: roleId.id }).lean()
+    let rawStaffs = await Staff.find({ "delFlag": false, role: role.id }).lean()
         .populate("role")
         .select({
             "username": 1,
@@ -64,16 +129,9 @@ router.get('/totalstaffs', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let totalstaffs = await Staff.count({ "delFlag": false });
-    //fillter & process data for api
-    // let staffs = rawUsers.map((i) => {
-    //     delete i.role.createdAt;
-    //     delete i.role.updatedAt;
-    //     delete i.role.delFlag;
-    //     delete i.role.__v;
-    //     return i;
-    // });
+    let role = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
+    let totalstaffs = await Staff.count({ "delFlag": false, role: role.id });
+
 
     res.send({ total: totalstaffs });
 });

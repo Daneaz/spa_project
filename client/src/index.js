@@ -11,9 +11,11 @@ import Login from './views/login';
 import ErrorPage from './views/error';
 import Dashboard from './views/dashboard';
 import Calendar from './views/calendar';
+
 import Client from './views/Client/client';
 import NewClient from './views/Client/newClient';
-import ClientDetail from './views/Client/clientDetail'
+import ClientDetail from './views/Client/clientDetail';
+import UpdateClient from './views/Client/updateClient';
 
 import Staff from './views/Staff/staff';
 import NewStaff from './views/Staff/newStaff';
@@ -31,6 +33,7 @@ import Schedule  from './views/Schedule/Schedule';
 import Start from './views/Kiosk/start';
 import FacialLogin from './views/Kiosk/facialLogin';
 import Register from './views/Kiosk/register';
+
 
 
 function PrivateRoute({ component: Component, ...rest }) {
@@ -73,6 +76,7 @@ function Routers() {
                     <PrivateRoute exact path="/client" component={Client} />
                     <PrivateRoute exact path="/newclient" component={NewClient} />
                     <PrivateRoute exact path="/clientdetail" component={ClientDetail} />
+                    <PrivateRoute exact path="/updateclient" component={UpdateClient} />
 
                     <PrivateRoute exact path="/staff" component={Staff} />
                     <PrivateRoute exact path="/newstaff" component={NewStaff} />

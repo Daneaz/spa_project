@@ -21,7 +21,7 @@
                 "PORT"          : "3030",
                 // "MongoDB_ConnectionString" : "mongodb://13.251.30.223:27017/mrmDB",
                 // "MongoDB_ConnectionString" : "mongodb://localhost:27017/spaDB",
-                "MongoDB_ConnectionString" : "mongodb+srv://admin:wuleiAAD123@spa-4eelu.mongodb.net/test?retryWrites=true&w=majority",
+                "MongoDB_ConnectionString" : "mongodb+srv://admin:wuleiAAD123@spa-4eelu.mongodb.net/spaDB?retryWrites=true&w=majority",
                 "Secret"        : "D2C4F54C83213ABF391C11DD4EESD",
                 "DeviceSecret"  : "1DD4F39ES34CC4121CFAB3E2158DD",
                 "SecretKey"     : "t6v8y$B&E)H@McQvCjWnZr4u7x!z%C*F",

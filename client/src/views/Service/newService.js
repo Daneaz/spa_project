@@ -44,7 +44,7 @@ class NewStaff extends React.Component {
     }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/staffs');
+        const response = await fetchAPI('GET', 'staffMgt/workingStaff');
         this.setState({ staffList: response });
     }
 

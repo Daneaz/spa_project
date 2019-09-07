@@ -7,11 +7,13 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var ClientSchema = new Schema({
-    username   : { type: String, lowercase: true, unique: true, required: true },
+    mobile      : { type: Number, unique: true, required: true },
     password    : { type: String, required: true },
-    email       : { type: String, lowercase: true, required: true },
-    mobile      : { type: Number, lowercase: true },
+    email       : { type: String, lowercase: true },
     displayName : { type: String, required: true },
+    gender      : { type: String, required: true },
+    nric        : { type: String, required: true },
+    credit      : { type: Number, default: 0 },
     delFlag     : { type: Boolean, index: true, default: false }
 }, { timestamps: true });
 

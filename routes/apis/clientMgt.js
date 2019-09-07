@@ -16,17 +16,19 @@ router.get('/clients', async (reqe, res, next) => {
     //get raw data from data
     let rawClients = await Client.find({ "delFlag": false }).lean()
         .select({
-            "username": 1,
             "email": 1,
             "mobile": 1,
             "displayName": 1,
+            "nric": 1,
+            "gender": 1,
+            "credit": 1,
             "createdAt": 1,
         });
 
     res.send(rawClients);
 });
 
-/* Create client . */
+/* POST Create client . */
 router.post('/clients', async (reqe, res, next) => {
     try {
 
@@ -35,7 +37,7 @@ router.post('/clients', async (reqe, res, next) => {
 
         let rawNewClient = reqe.body;
 
-        let sClient = await Client.findOne({ "username": rawNewClient.username }).lean().select({ "username": 1 });
+        let sClient = await Client.findOne({ "mobile": rawNewClient.mobile }).lean().select({ "mobile": 1 });
         if (sClient != null) { throw new Error('login name is already taken.') }
 
         //load main fields
@@ -64,10 +66,12 @@ router.get('/clients/:id', async (reqe, res, next) => {
     //get raw data from data
     let client = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
         .select({
-            "username": 1,
             "email": 1,
             "mobile": 1,
             "displayName": 1,
+            "nric": 1,
+            "gender": 1,
+            "credit": 1,
         });
 
     res.send(client);
@@ -86,11 +90,11 @@ router.patch('/clients/:id', async (reqe, res, next) => {
         let newClient = await Client.findOne({ "_id": reqe.params.id, "delFlag": false });
 
         newClient.updatedBy = staff._id;
-        newClient.username = rawNewClient.username || newClient.username;
         newClient.email = rawNewClient.email || newClient.email;
         newClient.displayName = rawNewClient.displayName || newClient.displayName;
         newClient.mobile = rawNewClient.mobile || newClient.mobile;
-
+        newClient.gender = rawNewClient.gender || newClient.gender;
+        newClient.nric = rawNewClient.nric || newClient.nric;
         //load fields by biz logic
         if (rawNewClient.password) { newClient.password = auth.hash(rawNewClient.password); }
 

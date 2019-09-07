@@ -2,9 +2,11 @@ import React from 'react';
 import { Animated } from "react-animated-css";
 import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
-import BackGroundImage from '../../images/Gerberas_Stones_Spa.jpg';
-import LoginImage from '../../images/login.png';
-import RegisterImage from '../../images/register.png';
+
+const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
+const LoginImage = '/static/images/login.png';
+const RegisterImage = '/static/images/register.png';
+
 const styles = theme => ({
     root: {
         height: 180,
@@ -23,9 +25,6 @@ const styles = theme => ({
         fill: theme.palette.common.white,
         stroke: theme.palette.divider,
         strokeWidth: 1,
-    },
-    paperContainer: {
-        backgroundImage: `url(${BackGroundImage})`
     },
     button: {
         height: "10%",

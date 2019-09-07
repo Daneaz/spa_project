@@ -9,7 +9,7 @@ import { TextField } from 'formik-material-ui';
 import Swal from 'sweetalert2';
 
 import { fetchAPI, setToken, setUser, removeToken, removeUser } from '../utils';
-import logo from '../logo.png';
+const logo = '/static/images/logo.png';
 
 const styles = theme => ({
   '@global': {

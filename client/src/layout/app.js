@@ -23,7 +23,7 @@ import {
     Settings as SettingsIcon,
 } from '@material-ui/icons';
 import { removeToken, removeUser, getAvatarLetter } from '../utils';
-import logo from '../logo.png';
+const logo = '/static/images/logo.png';
 
 const drawerWidth = 240;
 
