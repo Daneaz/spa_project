@@ -21,6 +21,7 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "react-select": "^3.0.4",
+    "react-simple-keyboard": "^2.0.2",
     "sweetalert2": "^8.13.1",
     "sweetalert2-react-content": "^1.1.0",
     "typeface-roboto": "0.0.54"

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var auth = require('../../services/auth');  
+let Client = require('../../models/auth/client');
 let logger = require('../../services/logger');
 
 /* POST login api. */
@@ -59,5 +60,29 @@ router.post('/login', async (reqe, res, next) => {
     res.json(rsJson);
 });
 
+/* POST Create client . */
+router.post('/clients', async (reqe, res, next) => {
+    try {
+
+        let rawNewClient = reqe.body;
+
+        let sClient = await Client.findOne({ "mobile": rawNewClient.mobile }).lean().select({ "mobile": 1 });
+        if (sClient != null) { throw new Error('login name is already taken.') }
+
+        //load main fields
+        let newClient = new Client(rawNewClient);
+
+        //load fields by biz logic
+        newClient.password = auth.hash(rawNewClient.password);
+
+        //save client 
+        let doc = await newClient.save();
+        let rsObj = { ok: "Client has been created.", id: doc._id };
+        logger.audit("Client Mgt", "Create", doc._id, `A new client has self registor`);
+        res.json(rsObj);
+
+    } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
+
+});
 
 module.exports = router;
