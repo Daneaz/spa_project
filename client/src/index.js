@@ -30,9 +30,11 @@ import Report from './views/report';
 import Setting from './views/setting';
 import Schedule  from './views/Schedule/Schedule';
 
+//Kiosk
 import Start from './views/Kiosk/start';
 import FacialLogin from './views/Kiosk/facialLogin';
 import Register from './views/Kiosk/register';
+import Snapshot from './views/Kiosk/snapshot'
 
 
 
@@ -88,11 +90,14 @@ function Routers() {
                     <PrivateRoute exact path="/newservice" component={NewService} />
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
 
+                    <PrivateRoute exact path="/setting" component={Setting} />
+                    
                     <Route exact path="/start" component={Start} />
                     <Route exact path="/faciallogin" component={FacialLogin} />
                     <Route exact path="/register" component={Register} />
+                    <Route exact path="/snapshot" component={Snapshot} />
 
-                    <PrivateRoute exact path="/setting" component={Setting} />
+                    
                     <Route component={ErrorPage} />
                 </Switch>
             </Router>

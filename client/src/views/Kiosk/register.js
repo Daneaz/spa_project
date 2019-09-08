@@ -11,7 +11,6 @@ import { fetchAPI } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-import * as yup from 'yup';
 
 const mainFontSize = 35;
 
@@ -115,6 +114,12 @@ class Register extends React.Component {
         } else {
             this.setState({ layoutName: "default" })
         }
+        var value = this.refs.displayValue;
+        if (inputName === 'password' || inputName === 'confirmPassoword') {
+            value.children[0].children[0].type = 'password';
+        } else {
+            value.children[0].children[0].type = 'text';
+        }
         this.setState(
             {
                 inputName: inputName,
@@ -143,42 +148,49 @@ class Register extends React.Component {
                 type: 'error', text: 'Mobile must be 8 digit',
                 title: "Error"
             })
+            return;
         }
         else if (!input.password) {
             Swal.fire({
                 type: 'error', text: 'Please enter a password',
                 title: "Error"
             })
+            return;
         }
         else if (!input.confirmPassoword) {
             Swal.fire({
                 type: 'error', text: 'Please enter a password',
                 title: "Error"
             })
+            return;
         }
         else if (input.confirmPassoword !== input.password) {
             Swal.fire({
                 type: 'error', text: 'Password does not match',
                 title: "Error"
             })
+            return;
         }
         else if (!input.displayName) {
             Swal.fire({
                 type: 'error', text: 'Please enter display name',
                 title: "Error"
             })
+            return;
         }
         else if (!input.email) {
             Swal.fire({
                 type: 'error', text: 'Please enter email',
                 title: "Error"
             })
+            return;
         }
         else if (!input.nric) {
             Swal.fire({
                 type: 'error', text: 'Please enter NRIC',
                 title: "Error"
             })
+            return;
         }
 
         try {
