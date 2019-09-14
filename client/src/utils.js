@@ -1,7 +1,7 @@
 //local storage
-const setLocalStorage = (key, val) => { localStorage.setItem(key, val) };
-const getLocalStorage = (key) => { return localStorage.getItem(key) };
-const removeLocalStorage = (key) => { localStorage.removeItem(key) };
+export const setLocalStorage = (key, val) => { localStorage.setItem(key, val) };
+export const getLocalStorage = (key) => { return localStorage.getItem(key) };
+export const removeLocalStorage = (key) => { localStorage.removeItem(key) };
 
 //auth token
 export const removeToken = () => { removeLocalStorage('token') };

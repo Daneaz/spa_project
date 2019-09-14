@@ -11,6 +11,8 @@ dotenv.config();
 let auth = require('./services/auth');
 let logger = require('./services/logger');
 
+
+
 var indexRouter = require('./routes/index');
 var apiAuthRouter = require('./routes/apis/auth');
 var apiUserMgtRouter = require('./routes/apis/staffMgt');
@@ -38,6 +40,7 @@ var pjson = require('./package.json');
 app.locals.ver = pjson.version;
 
 //routing
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', indexRouter);
 app.use(`/api/auth`, apiAuthRouter);
 

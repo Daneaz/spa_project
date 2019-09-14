@@ -2,6 +2,7 @@ import React from 'react';
 import { Animated } from "react-animated-css";
 import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
+import { removeLocalStorage } from '../../utils';
 
 const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
 const LoginImage = '/static/images/login.png';
@@ -68,15 +69,18 @@ class FacialLogin extends React.Component {
         visible: true,
     }
 
+    componentDidMount() {
+        removeLocalStorage("userid");
+    }
+
     handleRegisterClick = () => {
         const { history } = this.props;
         this.setState({ visible: false })
         setTimeout(function () {
-            history.push('/snapshot');
+            history.push('/register');
         }, 500);
     }
-
-
+    
     handleFacialLoginClick = () => {
         const { history } = this.props;
         this.setState({ visible: false })

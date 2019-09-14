@@ -34,9 +34,8 @@ import Schedule  from './views/Schedule/Schedule';
 import Start from './views/Kiosk/start';
 import FacialLogin from './views/Kiosk/facialLogin';
 import Register from './views/Kiosk/register';
-import Snapshot from './views/Kiosk/snapshot'
-
-
+import Snapshot from './views/Kiosk/snapshot';
+import SnapshotManual from './views/Kiosk/snapshotManual';
 
 function PrivateRoute({ component: Component, ...rest }) {
     return (
@@ -96,6 +95,8 @@ function Routers() {
                     <Route exact path="/faciallogin" component={FacialLogin} />
                     <Route exact path="/register" component={Register} />
                     <Route exact path="/snapshot" component={Snapshot} />
+                    <Route exact path="/snapshotmanual" component={SnapshotManual} />
+                    
 
                     
                     <Route component={ErrorPage} />

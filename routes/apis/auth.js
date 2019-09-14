@@ -1,41 +1,42 @@
 var express = require('express');
 var router = express.Router();
-
-var auth = require('../../services/auth');  
+const path = require('path');
+var fs = require('fs');
+var auth = require('../../services/auth');
 let Client = require('../../models/auth/client');
 let logger = require('../../services/logger');
 
 /* POST login api. */
 router.post('/login', async (reqe, res, next) => {
 
-    var rsJson = { error : "invalid username or password" };
-    try{
+    var rsJson = { error: "invalid username or password" };
+    try {
         //getting username & password from request body
         var username = reqe.body.username.toLowerCase();
         var password = reqe.body.password;
 
-        if(username != null && username.length > 0 && password != null && password.length > 0){
-            
+        if (username != null && username.length > 0 && password != null && password.length > 0) {
+
             //* get and check user account */
             let userObj = await auth.getUserByLogin(username, password);
 
-            if(userObj != null){ 
+            if (userObj != null) {
 
                 var ip = reqe.headers['x-forwarded-for'] || reqe.connection.remoteAddress;
 
                 //* JWT Auth */
                 var userData = {
-                    id          : userObj._id,
-                    username   : userObj.username,
-                    displayName : userObj.displayName,
-                    role        : {
-                        id      : userObj.role._id,
-                        name    : userObj.role.name
+                    id: userObj._id,
+                    username: userObj.username,
+                    displayName: userObj.displayName,
+                    role: {
+                        id: userObj.role._id,
+                        name: userObj.role.name
                     },
-                    IP          : ip
+                    IP: ip
                 }
                 //console.log(userData);
-                
+
                 // issue JWT to cookie
                 let token = auth.issueJwtCookie(userData, res);
 
@@ -46,21 +47,38 @@ router.post('/login', async (reqe, res, next) => {
                 delete userObj.role.__v;
 
                 var rsJson = {
-                    "ok"    : `Staff has logined from ${ip}`,
-                    "token" : token,
-                    "user"  : userObj
+                    "ok": `Staff has logined from ${ip}`,
+                    "token": token,
+                    "user": userObj
                 };
                 logger.audit("Auth", "Login", userObj._id, userObj._id, `${userObj.displayName} has logined from ${ip}`);
             }
         }
-    }catch(err){  }
+    } catch (err) { }
 
-    if(rsJson.error){ res.status(400) }
-    
+    if (rsJson.error) { res.status(400) }
+
     res.json(rsJson);
 });
 
-/* POST Create client . */
+/* GET client details by id. */
+router.get('/clients/:id', async (reqe, res, next) => {
+
+    //get raw data from data
+    let client = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
+        .select({
+            "email": 1,
+            "mobile": 1,
+            "displayName": 1,
+            "nric": 1,
+            "gender": 1,
+            "credit": 1,
+        });
+
+    res.send(client);
+});
+
+/* Register client over Kiosk POST Create client . */
 router.post('/clients', async (reqe, res, next) => {
     try {
 
@@ -76,12 +94,40 @@ router.post('/clients', async (reqe, res, next) => {
         newClient.password = auth.hash(rawNewClient.password);
 
         //save client 
-        let doc = await newClient.save();
-        let rsObj = { ok: "Client has been created.", id: doc._id };
-        logger.audit("Client Mgt", "Create", doc._id, `A new client has self registor`);
+        let user = await newClient.save();
+        let rsObj = { ok: "Client has been created.", user: user };
+        logger.audit("Client Mgt", "Create", user._id, `A new client has self registor`);
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
+
+});
+
+/* Save photo over Kiosk POST Create client . */
+router.post('/savephoto', async (req, res, next) => {
+    try {
+        let dataObj = req.body;
+
+        if (!dataObj.imagebase64) return res.sendStatus(400);
+        // if (!dataObj.id) return res.sendStatus(400);
+
+        var id = dataObj.id;
+        var imageBase64s = dataObj.imagebase64.split(",");
+        var fileType = "jpg";
+        if (imageBase64s[0].includes("png")) { fileType = "png" }
+        var imgData = imageBase64s[1];
+
+        //console.log("imagebase64", imagebase64,firstname, lastname, filetype);
+
+        var save_filename = path.resolve(__dirname, `../../client/public/photos/${id}.${fileType}`);
+
+        fs.writeFile(save_filename, imgData, { encoding: 'base64' }, function (err) {
+            if (err) throw err;
+            console.log('File created');
+        });
+
+        res.json({ ok: 'success', path: save_filename });
+    } catch (err) { res.status(400).json({ error: `Cannot save photo, ${err.message}` }) }
 
 });
 

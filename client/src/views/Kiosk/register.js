@@ -7,7 +7,7 @@ import {
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
-import { fetchAPI } from '../../utils';
+import { fetchAPI, setLocalStorage } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
@@ -197,7 +197,8 @@ class Register extends React.Component {
             const respObj = await fetchAPI('POST', 'auth/clients', this.state.input);
 
             if (respObj && respObj.ok) {
-                history.push('/start');
+                setLocalStorage("userid", respObj.user._id);
+                history.push('/snapshot');
             } else { throw new Error('Register failed') }
         } catch (err) {
             Swal.fire({
@@ -268,10 +269,8 @@ class Register extends React.Component {
                                     value={input["nric"] || ""}
                                     onChange={e => this.onChangeInput(e)}
                                 />
-                                <Typography>
-                                    <h2>
-                                        Gender
-                                        </h2>
+                                <Typography variant='h3' color='primary' gutterBottom>
+                                    Gender
                                 </Typography>
                                 <Select className={classes.select}
                                     onChange={this.handleGenderSelection}
