@@ -263,7 +263,7 @@ class FacialLogin extends React.Component {
             data.id = "auth";
             const respObj = await fetchAPI('POST', 'auth/savephoto', data);
             if (respObj && respObj.ok) {
-                this.faceAPIDetect(`${"http://180.129.28.114:3000"}/photos/${data.id}.png`);
+                this.faceAPIDetect(`${process.env.REACT_APP_FACE_API}/photos/${data.id}.png`);
             }
         } catch (error) {
             console.log(error);

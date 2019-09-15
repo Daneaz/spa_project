@@ -289,8 +289,7 @@ class Snapshot extends React.Component {
             data.id = userid;
             const respObj = await fetchAPI('POST', 'auth/savephoto', data);
             if (respObj && respObj.ok) {
-                this.faceAPIAddPerson(`${"http://180.129.28.114:3000"}/photos/${data.id}.png`);
-                // this.faceAPIDetect(`${"http://180.129.28.114:3000"}/photos/1.png`);
+                this.faceAPIAddPerson(`${process.env.REACT_APP_FACE_API}/photos/${data.id}.png`);
             }
         } catch (error) {
             console.log(error);
