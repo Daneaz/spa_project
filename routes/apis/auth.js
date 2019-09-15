@@ -4,6 +4,7 @@ const path = require('path');
 var fs = require('fs');
 var auth = require('../../services/auth');
 let Client = require('../../models/auth/client');
+let Service = require('../../models/service');
 let logger = require('../../services/logger');
 
 /* POST login api. */
@@ -61,22 +62,51 @@ router.post('/login', async (reqe, res, next) => {
     res.json(rsJson);
 });
 
-/* GET client details by id. */
-router.get('/clients/:id', async (reqe, res, next) => {
 
-    //get raw data from data
-    let client = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
-        .select({
-            "email": 1,
-            "mobile": 1,
-            "displayName": 1,
-            "nric": 1,
-            "gender": 1,
-            "credit": 1,
-        });
+router.get('/faciallogin/:id', async (reqe, res, next) => {
 
-    res.send(client);
+    var rsJson = { error: "invalid username or password" };
+    try {
+        let userObj = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
+            .select({
+                "email": 1,
+                "mobile": 1,
+                "displayName": 1,
+                "nric": 1,
+                "gender": 1,
+                "credit": 1,
+            });
+
+        if (userObj != null) {
+
+            var ip = reqe.headers['x-forwarded-for'] || reqe.connection.remoteAddress;
+
+            //* JWT Auth */
+            var userData = {
+                id: userObj._id,
+                displayName: userObj.displayName,
+                IP: ip
+            }
+            //console.log(userData);
+
+            // issue JWT to cookie
+            let token = auth.issueJwtCookie(userData, res);
+
+            var rsJson = {
+                "ok": `Client has logined from ${ip}`,
+                "token": token,
+                "user": userObj
+            };
+            logger.audit("Auth", "Facial Login", userObj._id, userObj._id, `${userObj.displayName} has logined from ${ip}`);
+        }
+
+    } catch (err) { }
+
+    if (rsJson.error) { res.status(400) }
+
+    res.json(rsJson);
 });
+
 
 /* Register client over Kiosk POST Create client . */
 router.post('/clients', async (reqe, res, next) => {
@@ -130,5 +160,40 @@ router.post('/savephoto', async (req, res, next) => {
     } catch (err) { res.status(400).json({ error: `Cannot save photo, ${err.message}` }) }
 
 });
+
+/* GET service list. */
+router.get('/services', async (reqe, res, next) => {
+    //get raw data from data
+    let services = await Service.find({ "delFlag": false }).lean()
+        .populate("staff")
+        .select({
+            "name": 1,
+            "duration": 1,
+            "price": 1,
+            "staff": 1,
+        });
+    res.send(services);
+});
+
+/* Register client over Kiosk POST Create client . */
+router.post('/buyservice', async (reqe, res, next) => {
+    try {
+
+        let data = reqe.body;
+
+        Client.findOne({ "_id": data.id, "delFlag": false })
+            .then(client => {
+                if (client.credit < data.price) {
+                    res.json({ error: "Not enought credit, Please top up!" });
+                } else {
+                    client.credit = client.credit - data.price;
+                    client.save();
+                    res.json({ ok: "Please process to the waiting area!" });
+                }
+            })
+    } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
+
+});
+
 
 module.exports = router;

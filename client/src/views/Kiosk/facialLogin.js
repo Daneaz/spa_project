@@ -1,10 +1,14 @@
 import React from 'react';
 import { Animated } from "react-animated-css";
-import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid, Typography } from '@material-ui/core';
+import {
+    Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid, Typography,
+    InputLabel, FormControl, Select, Input, MenuItem,
+} from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import * as faceapi from 'face-api.js';
 import Webcam from 'react-webcam';
-import { fetchAPI } from '../../utils';
+import { fetchAPI, setToken, setUser, getClient } from '../../utils';
+import Swal from 'sweetalert2';
 
 const axios = require('axios');
 const uriBase = 'https://spa-fr.cognitiveservices.azure.com/face/v1.0';
@@ -25,7 +29,24 @@ const styles = theme => ({
         height: 180,
     },
     submit: {
-        margin: theme.spacing(5, 0, 0),
+        margin: theme.spacing(3),
+        minWidth: 320,
+    },
+    cancel: {
+        margin: theme.spacing(3),
+        minWidth: 320,
+    },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    formControl: {
+        margin: theme.spacing(3),
+        minWidth: 700,
+    },
+    bold: {
+        margin: theme.spacing(3),
+        fontWeight: 500,
     },
 });
 
@@ -34,6 +55,11 @@ class FacialLogin extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            selectedServiceData: '',
+            selectedService: '',
+            selectedStaff: '',
+            serviceList: [],
+            staffList: [],
             client: '',
             takingPicture: true,
             timerOn: false,
@@ -41,8 +67,24 @@ class FacialLogin extends React.Component {
         }
         this.webcam = React.createRef();
         this.canvas = React.createRef();
-        this.packageChoosing = React.createRef();
-        this.photoTaking = React.createRef();
+    }
+
+    componentDidMount() {
+        faceapi.loadFaceDetectionModel(MODEL_URL)
+            .then(() => faceapi.loadTinyFaceDetectorModel(MODEL_URL)
+                .then(() => {
+                    setTimeout(() => this.startDetection(), 1000);
+                }));
+        fetchAPI('GET', 'auth/services').then(serviceList => {
+            this.setState({
+                serviceList: serviceList,
+                staffList: serviceList[0].staff
+            });
+        });
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer);
     }
 
     startTimer = () => {
@@ -68,18 +110,6 @@ class FacialLogin extends React.Component {
         this.setState({ timerOn: false, timerTime: 3000 });
     };
 
-    componentDidMount() {
-        faceapi.loadFaceDetectionModel(MODEL_URL)
-            .then(() => faceapi.loadTinyFaceDetectorModel(MODEL_URL)
-                .then(() => {
-                    this.startDetection();
-                }));
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.timer);
-    }
-
     getTL(v) {
         v -= 70;
         return ((v <= 0) ? 0 : v);
@@ -102,12 +132,14 @@ class FacialLogin extends React.Component {
             }
         };
         axios(options).then(response => {
-            fetchAPI('GET', `auth/clients/${response.data.name}`).then(client => {
-                this.setState({ client: client })
-                this.photoTaking.style.display = 'none';
-                this.packageChoosing.style.display = 'block'
+            fetchAPI('GET', `auth/faciallogin/${response.data.name}`).then(respObj => {
+                setToken(respObj.token);
+                setUser(respObj.user);
+                const photoTaking = document.getElementById('photoTaking')
+                const packageChoosing = document.getElementById('packageChoosing')
+                photoTaking.style.display = 'none';
+                packageChoosing.style.display = 'block'
             })
-            console.log(response.data.name);
         }).catch(error => {
             console.log('Error: ', error);
         });
@@ -135,11 +167,22 @@ class FacialLogin extends React.Component {
         };
         axios(options).then(response => {
             if (response.error) {
-                alert("Authentication Fail");
                 this.setState({ takingPicture: true });
-                return setTimeout(() => this.startDetection(), 500);
+                Swal.fire({
+                    type: 'error',
+                    title: 'Oops...',
+                    text: 'Authendication fail!',
+                    showCancelButton: true,
+                    confirmButtonText: 'Re-try!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true,
+                    animation: false,
+                    customClass: {
+                        popup: 'animated tada'
+                    }
+                })
+                // return setTimeout(() => this.startDetection(), 500);
             }
-            console.log(response.data[0].candidates[0].personId);
             this.faceAPIGetPersonId(response.data[0].candidates[0].personId);
         }).catch(error => {
             console.log('Error: ', error);
@@ -160,7 +203,6 @@ class FacialLogin extends React.Component {
         };
 
         axios(options).then(response => {
-            console.log(response.data);
             this.faceAPIIdentify(response.data);
         }).catch(error => {
             console.log('Error: ', error);
@@ -228,21 +270,109 @@ class FacialLogin extends React.Component {
         }
     };
 
+    handleSelectStaffChange = (event) => {
+        this.setState({ selectedStaff: event.target.value });
+    };
+
+    handleSelectServiceChange = (event, child) => {
+        this.setState({ selectedStaff: '' });
+        let index = child.props.id;
+        this.setState({
+            selectedServiceData: this.state.serviceList[index],
+            selectedService: event.target.value,
+            staffList: this.state.serviceList[index].staff
+        });
+    };
+
+    submit() {
+        let data = {}
+        data.id = getClient()._id;
+        data.price = this.state.selectedServiceData.price;
+        fetchAPI('POST', 'auth/buyservice', data).then(respObj => {
+
+            if (respObj.ok) {
+                Swal.fire({
+                    type: 'success',
+                    title: respObj.ok,
+                    animation: false,
+                    customClass: {
+                        popup: 'animated tada'
+                    },
+                    preConfirm: () => {
+                        return this.props.history.push('/start')
+                    }
+                })
+            } else if (respObj.error) {
+                Swal.fire({
+                    type: 'error',
+                    title: respObj.error,
+                    animation: false,
+                    customClass: {
+                        popup: 'animated tada'
+                    },
+                    preConfirm: () => {
+                        return this.props.history.push('/start')
+                    }
+                })
+            }
+        });
+    }
+
     render() {
         const { classes } = this.props;
-        let displayText, button;
+        let displayText;
         if (this.state.timerOn) {
             displayText = `Identifying, please keep still`
         } else {
             displayText = `Face not detected, adjust your position...`
         }
+        let serviceInfoDiv;
+        if (this.state.selectedServiceData) {
+            let service = this.state.selectedServiceData;
+            serviceInfoDiv =
+                <Animated key="serviceInfoDiv" animationIn="fadeIn" animationOut="fadeOut" >
+                    <FormControl className={classes.formControl} fullWidth>
+                        <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }} >Staff Name</InputLabel>
+                        <Select
+                            style={{ fontSize: 40, height: 100 }}
+                            value={this.state.selectedStaff}
+                            onChange={this.handleSelectStaffChange}
+                            input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
+                        >
+                            {this.state.staffList.map(staff => (
+                                <MenuItem value={staff._id} style={{ fontSize: 40 }}>
+                                    {staff.displayName}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Typography variant="h3" className={classes.bold}> Price: ${service.price}</Typography>
+                    <Typography variant="h3" className={classes.bold}> Duration: {service.duration} mins</Typography>
+                </Animated>
+
+        }
+        let confirmDiv;
+        if (this.state.selectedStaff && this.state.selectedService) {
+            confirmDiv = <Animated animationIn="fadeIn" animationOut="fadeOut" key="confirmDiv" >
+                <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                    style={{ fontSize: 40 }} onClick={() => this.submit()}
+                >
+                    Confirm
+                </Button>
+                <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
+                    onClick={() => { this.props.history.push('/start'); }} style={{ fontSize: 40 }}
+                >
+                    Cancel
+                </Button>
+            </Animated>
+        }
 
         return (
             <div>
-                <Animated animationIn="fadeIn" animationOut="fadeOut" >
+                <Animated animationIn="fadeIn" animationOut="fadeOut">
                     <Paper style={{ zIndex: -1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
                         <div style={{ flexDirection: 'column', alignItems: 'center' }}>
-                            <div ref="photoTaking" style={{ display: "block" }} >
+                            <div id="photoTaking" ref="photoTaking" style={{ display: "block" }} >
                                 <div style={{ height: 600, width: 800, alignItems: 'center' }}>
                                     <Webcam
                                         style={{ position: 'absolute', zIndex: 1 }}
@@ -256,13 +386,46 @@ class FacialLogin extends React.Component {
                                     <canvas id='videoOverlay' ref={this.canvas} style={{ height: 600, width: 800, position: 'relative', zIndex: 2 }} />
                                 </div>
                                 <div>
-                                    <Typography style={{ fontSize: 40 }} align="center" color="primary" >
+                                    <Typography style={{ fontSize: 40, fontWeight: 500 }} align="center" color="primary" >
                                         {displayText}
                                     </Typography>
                                 </div>
                             </div>
-                            <div ref="packageChoosing" style={{ display: "none" }}>
-                                <h1>test</h1>
+                            <div id="packageChoosing" ref="packageChoosing" style={{ display: "none" }}>
+                                <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDelay={500} >
+                                    <form >
+                                        <Grid
+                                            container
+                                            direction="column"
+                                            justify="center"
+                                            alignItems="center"
+                                        >
+                                            <Grid item xs={12}>
+                                                <FormControl className={classes.formControl} fullWidth >
+                                                    <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }}>Service Type</InputLabel>
+                                                    <Select
+                                                        style={{ fontSize: 40, height: 100 }}
+                                                        value={this.state.selectedService}
+                                                        onChange={this.handleSelectServiceChange}
+                                                        input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
+                                                    >
+                                                        {this.state.serviceList.map((service, i) => (
+                                                            <MenuItem id={i} value={service._id} style={{ fontSize: 40 }}>
+                                                                {service.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                {serviceInfoDiv}
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                {confirmDiv}
+                                            </Grid>
+                                        </Grid>
+                                    </form>
+                                </Animated>
                             </div>
                         </div>
                     </Paper>

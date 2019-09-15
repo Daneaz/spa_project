@@ -107,7 +107,8 @@ class Client extends React.Component {
   handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
-      pathname: "/clientdetail",
+      // pathname: "/clientdetail",
+      pathname: "/updateclient",
       state: {
         data: this.state.clientList[rowMeta.dataIndex]
       }

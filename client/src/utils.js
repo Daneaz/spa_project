@@ -9,6 +9,12 @@ export const setToken = (tokenStr) => { return setLocalStorage('token', tokenStr
 export const getToken = () => { return getLocalStorage('token') };
 export const removeUser = () => { removeLocalStorage('user') };
 export const setUser = (userObj) => { setLocalStorage('user', JSON.stringify(userObj)) };
+export const getClient = () => {
+    try {
+        const userObj = JSON.parse(getLocalStorage('user'));
+        if (userObj._id && userObj.displayName && getToken()) { return userObj } else { return null }
+    } catch{ return null }
+};
 export const getUser = () => {
     try {
         const userObj = JSON.parse(getLocalStorage('user'));
