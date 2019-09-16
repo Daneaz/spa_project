@@ -25,7 +25,7 @@ const styles = theme => ({
         height: 180,
     },
     submit: {
-        margin: theme.spacing(5, 0, 0),
+        margin: theme.spacing(5),
     },
 });
 
@@ -73,8 +73,7 @@ class Snapshot extends React.Component {
         faceapi.loadFaceDetectionModel(MODEL_URL)
             .then(() => faceapi.loadTinyFaceDetectorModel(MODEL_URL)
                 .then(() => {
-                    this.startDetection();
-                    // this.faceAPIIdentify();
+                    setTimeout(() => this.startDetection(), 1000);
                 }));
     }
 
@@ -315,7 +314,7 @@ class Snapshot extends React.Component {
             displayText = `Face not detected, adjust your position...`
         }
         if (this.state.takingPicture) {
-            button = (<Button variant="contained" color="primary" fullWidth style={{ margin: (5, 0, 0) }}
+            button = (<Button variant="contained" color="primary" fullWidth className={classes.submit}
                 style={{ display: 'block', fontSize: 40 }} onClick={() => {
                     this.setState({ takingPicture: false })
                     // this.capture();
@@ -326,13 +325,13 @@ class Snapshot extends React.Component {
                 </Button>);
         } else {
             button = [
-                <Button key="btnRetake" variant="contained" color="primary" fullWidth style={{ margin: (5, 0, 0) }}
-                    style={{ display: 'block', fontSize: 40, paddingTop: 10 }} onClick={() => this.retakePhoto()}
+                <Button key="btnRetake" variant="contained" color="primary" fullWidth className={classes.submit}
+                    style={{ display: 'block', fontSize: 40 }} onClick={() => this.retakePhoto()}
                 >
                     Retake A Snapshot
                 </Button>,
-                <Button key="btnDone" variant="contained" color="primary" fullWidth style={{ margin: (5, 0, 0) }}
-                    style={{ display: 'block', fontSize: 40, paddingTop: 10 }} onClick={() => this.props.history.push('/start')}
+                <Button key="btnDone" variant="contained" color="primary" fullWidth
+                    style={{ display: 'block', fontSize: 40 }} onClick={() => this.props.history.push('/start')}
                 >
                     Done
                 </Button>
@@ -343,7 +342,7 @@ class Snapshot extends React.Component {
             <div>
                 <Animated animationIn="fadeIn" animationOut="fadeOut" >
                     <Paper style={{ zIndex: -1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                        <div style={{ flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }}>
                             <div id="photoTaking" >
                                 <div style={{ height: 600, width: 800, alignItems: 'center' }}>
                                     {/* <video id="webcam" onLoadedMetadata={this.startDetection} autoPlay muted playsInline style={{ height: 600, width: 800, position: 'absolute', zIndex: 1 }} /> */}
