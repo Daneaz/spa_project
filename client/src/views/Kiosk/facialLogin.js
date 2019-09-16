@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 const axios = require('axios');
 const uriBase = 'https://spa-fr.cognitiveservices.azure.com/face/v1.0';
 const subscriptionKey = '5463be0170e742d98bf5b3606727fbdb';
+const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 const MODEL_URL = '/models'
 
 let faceBox = { detected: false, topLeftX: 0, topLeftY: 0, bottomRightX: 0, bottomRightY: 0 };
@@ -120,6 +121,70 @@ class FacialLogin extends React.Component {
         else { return ((v > 480) ? 480 : v) }
     }
 
+    faceAPIVerify(faceId, personId) {
+        const fullUrl = `${uriBase}/verify`
+
+        const options = {
+            method: 'POST',
+            url: fullUrl,
+            data: {
+                personGroupId: "1",
+                faceId: faceId,
+                personId: personId,
+            },
+            headers: {
+                'Content-Type': 'application/json',
+                'Ocp-Apim-Subscription-Key': subscriptionKey
+            }
+        };
+        axios(options).then(response => {
+            if (response.error) {
+                this.setState({ takingPicture: true });
+                Swal.fire({
+                    type: 'error',
+                    title: 'Oops...',
+                    text: 'Authendication fail!',
+                    showCancelButton: true,
+                    confirmButtonText: 'Re-try!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true,
+                    animation: false,
+                    customClass: {
+                        popup: 'animated tada'
+                    },
+                    preConfirm: () => {
+                        return setTimeout(() => this.startDetection(), 500);
+                    }
+                })
+                // return setTimeout(() => this.startDetection(), 500);
+            }
+            console.log("Verify:")
+            console.log(response.data)
+            if (response.data.isIdentical) {
+                this.faceAPIGetPersonId(personId);
+            } else {
+                Swal.fire({
+                    type: 'error',
+                    title: 'Oops...',
+                    text: 'Authendication fail!',
+                    showCancelButton: true,
+                    confirmButtonText: 'Re-try!',
+                    cancelButtonText: 'No, cancel!',
+                    reverseButtons: true,
+                    animation: false,
+                    customClass: {
+                        popup: 'animated tada'
+                    },
+                    preConfirm: () => {
+                        return setTimeout(() => this.startDetection(), 500);
+                    }
+                })
+            }
+        }).catch(error => {
+            console.log('Error: ', error);
+        });
+    }
+
     faceAPIGetPersonId(personId) {
         const fullUrl = `${uriBase}/persongroups/1/persons/${personId}`
 
@@ -133,6 +198,8 @@ class FacialLogin extends React.Component {
         };
         axios(options).then(response => {
             fetchAPI('GET', `auth/faciallogin/${response.data.name}`).then(respObj => {
+                console.log("Client: ")
+                console.log(respObj)
                 setToken(respObj.token);
                 setUser(respObj.user);
                 const photoTaking = document.getElementById('photoTaking')
@@ -179,15 +246,19 @@ class FacialLogin extends React.Component {
                     animation: false,
                     customClass: {
                         popup: 'animated tada'
+                    },
+                    preConfirm: () => {
+                        return setTimeout(() => this.startDetection(), 500);
                     }
                 })
                 // return setTimeout(() => this.startDetection(), 500);
             }
-            this.faceAPIGetPersonId(response.data[0].candidates[0].personId);
+            console.log("Identify: ")
+            console.log(response.data)
+            this.faceAPIVerify(response.data[0].faceId, response.data[0].candidates[0].personId)
         }).catch(error => {
             console.log('Error: ', error);
         });
-
     }
 
     faceAPIDetect(imageUrl) {
@@ -203,6 +274,8 @@ class FacialLogin extends React.Component {
         };
 
         axios(options).then(response => {
+            console.log("Detect: ")
+            console.log(response.data)
             this.faceAPIIdentify(response.data);
         }).catch(error => {
             console.log('Error: ', error);
@@ -261,9 +334,9 @@ class FacialLogin extends React.Component {
             let data = {};
             data.imagebase64 = imageUrl;
             data.id = "auth";
-            const respObj = await fetchAPI('POST', 'auth/savephoto', data);
+            const respObj = await fetchAPI('POST', 'photoMgt/savephoto', data);
             if (respObj && respObj.ok) {
-                this.faceAPIDetect(`${process.env.REACT_APP_FACE_API}/photos/${data.id}.png`);
+                this.faceAPIDetect(`${STORAGE_URL}/${data.id}.png`);
             }
         } catch (error) {
             console.log(error);

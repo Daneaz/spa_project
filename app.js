@@ -19,6 +19,7 @@ var apiUserMgtRouter = require('./routes/apis/staffMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
 var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
 var apiBookingMgtRouter = require('./routes/apis/bookingMgt');
+var apiPhotoMgtRouter = require('./routes/apis/photoMgt');
 var app = express();
 
 //setup express
@@ -42,7 +43,9 @@ app.locals.ver = pjson.version;
 //routing
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', indexRouter);
+app.use('/api/photoMgt', apiPhotoMgtRouter);
 app.use(`/api/auth`, apiAuthRouter);
+
 
 // check jwt if invalid
 app.use(auth.checkJwt);
@@ -50,7 +53,6 @@ app.use('/api/staffMgt', apiUserMgtRouter);
 app.use('/api/clientMgt', apiClientMgtRouter);
 app.use('/api/serviceMgt', apiServiceMgtRouter);
 app.use('/api/bookingMgt', apiBookingMgtRouter);
-
 
 
 // catch 404 and forward to error handler

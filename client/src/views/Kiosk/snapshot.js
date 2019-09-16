@@ -9,6 +9,7 @@ import { fetchAPI, getLocalStorage } from '../../utils';
 const axios = require('axios');
 const uriBase = 'https://spa-fr.cognitiveservices.azure.com/face/v1.0';
 const subscriptionKey = '5463be0170e742d98bf5b3606727fbdb';
+const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 const MODEL_URL = '/models'
 
 let faceBox = { detected: false, topLeftX: 0, topLeftY: 0, bottomRightX: 0, bottomRightY: 0 };
@@ -286,9 +287,9 @@ class Snapshot extends React.Component {
             let data = {};
             data.imagebase64 = imageUrl;
             data.id = userid;
-            const respObj = await fetchAPI('POST', 'auth/savephoto', data);
+            const respObj = await fetchAPI('POST', 'photoMgt/savephoto', data);
             if (respObj && respObj.ok) {
-                this.faceAPIAddPerson(`${process.env.REACT_APP_FACE_API}/photos/${data.id}.png`);
+                this.faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`);
             }
         } catch (error) {
             console.log(error);

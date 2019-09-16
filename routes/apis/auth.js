@@ -133,34 +133,6 @@ router.post('/clients', async (reqe, res, next) => {
 
 });
 
-/* Save photo over Kiosk POST Create client . */
-router.post('/savephoto', async (req, res, next) => {
-    try {
-        let dataObj = req.body;
-
-        if (!dataObj.imagebase64) return res.sendStatus(400);
-        // if (!dataObj.id) return res.sendStatus(400);
-
-        var id = dataObj.id;
-        var imageBase64s = dataObj.imagebase64.split(",");
-        var fileType = "jpg";
-        if (imageBase64s[0].includes("png")) { fileType = "png" }
-        var imgData = imageBase64s[1];
-
-        //console.log("imagebase64", imagebase64,firstname, lastname, filetype);
-
-        var save_filename = path.resolve(__dirname, `../../client/public/photos/${id}.${fileType}`);
-
-        fs.writeFile(save_filename, imgData, { encoding: 'base64' }, function (err) {
-            if (err) throw err;
-            console.log('File created');
-        });
-
-        res.json({ ok: 'success', path: save_filename });
-    } catch (err) { res.status(400).json({ error: `Cannot save photo, ${err.message}` }) }
-
-});
-
 /* GET service list. */
 router.get('/services', async (reqe, res, next) => {
     //get raw data from data
