@@ -8,11 +8,12 @@ export const removeToken = () => { removeLocalStorage('token') };
 export const setToken = (tokenStr) => { return setLocalStorage('token', tokenStr) };
 export const getToken = () => { return getLocalStorage('token') };
 export const removeUser = () => { removeLocalStorage('user') };
+export const removeClient = () => { removeLocalStorage('client') };
 export const setUser = (userObj) => { setLocalStorage('user', JSON.stringify(userObj)) };
+export const setClient = (clientObj) => { setLocalStorage('client', JSON.stringify(clientObj)) };
 export const getClient = () => {
     try {
-        const userObj = JSON.parse(getLocalStorage('user'));
-        if (userObj._id && userObj.displayName && getToken()) { return userObj } else { return null }
+        return JSON.parse(getLocalStorage('client'));
     } catch{ return null }
 };
 export const getUser = () => {
@@ -21,10 +22,10 @@ export const getUser = () => {
         if (userObj._id && userObj.username && userObj.displayName && userObj.role && getToken()) { return userObj } else { return null }
     } catch{ return null }
 };
-export const getAvatarLetter = (fullText) => { 
+export const getAvatarLetter = (fullText) => {
     const textArr = fullText.trim().toUpperCase().split(' ');
     let letter = "";
-    textArr.forEach(t => { if(t.length > 0){ letter += t.substr(0, 1); if(letter.letter >= 2){ return } } });
+    textArr.forEach(t => { if (t.length > 0) { letter += t.substr(0, 1); if (letter.letter >= 2) { return } } });
     return letter;
 };
 
@@ -48,10 +49,10 @@ export const fetchAPI = async (method, url, jsonObj) => {
             const respJson = await resp.json();
             if (resp.status === 200) { //success respones
                 resolve(respJson);
-            } else if(resp.status === 401) { //if no login
+            } else if (resp.status === 401) { //if no login
                 removeToken();
                 removeUser();
-                document.location.href="/";
+                document.location.href = "/";
             } else { //failed respones cdx, return error message
                 throw respJson.error || resp.statusText;
             }

@@ -3,8 +3,11 @@ import { Animated } from "react-animated-css";
 import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import Webcam from 'react-webcam';
-const MODEL_URL = '/models'
+import Swal from 'sweetalert2';
+import { faceAPIAddPerson } from './faceAPI';
+import { fetchAPI, getClient, removeClient } from '../../utils';
 
+const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 
 const videoConstraints = {
     width: 800,
@@ -29,6 +32,7 @@ class FacialLogin extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            imageUrl: '',
             takingPicture: true,
         }
         this.webcam = React.createRef();
@@ -37,15 +41,44 @@ class FacialLogin extends React.Component {
 
     capture = () => {
         this.setState({ takingPicture: false })
-        const imageSrc = this.webcam.current.getScreenshot();
+        const imageUrl = this.webcam.current.getScreenshot();
         const ctx = this.canvasPicWebCam.current.getContext("2d");
         var image = new Image();
 
         image.onload = async () => {
             ctx.drawImage(image, 0, 0);
         };
-        image.src = imageSrc;
+        image.src = imageUrl;
+        this.setState({ imageUrl: imageUrl })
     };
+
+    createUser() {
+        const user = getClient();
+        fetchAPI('POST', 'kiosk/clients', user).then(respObj => {
+            if (respObj && respObj.ok) {
+                let data = {};
+                data.imagebase64 = this.state.imageUrl;
+                data.id = respObj.user._id;
+                fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
+                    if (respObj && respObj.ok) {
+                        faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`, data.id);
+                        removeClient();
+                        this.props.history.push('/start')
+                    } else {
+                        Swal.fire({
+                            type: 'error', text: 'Please try again.',
+                            title: respObj.error
+                        })
+                    }
+                })
+            } else {
+                Swal.fire({
+                    type: 'error', text: 'Please try again.',
+                    title: respObj.error
+                })
+            }
+        })
+    }
 
     render() {
         const { classes } = this.props;
@@ -61,7 +94,7 @@ class FacialLogin extends React.Component {
         if (this.state.takingPicture) {
             button = [
                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
-                    style={{ display: 'block', fontSize: 40}} onClick={() => {
+                    style={{ display: 'block', fontSize: 40 }} onClick={() => {
                         this.setState({ takingPicture: false })
                         // this.capture();
                         this.props.history.push('/snapshot');
@@ -84,7 +117,7 @@ class FacialLogin extends React.Component {
                     Retake A Snapshot
                 </Button>,
                 <Button key="btnDone" variant="contained" color="primary" fullWidth
-                    style={{ display: 'block', fontSize: 40, paddingTop: 10 }} onClick={() => this.props.history.push('/start')}
+                    style={{ display: 'block', fontSize: 40, paddingTop: 10 }} onClick={() => this.createUser()}
                 >
                     Done
                 </Button>
@@ -100,7 +133,7 @@ class FacialLogin extends React.Component {
                                 audio={false}
                                 height={600}
                                 ref={this.webcam}
-                                screenshotFormat="image/jpeg"
+                                screenshotFormat="image/png"
                                 width={800}
                                 videoConstraints={videoConstraints}
                             />

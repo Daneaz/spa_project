@@ -7,7 +7,7 @@ import {
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
-import { fetchAPI, setLocalStorage } from '../../utils';
+import { fetchAPI, setClient } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
@@ -194,12 +194,8 @@ class Register extends React.Component {
         }
 
         try {
-            const respObj = await fetchAPI('POST', 'kiosk/clients', this.state.input);
-
-            if (respObj && respObj.ok) {
-                setLocalStorage("userid", respObj.user._id);
-                history.push('/snapshot');
-            } else { throw new Error('Register failed') }
+            setClient(this.state.input);
+            history.push('/snapshot');
         } catch (err) {
             Swal.fire({
                 type: 'error', text: 'Please try again.',

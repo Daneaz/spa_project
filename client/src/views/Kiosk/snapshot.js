@@ -4,11 +4,10 @@ import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, B
 import { withStyles } from '@material-ui/styles';
 import * as faceapi from 'face-api.js';
 import Webcam from 'react-webcam';
-import { fetchAPI, getLocalStorage } from '../../utils';
+import { fetchAPI, getClient, removeClient } from '../../utils';
+import { faceAPIAddPerson } from './faceAPI';
+import Swal from 'sweetalert2';
 
-const axios = require('axios');
-const uriBase = 'https://spa-fr.cognitiveservices.azure.com/face/v1.0';
-const subscriptionKey = '5463be0170e742d98bf5b3606727fbdb';
 const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 const MODEL_URL = '/models'
 
@@ -38,6 +37,7 @@ class Snapshot extends React.Component {
             takingPicture: true,
             timerOn: false,
             timerTime: 3000,
+            imageUrl:'',
         }
         this.webcam = React.createRef();
         this.canvas = React.createRef();
@@ -92,131 +92,7 @@ class Snapshot extends React.Component {
         else { return ((v > 480) ? 480 : v) }
     }
 
-    faceAPITrainStatus() {
-        const fullUrl = `${uriBase}/persongroups/1/training`
-        const options = {
-            method: 'GET',
-            url: fullUrl,
-            headers: {
-                'Content-Type': 'application/json',
-                'Ocp-Apim-Subscription-Key': subscriptionKey
-            }
-        };
-
-        axios(options).then(response => {
-            console.log(response.data);
-        }).catch(error => {
-            console.log('Error: ', error);
-        });
-    }
-
-    faceAPITrain() {
-        const fullUrl = `${uriBase}/persongroups/1/train`
-        const options = {
-            method: 'POST',
-            url: fullUrl,
-            headers: {
-                'Content-Type': 'application/json',
-                'Ocp-Apim-Subscription-Key': subscriptionKey
-            }
-        };
-
-        axios(options).then(response => {
-            console.log(response.data);
-        }).catch(error => {
-            console.log('Error: ', error);
-        });
-    }
-
-    faceAPIAddFace(personId, imageUrl) {
-        const fullUrl = `${uriBase}/persongroups/1/persons/${personId}/persistedFaces`
-        const options = {
-            method: 'POST',
-            url: fullUrl,
-            data: { url: imageUrl },
-            headers: {
-                'Content-Type': 'application/json',
-                'Ocp-Apim-Subscription-Key': subscriptionKey
-            }
-        };
-
-        axios(options).then(response => {
-            // response.data;
-            this.faceAPITrain();
-            console.log(response.data);
-        }).catch(error => {
-            console.log('Error: ', error);
-        });
-    }
-
-    faceAPIAddPerson(imageUrl) {
-        const userid = getLocalStorage("userid");
-        const fullUrl = `${uriBase}/persongroups/1/persons`
-        const options = {
-            method: 'POST',
-            url: fullUrl,
-            data: { name: userid },
-            headers: {
-                'Content-Type': 'application/json',
-                'Ocp-Apim-Subscription-Key': subscriptionKey
-            }
-        };
-
-        axios(options).then(response => {
-            this.faceAPIAddFace(response.data.personId, imageUrl)
-            console.log(response.data.personId);
-        }).catch(error => {
-            console.log('Error: ', error);
-        });
-    }
-
-    faceAPIIdentify(faceIdData) {
-        let faceIds = [];
-        for (let i = 0; i < faceIdData.length; i++) {
-            faceIds.push(faceIdData[i].faceId)
-        }
-        const fullUrl = `${uriBase}/identify`
-
-        const options = {
-            method: 'POST',
-            url: fullUrl,
-            data: {
-                personGroupId: "1",
-                faceIds: faceIds,
-                maxNumOfCandidatesReturned: 1,
-            },
-            headers: {
-                'Content-Type': 'application/json',
-                'Ocp-Apim-Subscription-Key': subscriptionKey
-            }
-        };
-        axios(options).then(response => {
-            console.log(response);
-        }).catch(error => {
-            console.log('Error: ', error);
-        });
-
-    }
-
-    faceAPIDetect(imageUrl) {
-        const fullUrl = `${uriBase}/detect?returnFaceId=true`
-        const options = {
-            method: 'POST',
-            url: fullUrl,
-            data: { url: imageUrl },
-            headers: {
-                'Content-Type': 'application/json',
-                'Ocp-Apim-Subscription-Key': subscriptionKey
-            }
-        };
-
-        axios(options).then(response => {
-            console.log(response.data);
-            this.faceAPIIdentify(response.data);
-        }).catch(error => {
-            console.log('Error: ', error);
-        });
-    }
+    
 
     startDetection = () => {
         try {
@@ -270,7 +146,7 @@ class Snapshot extends React.Component {
 
     capture = async (imageUrl) => {
         try {
-            const userid = getLocalStorage("userid");
+
             console.log("capture")
             this.setState({ takingPicture: false })
             const taking = document.getElementById('photoTaking')
@@ -284,13 +160,7 @@ class Snapshot extends React.Component {
                 photoctx.drawImage(img, 0, 0, photoCanvas.width, photoCanvas.height);
             };
             img.src = imageUrl;
-            let data = {};
-            data.imagebase64 = imageUrl;
-            data.id = userid;
-            const respObj = await fetchAPI('POST', 'kiosk/savephoto', data);
-            if (respObj && respObj.ok) {
-                this.faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`);
-            }
+            this.setState({ imageUrl: imageUrl })
         } catch (error) {
             console.log(error);
         }
@@ -304,6 +174,35 @@ class Snapshot extends React.Component {
         taking.style.display = 'block';
         showing.style.display = 'none'
         this.startDetection();
+    }
+
+    createUser() {
+        const user = getClient();
+        fetchAPI('POST', 'kiosk/clients', user).then(respObj => {
+            if (respObj && respObj.ok) {
+                console.log(respObj.user._id);
+                let data = {};
+                data.imagebase64 = this.state.imageUrl;
+                data.id = respObj.user._id;
+                fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
+                    if (respObj && respObj.ok) {
+                        faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`, data.id);
+                        removeClient();
+                        this.props.history.push('/start')
+                    } else {
+                        Swal.fire({
+                            type: 'error', text: 'Please try again.',
+                            title: respObj.error
+                        })
+                    }
+                })
+            } else {
+                Swal.fire({
+                    type: 'error', text: 'Please try again.',
+                    title: respObj.error
+                })
+            }
+        })
     }
 
     render() {
@@ -332,7 +231,7 @@ class Snapshot extends React.Component {
                     Retake A Snapshot
                 </Button>,
                 <Button key="btnDone" variant="contained" color="primary" fullWidth
-                    style={{ display: 'block', fontSize: 40 }} onClick={() => this.props.history.push('/start')}
+                    style={{ display: 'block', fontSize: 40 }} onClick={() => this.createUser()}
                 >
                     Done
                 </Button>

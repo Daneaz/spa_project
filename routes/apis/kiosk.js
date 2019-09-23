@@ -4,6 +4,14 @@ var auth = require('../../services/auth');
 let Client = require('../../models/auth/client');
 let Service = require('../../models/service');
 let logger = require('../../services/logger');
+const path = require('path');
+var fs = require('fs');
+const storage = require('azure-storage');
+
+const accountName = 'projectspa';
+const accountKey = 'R7zA1Mtsis7edYRfOEwu8Sv4gmA51Cz3bx13N5GH83ixS/XI/IPr/yO0Ku8btTp6tvYghS6rzPEFMGJfFoUYjg==';
+const containerName = 'spacontainer';
+const blobService = storage.createBlobService(accountName, accountKey);
 
 router.get('/faciallogin/:id', async (reqe, res, next) => {
 
@@ -115,7 +123,6 @@ router.post('/savephoto', async (req, res, next) => {
         let dataObj = req.body;
 
         if (!dataObj.imagebase64) return res.sendStatus(400);
-        // if (!dataObj.id) return res.sendStatus(400);
 
         var id = dataObj.id;
         var imageBase64s = dataObj.imagebase64.split(",");
@@ -123,19 +130,21 @@ router.post('/savephoto', async (req, res, next) => {
         if (imageBase64s[0].includes("png")) { fileType = "png" }
         var imgData = imageBase64s[1];
 
-        //console.log("imagebase64", imagebase64,firstname, lastname, filetype);
-
-        var save_filename = path.resolve(__dirname, `../../public/photos/${id}.${fileType}`);
-        save_filename = `public/photos/${id}.${fileType}`
+        var save_filename = `public/photos/${id}.${fileType}`
         fs.writeFile(save_filename, imgData, { encoding: 'base64' }, function (err) {
             if (err) throw err;
             console.log('File created');
-            uploadLocalFile(containerName, save_filename).then(response=>{
+            uploadLocalFile(containerName, save_filename).then(response => {
                 console.log(response.message);
                 console.log(`Blobs in "${containerName}" container:`);
+                fs.unlink(save_filename, function (err) {
+                    if (err) throw err;
+                    // if no error, file has been deleted successfully
+                    console.log('File deleted!');
+                });
                 res.json({ ok: 'success', path: save_filename });
             });
-            
+
         });
 
     } catch (err) { res.status(400).json({ error: `Cannot save photo, ${err.message}` }) }
@@ -155,5 +164,40 @@ const uploadLocalFile = async (containerName, filePath) => {
         });
     });
 };
+
+const listBlobs = async (containerName) => {
+    return new Promise((resolve, reject) => {
+        blobService.listBlobsSegmented(containerName, null, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ message: `${data.entries.length} blobs in '${containerName}'`, blobs: data.entries });
+            }
+        });
+    });
+};
+
+const deleteBlob = async (containerName, blobName) => {
+    return new Promise((resolve, reject) => {
+        blobService.deleteBlobIfExists(containerName, blobName, err => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ message: `Block blob '${blobName}' deleted` });
+            }
+        });
+    });
+};
+
+// const execute = async () => {
+
+//     console.log(`Blobs in "${containerName}" container:`);
+//     response = await listBlobs(containerName);
+//     response.blobs.forEach((blob) => console.log(` - ${blob.name}`));
+//     // var blobName = "5d7fc9803801852e78e6d194.png"
+//     // await deleteBlob(containerName, blobName);
+//     // console.log(`Blob "${blobName}" is deleted`);
+// }
+// execute().then(() => console.log("Done")).catch((e) => console.log(e));
 
 module.exports = router;
