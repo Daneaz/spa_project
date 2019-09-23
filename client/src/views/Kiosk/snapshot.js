@@ -287,7 +287,7 @@ class Snapshot extends React.Component {
             let data = {};
             data.imagebase64 = imageUrl;
             data.id = userid;
-            const respObj = await fetchAPI('POST', 'photoMgt/savephoto', data);
+            const respObj = await fetchAPI('POST', 'kiosk/savephoto', data);
             if (respObj && respObj.ok) {
                 this.faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`);
             }

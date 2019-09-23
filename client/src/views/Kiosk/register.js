@@ -194,7 +194,7 @@ class Register extends React.Component {
         }
 
         try {
-            const respObj = await fetchAPI('POST', 'auth/clients', this.state.input);
+            const respObj = await fetchAPI('POST', 'kiosk/clients', this.state.input);
 
             if (respObj && respObj.ok) {
                 setLocalStorage("userid", respObj.user._id);

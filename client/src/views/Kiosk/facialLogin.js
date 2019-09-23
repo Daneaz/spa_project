@@ -76,7 +76,7 @@ class FacialLogin extends React.Component {
                 .then(() => {
                     setTimeout(() => this.startDetection(), 1000);
                 }));
-        fetchAPI('GET', 'auth/services').then(serviceList => {
+        fetchAPI('GET', 'kiosk/services').then(serviceList => {
             this.setState({
                 serviceList: serviceList,
                 staffList: serviceList[0].staff
@@ -197,7 +197,7 @@ class FacialLogin extends React.Component {
             }
         };
         axios(options).then(response => {
-            fetchAPI('GET', `auth/faciallogin/${response.data.name}`).then(respObj => {
+            fetchAPI('GET', `kiosk/faciallogin/${response.data.name}`).then(respObj => {
                 console.log("Client: ")
                 console.log(respObj)
                 setToken(respObj.token);
@@ -334,7 +334,7 @@ class FacialLogin extends React.Component {
             let data = {};
             data.imagebase64 = imageUrl;
             data.id = "auth";
-            const respObj = await fetchAPI('POST', 'photoMgt/savephoto', data);
+            const respObj = await fetchAPI('POST', 'kiosk/savephoto', data);
             if (respObj && respObj.ok) {
                 this.faceAPIDetect(`${STORAGE_URL}/${data.id}.png`);
             }
@@ -361,7 +361,7 @@ class FacialLogin extends React.Component {
         let data = {}
         data.id = getClient()._id;
         data.price = this.state.selectedServiceData.price;
-        fetchAPI('POST', 'auth/buyservice', data).then(respObj => {
+        fetchAPI('POST', 'kiosk/buyservice', data).then(respObj => {
 
             if (respObj.ok) {
                 Swal.fire({

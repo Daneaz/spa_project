@@ -15,11 +15,12 @@ let logger = require('./services/logger');
 
 var indexRouter = require('./routes/index');
 var apiAuthRouter = require('./routes/apis/auth');
+var apiKioskRouter = require('./routes/apis/kiosk');
 var apiUserMgtRouter = require('./routes/apis/staffMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
 var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
 var apiBookingMgtRouter = require('./routes/apis/bookingMgt');
-var apiPhotoMgtRouter = require('./routes/apis/photoMgt');
+
 var app = express();
 
 //setup express
@@ -43,7 +44,7 @@ app.locals.ver = pjson.version;
 //routing
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', indexRouter);
-app.use('/api/photoMgt', apiPhotoMgtRouter);
+app.use('/api/kiosk', apiKioskRouter);
 app.use(`/api/auth`, apiAuthRouter);
 
 
