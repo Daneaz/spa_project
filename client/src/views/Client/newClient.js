@@ -63,8 +63,6 @@ class NewClient extends React.Component {
                             if (!values.password) { errors.password = 'Please enter password' }
                             if (!values.confirmPassoword) { errors.confirmPassoword = 'Please enter password' }
                             if (!values.displayName) { errors.displayName = 'Please enter password' }
-                            if (!values.email) { errors.email = 'Please enter email address' }
-                            if (!values.nric) {errors.nric = 'Please enter NRIC'}
                             if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
                             return errors;
                         }}

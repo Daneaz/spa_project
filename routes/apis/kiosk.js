@@ -3,19 +3,26 @@ var router = express.Router();
 var auth = require('../../services/auth');
 let Client = require('../../models/auth/client');
 let Service = require('../../models/service');
+let Booking = require('../../models/bookings');
 let logger = require('../../services/logger');
 const path = require('path');
 var fs = require('fs');
-const storage = require('azure-storage');
 
+// Azure storage config
+const storage = require('azure-storage');
 const accountName = 'projectspa';
 const accountKey = 'R7zA1Mtsis7edYRfOEwu8Sv4gmA51Cz3bx13N5GH83ixS/XI/IPr/yO0Ku8btTp6tvYghS6rzPEFMGJfFoUYjg==';
 const containerName = 'spacontainer';
 const blobService = storage.createBlobService(accountName, accountKey);
 
+// SMS Config
+const messagingApi = require("@cmdotcom/text-sdk");
+const yourProductToken = "91888406-8B79-4800-9DB9-02390203CDA7";
+const myMessageApi = new messagingApi.MessageApiClient(yourProductToken);
+
 router.get('/faciallogin/:id', async (reqe, res, next) => {
 
-    var rsJson = { error: "invalid username or password" };
+    var rsJson = { error: "invalid mobile" };
     try {
         let userObj = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
             .select({
@@ -57,6 +64,49 @@ router.get('/faciallogin/:id', async (reqe, res, next) => {
     res.json(rsJson);
 });
 
+router.get('/mobilelogin/:mobile', async (reqe, res, next) => {
+
+    var rsJson = { error: "invalid mobile" };
+    try {
+        let userObj = await Client.findOne({ "mobile": reqe.params.mobile, "delFlag": false }).lean()
+            .select({
+                "email": 1,
+                "mobile": 1,
+                "displayName": 1,
+                "nric": 1,
+                "gender": 1,
+                "credit": 1,
+            });
+
+        if (userObj != null) {
+
+            var ip = reqe.headers['x-forwarded-for'] || reqe.connection.remoteAddress;
+
+            //* JWT Auth */
+            var userData = {
+                id: userObj._id,
+                displayName: userObj.displayName,
+                IP: ip
+            }
+            //console.log(userData);
+
+            // issue JWT to cookie
+            let token = auth.issueJwtCookie(userData, res);
+
+            var rsJson = {
+                "ok": `Client has logined from ${ip}`,
+                "token": token,
+                "user": userObj
+            };
+            logger.audit("Auth", "Facial Login", userObj._id, userObj._id, `${userObj.displayName} has logined from ${ip}`);
+        }
+
+    } catch (err) { }
+
+    if (rsJson.error) { res.status(400) }
+
+    res.json(rsJson);
+});
 
 /* Register client over Kiosk POST Create client . */
 router.post('/clients', async (reqe, res, next) => {
@@ -97,6 +147,34 @@ router.get('/services', async (reqe, res, next) => {
     res.send(services);
 });
 
+/* GET service list. */
+router.post('/availablestaff', async (reqe, res, next) => {
+    //get raw data from data
+    let service = reqe.body;
+    let startTime = new Date();
+    let endTime = new Date(startTime.getTime() + service.duration * 60000);
+    let staffs = service.staff;
+    let staffList = []
+    let todayDate = new Date(startTime.toDateString());
+    for (let i = 0; i < staffs.length; i++) {
+        let bookings = await Booking.find({ staff: staffs[i]._id, start: { $gte: todayDate }, delFlag: false });
+        if (bookings.length <= 0) {
+            staffList.push(staffs[i])
+            continue;
+        }
+        let conflit = false;
+        for (let j = 0; j < bookings.length; j++) {
+            if ((bookings[j].end > startTime && startTime > bookings[j].start) || (bookings[j].end > endTime && endTime > bookings[j].start)) {
+                conflit = true
+            }
+        }
+        if (!conflit) {
+            staffList.push(staffs[i])
+        }
+    }
+    res.send(staffList);
+});
+
 /* Register client over Kiosk POST Create client . */
 router.post('/buyservice', async (reqe, res, next) => {
     try {
@@ -110,10 +188,43 @@ router.post('/buyservice', async (reqe, res, next) => {
                 } else {
                     client.credit = client.credit - data.price;
                     client.save();
+                    let mobile = client.mobile;
+                    let firstDigit = mobile.toString()[0];
+                    if (mobile.toString().length === 8 && (firstDigit === '8' || firstDigit === '9')) {
+                        mobile = `+65${mobile}`;
+                    }
+                    let message = `You have purchase a service recently. Your remaining credit is ${client.credit}`
+                    const result = myMessageApi.sendTextMessage([mobile], "Sante", message);
+                    result.then((result) => {
+                        console.log(result);
+                    }).catch((error) => {
+                        console.log(error);
+                    });
                     res.json({ ok: "Please process to the waiting area!" });
                 }
             })
-    } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ error: `Cannot create client, ${err.message}` })
+    }
+
+});
+
+/* POST Create booking. */
+router.post('/bookings', async (reqe, res, next) => {
+    try {
+
+        //load main fields
+        let booking = new Booking(reqe.body);
+        booking.createdBy = "Kiosk";
+
+        //save client 
+        let doc = await booking.save();
+        let rsObj = { ok: "Booking has been created.", id: doc._id };
+        logger.audit("Kiosk", "Create", doc._id, `A new booking has been created by Kiosk`);
+        res.json(rsObj);
+
+    } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
 
 });
 
@@ -130,24 +241,19 @@ router.post('/savephoto', async (req, res, next) => {
         if (imageBase64s[0].includes("png")) { fileType = "png" }
         var imgData = imageBase64s[1];
 
-        var save_filename = `public/photos/${id}.${fileType}`
-        fs.writeFile(save_filename, imgData, { encoding: 'base64' }, function (err) {
-            if (err) throw err;
-            console.log('File created');
-            uploadLocalFile(containerName, save_filename).then(response => {
-                console.log(response.message);
-                console.log(`Blobs in "${containerName}" container:`);
-                fs.unlink(save_filename, function (err) {
-                    if (err) throw err;
-                    // if no error, file has been deleted successfully
-                    console.log('File deleted!');
-                });
-                res.json({ ok: 'success', path: save_filename });
-            });
+        var buffer = Buffer.from(imgData, 'base64');
+        var blobName = `${id}.${fileType}`
 
+        uploadFromURL(containerName, blobName, buffer).then(response => {
+            console.log(response.message);
+            console.log(`Blobs in "${containerName}" container:`);
+            res.json({ ok: 'success' });
         });
 
-    } catch (err) { res.status(400).json({ error: `Cannot save photo, ${err.message}` }) }
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ error: `Cannot save photo, ${err.message}` })
+    }
 
 });
 
@@ -160,6 +266,18 @@ const uploadLocalFile = async (containerName, filePath) => {
                 reject(err);
             } else {
                 resolve({ message: `Local file "${filePath}" is uploaded` });
+            }
+        });
+    });
+};
+
+const uploadFromURL = async (containerName, blobName, stream) => {
+    return new Promise((resolve, reject) => {
+        blobService.createBlockBlobFromText(containerName, blobName, stream, { contentType: "image/jpeg" }, err => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ message: `File "${blobName}" is uploaded` });
             }
         });
     });
@@ -189,15 +307,15 @@ const deleteBlob = async (containerName, blobName) => {
     });
 };
 
-// const execute = async () => {
+const execute = async () => {
 
-//     console.log(`Blobs in "${containerName}" container:`);
-//     response = await listBlobs(containerName);
-//     response.blobs.forEach((blob) => console.log(` - ${blob.name}`));
-//     // var blobName = "5d7fc9803801852e78e6d194.png"
-//     // await deleteBlob(containerName, blobName);
-//     // console.log(`Blob "${blobName}" is deleted`);
-// }
-// execute().then(() => console.log("Done")).catch((e) => console.log(e));
+    console.log(`Blobs in "${containerName}" container:`);
+    response = await listBlobs(containerName);
+    response.blobs.forEach((blob) => console.log(` - ${blob.name}`));
+    // var blobName = "5d7fc9803801852e78e6d194.jpg"
+    // await deleteBlob(containerName, blobName);
+    // console.log(`Blob "${blobName}" is deleted`);
+}
+execute().then(() => console.log("Done")).catch((e) => console.log(e));
 
 module.exports = router;

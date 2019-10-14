@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@cmdotcom/text-sdk": "^1.1.0",
     "azure-storage": "^2.10.3",
     "cookie": "^0.4.0",
     "cookie-parser": "~1.4.4",

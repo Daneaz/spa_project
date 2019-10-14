@@ -11,8 +11,8 @@ var ClientSchema = new Schema({
     password    : { type: String, required: true },
     email       : { type: String, lowercase: true },
     displayName : { type: String, required: true },
-    gender      : { type: String, required: true },
-    nric        : { type: String, required: true },
+    gender      : { type: String, },
+    nric        : { type: String, },
     credit      : { type: Number, default: 0 },
     delFlag     : { type: Boolean, index: true, default: false }
 }, { timestamps: true });

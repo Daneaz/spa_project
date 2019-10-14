@@ -1,13 +1,14 @@
 import React from 'react';
 import { Animated } from "react-animated-css";
 import {
-    Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid, Typography,
+    Button, Grid, Typography,
     InputLabel, FormControl, Select, Input, MenuItem,
 } from '@material-ui/core';
+import KioskLayout from './Component/KioskLayout';
 import { withStyles } from '@material-ui/styles';
 import * as faceapi from 'face-api.js';
 import Webcam from 'react-webcam';
-import { fetchAPI, setToken, setUser, getClient } from '../../utils';
+import { fetchAPI, setToken, setClient, getClient } from '../../utils';
 import Swal from 'sweetalert2';
 
 const axios = require('axios');
@@ -17,7 +18,6 @@ const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 const MODEL_URL = '/models'
 
 let faceBox = { detected: false, topLeftX: 0, topLeftY: 0, bottomRightX: 0, bottomRightY: 0 };
-const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
 
 const videoConstraints = {
     width: 800,
@@ -31,11 +31,11 @@ const styles = theme => ({
     },
     submit: {
         margin: theme.spacing(3),
-        minWidth: 320,
+        minWidth: 220,
     },
     cancel: {
         margin: theme.spacing(3),
-        minWidth: 320,
+        minWidth: 220,
     },
     container: {
         display: 'flex',
@@ -43,7 +43,7 @@ const styles = theme => ({
     },
     formControl: {
         margin: theme.spacing(3),
-        minWidth: 700,
+        minWidth: 500,
     },
     bold: {
         margin: theme.spacing(3),
@@ -65,6 +65,7 @@ class FacialLogin extends React.Component {
             takingPicture: true,
             timerOn: false,
             timerTime: 3000,
+            displayName: '',
         }
         this.webcam = React.createRef();
         this.canvas = React.createRef();
@@ -81,7 +82,9 @@ class FacialLogin extends React.Component {
                 serviceList: serviceList,
                 staffList: serviceList[0].staff
             });
-        });
+        }).catch(error => {
+            console.log(error);
+        })
     }
 
     componentWillUnmount() {
@@ -198,17 +201,35 @@ class FacialLogin extends React.Component {
         };
         axios(options).then(response => {
             fetchAPI('GET', `kiosk/faciallogin/${response.data.name}`).then(respObj => {
-                console.log("Client: ")
-                console.log(respObj)
-                setToken(respObj.token);
-                setUser(respObj.user);
-                const photoTaking = document.getElementById('photoTaking')
-                const packageChoosing = document.getElementById('packageChoosing')
-                photoTaking.style.display = 'none';
-                packageChoosing.style.display = 'block'
+                if (respObj && respObj.ok) {
+                    console.log("Client: ")
+                    console.log(respObj)
+                    setToken(respObj.token);
+                    setClient(respObj.user);
+                    this.setState({ displayName: respObj.user.displayName })
+                    const photoTaking = document.getElementById('photoTaking')
+                    const packageChoosing = document.getElementById('packageChoosing')
+                    photoTaking.style.display = 'none';
+                    packageChoosing.style.display = 'block'
+                } else {
+                    Swal.fire({
+                        type: 'error', text: 'Please try again.',
+                        title: "Authentication fail!",
+                        preConfirm: () => {
+                            return setTimeout(() => this.startDetection(), 500);
+                        }
+                    })
+                }
             })
         }).catch(error => {
-            console.log('Error: ', error);
+            console.log(error)
+            Swal.fire({
+                type: 'error', text: 'Please try again.',
+                title: "Authentication fail!",
+                preConfirm: () => {
+                    return setTimeout(() => this.startDetection(), 500);
+                }
+            })
         });
     }
 
@@ -255,7 +276,18 @@ class FacialLogin extends React.Component {
             }
             console.log("Identify: ")
             console.log(response.data)
-            this.faceAPIVerify(response.data[0].faceId, response.data[0].candidates[0].personId)
+            if (response.data[0].candidates[0]) {
+                this.faceAPIVerify(response.data[0].faceId, response.data[0].candidates[0].personId)
+            } else {
+                Swal.fire({
+                    type: 'error', text: 'Please try again.',
+                    title: "Authentication fail!",
+                    preConfirm: () => {
+                        return setTimeout(() => this.startDetection(), 500);
+                    }
+                })
+
+            }
         }).catch(error => {
             console.log('Error: ', error);
         });
@@ -312,7 +344,7 @@ class FacialLogin extends React.Component {
                                 faceBox.bottomRightY = this.getBR((box.y + box.height), false);
                             }
                             canvas.getContext('2d').drawImage(video, 0, 0);
-                            this.capture(canvas.toDataURL())
+                            this.capture(canvas.toDataURL('image/jpeg', 0.5))
                             return;
                         }
                         return setTimeout(() => this.startDetection(), 300);
@@ -336,10 +368,24 @@ class FacialLogin extends React.Component {
             data.id = "auth";
             const respObj = await fetchAPI('POST', 'kiosk/savephoto', data);
             if (respObj && respObj.ok) {
-                this.faceAPIDetect(`${STORAGE_URL}/${data.id}.png`);
+                this.faceAPIDetect(`${STORAGE_URL}/${data.id}.jpg`);
+            } else {
+                Swal.fire({
+                    type: 'error', text: 'Please try again.',
+                    title: "Authentication fail!",
+                    preConfirm: () => {
+                        return setTimeout(() => this.startDetection(), 500);
+                    }
+                })
             }
         } catch (error) {
-            console.log(error);
+            Swal.fire({
+                type: 'error', text: 'Please try again.',
+                title: "Authentication fail!",
+                preConfirm: () => {
+                    return setTimeout(() => this.startDetection(), 500);
+                }
+            })
         }
     };
 
@@ -350,35 +396,70 @@ class FacialLogin extends React.Component {
     handleSelectServiceChange = (event, child) => {
         this.setState({ selectedStaff: '' });
         let index = child.props.id;
-        this.setState({
-            selectedServiceData: this.state.serviceList[index],
-            selectedService: event.target.value,
-            staffList: this.state.serviceList[index].staff
+
+        fetchAPI('POST', 'kiosk/availablestaff', this.state.serviceList[index]).then(staffAvailable => {
+            if (staffAvailable.length === 0) {
+                staffAvailable = [
+                    {
+                        displayName: "No Staff Available"
+                    }
+                ]
+            }
+            this.setState({
+                selectedServiceData: this.state.serviceList[index],
+                selectedService: event.target.value,
+                staffList: staffAvailable
+            });
         });
     };
 
     submit() {
+        let client = getClient()
         let data = {}
-        data.id = getClient()._id;
+        data.id = client._id;
         data.price = this.state.selectedServiceData.price;
-        fetchAPI('POST', 'kiosk/buyservice', data).then(respObj => {
+        fetchAPI('POST', 'kiosk/buyservice', data).then(service => {
 
-            if (respObj.ok) {
-                Swal.fire({
-                    type: 'success',
-                    title: respObj.ok,
-                    animation: false,
-                    customClass: {
-                        popup: 'animated tada'
-                    },
-                    preConfirm: () => {
-                        return this.props.history.push('/start')
+            if (service.ok) {
+                let start = new Date();
+                let end = new Date(start.getTime() + parseInt(this.state.selectedServiceData.duration) * 60000)
+                let values = {
+                    serviceName: `${this.state.selectedServiceData.name} ${client.displayName}`,
+                    start: start,
+                    end: end,
+                    staff: this.state.selectedStaff,
+                }
+                fetchAPI('POST', 'kiosk/bookings', values).then(respObj => {
+                    if (respObj && respObj.ok) {
+                        Swal.fire({
+                            type: 'success',
+                            title: respObj.ok,
+                            animation: false,
+                            customClass: {
+                                popup: 'animated tada'
+                            },
+                            preConfirm: () => {
+                                return this.props.history.push('/start')
+                            }
+                        })
+                    } else {
+                        Swal.fire({
+                            type: 'error',
+                            title: respObj.error,
+                            animation: false,
+                            customClass: {
+                                popup: 'animated tada'
+                            },
+                            preConfirm: () => {
+                                return this.props.history.push('/start')
+                            }
+                        })
                     }
                 })
-            } else if (respObj.error) {
+            } else if (service.error) {
                 Swal.fire({
                     type: 'error',
-                    title: respObj.error,
+                    title: service.error,
                     animation: false,
                     customClass: {
                         popup: 'animated tada'
@@ -388,7 +469,12 @@ class FacialLogin extends React.Component {
                     }
                 })
             }
+        }).catch(error => {
+            console.log(error)
         });
+    }
+    homePage = () => {
+        this.props.history.push('/start');
     }
 
     render() {
@@ -441,69 +527,69 @@ class FacialLogin extends React.Component {
         }
 
         return (
-            <div>
-                <Animated animationIn="fadeIn" animationOut="fadeOut">
-                    <Paper style={{ zIndex: -1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                        <div style={{ flexDirection: 'column', alignItems: 'center' }}>
-                            <div id="photoTaking" ref="photoTaking" style={{ display: "block" }} >
-                                <div style={{ height: 600, width: 800, alignItems: 'center' }}>
-                                    <Webcam
-                                        style={{ position: 'absolute', zIndex: 1 }}
-                                        audio={false}
-                                        height={600}
-                                        ref={this.webcam}
-                                        screenshotFormat="image/jpeg"
-                                        width={800}
-                                        videoConstraints={videoConstraints}
-                                    />
-                                    <canvas id='videoOverlay' ref={this.canvas} style={{ height: 600, width: 800, position: 'relative', zIndex: 2 }} />
-                                </div>
-                                <div>
-                                    <Typography style={{ fontSize: 40, fontWeight: 500 }} align="center" color="primary" >
-                                        {displayText}
-                                    </Typography>
-                                </div>
-                            </div>
-                            <div id="packageChoosing" ref="packageChoosing" style={{ display: "none" }}>
-                                <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDelay={500} >
-                                    <form >
-                                        <Grid
-                                            container
-                                            direction="column"
-                                            justify="center"
-                                            alignItems="center"
-                                        >
-                                            <Grid item xs={12}>
-                                                <FormControl className={classes.formControl} fullWidth >
-                                                    <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }}>Service Type</InputLabel>
-                                                    <Select
-                                                        style={{ fontSize: 40, height: 100 }}
-                                                        value={this.state.selectedService}
-                                                        onChange={this.handleSelectServiceChange}
-                                                        input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
-                                                    >
-                                                        {this.state.serviceList.map((service, i) => (
-                                                            <MenuItem id={i} value={service._id} style={{ fontSize: 40 }}>
-                                                                {service.name}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                {serviceInfoDiv}
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                {confirmDiv}
-                                            </Grid>
-                                        </Grid>
-                                    </form>
-                                </Animated>
-                            </div>
+            <KioskLayout {...this.props} imageWidth={200} imagePadding={40} displayName={this.state.displayName}>
+                <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }}>
+                    <div id="photoTaking" ref="photoTaking" style={{ display: "block", flexDirection: 'column', alignItems: 'center', display: 'flex' }} >
+                        <div style={{ height: 480, width: 600, alignItems: 'center' }}>
+                            <Webcam
+                                style={{ position: 'absolute', zIndex: 1 }}
+                                audio={false}
+                                height={480}
+                                ref={this.webcam}
+                                screenshotFormat="image/jpeg"
+                                width={600}
+                                videoConstraints={videoConstraints}
+                            />
+                            <canvas id='videoOverlay' ref={this.canvas} style={{ height: 480, width: 600, position: 'relative', zIndex: 2 }} />
                         </div>
-                    </Paper>
-                </Animated>
-            </div >
+                        <div>
+                            <Typography style={{ fontSize: 30, fontWeight: 500 }} align="center" color="primary" >
+                                {displayText}
+                            </Typography>
+                        </div>
+                        <Button onClick={() => { this.props.history.push('/mobilelogin'); }} variant="outlined" color="primary" style={{ top: 30, fontSize: 30 }}>
+                            Login By Mobile
+                        </Button>
+                    </div>
+                    <div id="packageChoosing" ref="packageChoosing" style={{ display: "none", paddingTop: 100 }}>
+                        <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDelay={500} >
+                            <form >
+                                <Grid
+                                    container
+                                    direction="column"
+                                    justify="center"
+                                    alignItems="center"
+                                >
+                                    <Grid item xs={12}>
+                                        <FormControl className={classes.formControl} >
+                                            <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }}>Service Type</InputLabel>
+                                            <Select
+                                                style={{ fontSize: 40, height: 100 }}
+                                                value={this.state.selectedService}
+                                                onChange={this.handleSelectServiceChange}
+                                                input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
+                                            >
+                                                {this.state.serviceList.map((service, i) => (
+                                                    <MenuItem id={i} value={service._id} style={{ fontSize: 40 }}>
+                                                        {service.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        {serviceInfoDiv}
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        {confirmDiv}
+                                    </Grid>
+                                </Grid>
+                            </form>
+                        </Animated>
+                    </div>
+
+                </div>
+            </KioskLayout>
         );
     }
 }

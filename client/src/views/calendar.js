@@ -6,7 +6,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { withStyles } from '@material-ui/styles';
 import {
-  Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, Input, MenuItem, FormControl, Select,
+  Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, Input, MenuItem, FormControl, Select, Paper, Box
 } from '@material-ui/core';
 import AppLayout from '../layout/app'
 import { fetchAPI } from '../utils';
@@ -33,10 +33,14 @@ class CalendarView extends React.Component {
       eventOpen: false,
       staffList: [],
       serviceList: [],
+      clientList: [],
       selectedStaff: {},
       selectedService: {},
+      selectedClient: {},
       events: [],
       newEvent: {},
+      editEvent: false,
+      selectedEvent: {},
     }
   }
 
@@ -44,6 +48,7 @@ class CalendarView extends React.Component {
     const staffList = await fetchAPI('GET', 'staffMgt/workingStaff');
     const serviceList = await fetchAPI('GET', 'serviceMgt/services');
     const events = await fetchAPI('GET', 'bookingMgt/bookings');
+    const clientList = await fetchAPI('GET', 'clientMgt/clients');
     events.map(event => {
       event.start = new Date(event.start);
       event.end = new Date(event.end);
@@ -51,6 +56,7 @@ class CalendarView extends React.Component {
     this.setState({
       staffList: staffList,
       serviceList: serviceList,
+      clientList: clientList,
       events: events,
     });
   }
@@ -63,6 +69,10 @@ class CalendarView extends React.Component {
     this.setState({ selectedService: event.target.value });
   };
 
+  handleSelectClientChange = (event) => {
+    this.setState({ selectedClient: event.target.value });
+  };
+
   handleEventConfirm = () => {
     this.setState({
       eventOpen: false,
@@ -73,40 +83,47 @@ class CalendarView extends React.Component {
 
   async submitNewBooking(event) {
     let serviceName;
+    let serviceDuration;
     for (let service of this.state.serviceList) {
       if (service._id === this.state.selectedService) {
         serviceName = service.name;
+        serviceDuration = service.duration
       }
     }
+    let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
     let values = {
-      serviceName: serviceName,
+      serviceName: `${serviceName} ${this.state.selectedClient}`,
       allDay: event.slots.length == 1,
       start: event.start,
-      end: event.end,
+      end: endtime,
       staff: this.state.selectedStaff,
     }
     const respObj = await fetchAPI('POST', 'bookingMgt/bookings', values);
     if (respObj && respObj.ok) {
       let booking = {
         id: respObj.id,
-        title: serviceName,
+        title: `${serviceName} ${this.state.selectedClient}`,
         allDay: event.slots.length == 1,
         start: event.start,
-        end: event.end,
+        end: endtime,
         resourceId: this.state.selectedStaff,
       }
       this.setState({
         events: this.state.events.concat([booking]),
       })
+      this.handleEventClose();
     } else { throw new Error('Fail to create booking') }
 
   }
 
   handleEventClose = () => {
+
     this.setState({
+      editEvent: false,
       eventOpen: false,
       selectedStaff: {},
       selectedService: {},
+      selectedClient: {},
     });
   }
 
@@ -174,9 +191,68 @@ class CalendarView extends React.Component {
     }
   }
 
+  handleEditEvent = (event) => {
+    let title = event.title.split(' ');
+    let clientName = title[title.length - 1]
+    let serviceName = event.title.replace(` ${clientName}`, '');
+    this.state.serviceList.map(service => {
+      if (service.name === serviceName) {
+        serviceName = service._id;
+      }
+    })
 
+    this.setState({
+      editEvent: true,
+      eventOpen: true,
+      selectedEvent: event,
+      selectedStaff: event.resourceId,
+      selectedClient: clientName,
+      selectedService: serviceName
+    });
 
-  deleteEvent = async event => {
+  }
+
+  handleUpdateEvent = async () => {
+    let event = this.state.selectedEvent;
+    let serviceName;
+    let serviceDuration;
+    for (let service of this.state.serviceList) {
+      if (service._id === this.state.selectedService) {
+        serviceName = service.name;
+        serviceDuration = service.duration
+      }
+    }
+    let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
+    let values = {
+      serviceName: `${serviceName} ${this.state.selectedClient}`,
+      start: event.start,
+      end: endtime,
+      staff: this.state.selectedStaff,
+    }
+    const respObj = await fetchAPI('PATCH', `bookingMgt/bookings/${event.id}`, values);
+    if (respObj && respObj.ok) {
+      this.setState((prevState, props) => {
+        const events = [...prevState.events]
+        const idx = events.indexOf(event)
+        events.splice(idx, 1);
+        return { events };
+      });
+      let booking = {
+        id: respObj.id,
+        title: `${serviceName} ${this.state.selectedClient}`,
+        start: event.start,
+        end: endtime,
+        resourceId: this.state.selectedStaff,
+      }
+      this.setState({
+        events: this.state.events.concat([booking]),
+      })
+      this.handleEventClose();
+    } else { throw new Error('Fail to create booking') }
+  }
+
+  deleteEvent = async () => {
+    let event = this.state.selectedEvent;
     const r = window.confirm("Would you like to remove this event?")
     if (r === true) {
       const response = await fetchAPI('DELETE', `bookingMgt/bookings/${event.id}`);
@@ -189,75 +265,103 @@ class CalendarView extends React.Component {
         });
       } else { throw new Error('Delete failed') }
     }
+    this.handleEventClose();
   }
 
   render() {
     const { classes } = this.props;
     return (
       <AppLayout title="Calendar" {...this.props} >
-        <DragAndDropCalendar
-          selectable
-          resizable
-          localizer={localizer}
-          events={this.state.events}
-          onEventDrop={this.moveEvent}
-          onEventResize={this.resizeEvent}
-          onSelectSlot={this.newEvent}
-          onSelectEvent={this.deleteEvent}
-          // onDragStart={console.log}
-          defaultView={Views.DAY}
-          views={['day', 'week']}
-          defaultDate={new Date()}
-          step={15}
-          timeslots={4}
-          resources={this.state.staffList}
-          resourceIdAccessor="_id"
-          resourceTitleAccessor="displayName"
-        // style={{ height: "100vh" }}
-        />
-        <Dialog disableBackdropClick disableEscapeKeyDown open={this.state.eventOpen} onClose={this.handleEventClose}>
-          <DialogTitle>New Appointment</DialogTitle>
-          <DialogContent>
-            <form className={classes.container}>
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="age-native-simple">Staff Name</InputLabel>
-                <Select
-                  value={this.state.selectedStaff}
-                  onChange={this.handleSelectStaffChange}
-                  input={<Input id="age-native-simple" />}
-                >
-                  {this.state.staffList.map(staff => (
-                    <MenuItem value={staff._id}>
-                      {staff.displayName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="age-native-simple">Service Type</InputLabel>
-                <Select
-                  value={this.state.selectedService}
-                  onChange={this.handleSelectServiceChange}
-                  input={<Input id="age-native-simple" />}
-                >
-                  {this.state.serviceList.map(service => (
-                    <MenuItem value={service._id}>
-                      {service.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </form>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleEventClose} color="secondary">
-              Cancel
-          </Button>
-            <Button onClick={this.handleEventConfirm} color="primary">
-              Ok
-          </Button>
-          </DialogActions>
-        </Dialog>
+        <Paper> <Box p={2}>
+          <DragAndDropCalendar
+            selectable
+            resizable
+            localizer={localizer}
+            events={this.state.events}
+            onEventDrop={this.moveEvent}
+            onEventResize={this.resizeEvent}
+            onSelectSlot={this.newEvent}
+            onSelectEvent={this.handleEditEvent}
+            defaultView={Views.DAY}
+            views={['day', 'week']}
+            defaultDate={new Date()}
+            step={15}
+            timeslots={4}
+            resources={this.state.staffList}
+            resourceIdAccessor="_id"
+            resourceTitleAccessor="displayName"
+          // style={{ height: "100vh" }}
+          />
+          <Dialog open={this.state.eventOpen} onClose={this.handleEventClose}>
+            <DialogTitle>New Appointment</DialogTitle>
+            <DialogContent>
+              <form className={classes.container}>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="age-native-simple">Customer Name</InputLabel>
+                  <Select
+                    value={this.state.selectedClient}
+                    onChange={this.handleSelectClientChange}
+                    input={<Input id="age-native-simple" />}
+                  >
+                    {this.state.clientList.map(client => (
+                      <MenuItem value={client.displayName}>
+                        {client.displayName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="age-native-simple">Staff Name</InputLabel>
+                  <Select
+                    value={this.state.selectedStaff}
+                    onChange={this.handleSelectStaffChange}
+                    input={<Input id="age-native-simple" />}
+                  >
+                    {this.state.staffList.map(staff => (
+                      <MenuItem value={staff._id}>
+                        {staff.displayName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="age-native-simple">Service Type</InputLabel>
+                  <Select
+                    value={this.state.selectedService}
+                    onChange={this.handleSelectServiceChange}
+                    input={<Input id="age-native-simple" />}
+                  >
+                    {this.state.serviceList.map(service => (
+                      <MenuItem value={service._id}>
+                        {service.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+              </form>
+            </DialogContent>
+            <DialogActions>
+              {this.state.editEvent ?
+                <Button onClick={this.deleteEvent} color="secondary">
+                  Delete
+                </Button> :
+                <Button onClick={this.handleEventClose} color="secondary">
+                  Cancel
+                </Button>
+              }
+              {this.state.editEvent ?
+                <Button onClick={this.handleUpdateEvent} color="primary">
+                  Update
+                </Button> :
+                <Button onClick={this.handleEventConfirm} color="primary">
+                  Ok
+                </Button>
+              }
+            </DialogActions>
+          </Dialog>
+        </Box>
+        </Paper>
       </AppLayout>
 
 

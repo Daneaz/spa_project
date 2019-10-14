@@ -15,13 +15,13 @@ router.get('/bookings', async (reqe, res, next) => {
 
     // return and rename the data as calender needs
     let bookings = await Booking.aggregate([
-        {$match: {delFlag: false}},
+        { $match: { delFlag: false } },
         {
             $project: {
                 "id": "$_id",
                 "title": "$serviceName",
                 "resourceId": "$staff",
-                "start" : 1,
+                "start": 1,
                 "end": 1,
                 "allDay": 1,
             }
@@ -50,7 +50,6 @@ router.post('/bookings', async (reqe, res, next) => {
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
-
 });
 
 /* PATCH update booking. */
@@ -66,7 +65,7 @@ router.patch('/bookings/:id', async (reqe, res, next) => {
         let booking = await Booking.findOne({ "_id": reqe.params.id, "delFlag": false });
 
         booking.updatedBy = staff._id;
-        // booking.serviceName = rawBooking.serviceName || booking.serviceName;
+        booking.serviceName = rawBooking.serviceName || booking.serviceName;
         booking.start = rawBooking.start || booking.start;
         booking.end = rawBooking.end || booking.end;
         booking.staff = rawBooking.staff || booking.staff;
@@ -89,16 +88,15 @@ router.delete('/bookings/:id', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.bookingMgt.delete) { next(createError(403)); return; }
 
-
         //load data from db
-        let booking = await Booking.findOne({ "_id" : reqe.params.id});
+        let booking = await Booking.findOne({ "_id": reqe.params.id });
         booking.updatedBy = staff._id;
         booking.delFlag = true;
         // //save user 
         let doc = await booking.save();
         let rsObj = {
-            ok      : "User has been deleted.", 
-            id      : doc._id
+            ok: "User has been deleted.",
+            id: doc._id
         };
         logger.audit("Booking Mgt", "Delete", doc._id, staff.id, `Booking has been deleted by ${staff.DisplayName}`);
         res.json(rsObj);

@@ -1,12 +1,10 @@
 import React from 'react';
 import Select from 'react-select';
-import { Animated } from "react-animated-css";
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress, Paper, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Slide, TextField
+    Typography, Button, Container, Dialog, DialogContent, Slide, TextField
 } from '@material-ui/core';
-
-import { Formik, Field, Form } from 'formik';
+import KioskLayout from './Component/KioskLayout';
 import { fetchAPI, setClient } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
@@ -17,8 +15,6 @@ const mainFontSize = 35;
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
-
-const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
 
 const styles = theme => ({
     container: {
@@ -128,12 +124,6 @@ class Register extends React.Component {
         );
     };
 
-    closeKeyboard = () => {
-        this.setState({
-            keyboardOpen: false
-        });
-    };
-
     handleKeyboardClose = () => {
         this.setState({ keyboardOpen: false });
     }
@@ -192,10 +182,18 @@ class Register extends React.Component {
             })
             return;
         }
-
         try {
-            setClient(this.state.input);
-            history.push('/snapshot');
+            fetchAPI('POST', 'kiosk/clients', this.state.input).then(respObj => {
+                if (respObj && respObj.ok) {
+                    setClient(respObj.user._id);
+                    this.props.history.push('/snapshot');
+                } else {
+                    Swal.fire({
+                        type: 'error', text: 'Please try again.',
+                        title: respObj.error
+                    })
+                }
+            });
         } catch (err) {
             Swal.fire({
                 type: 'error', text: 'Please try again.',
@@ -208,97 +206,91 @@ class Register extends React.Component {
         const { classes } = this.props;
         const { input, keyboardOpen } = this.state;
         return (
-            <div>
-                <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                    <CssBaseline />
-                    <Paper style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                        <Container component="main" maxWidth="md" className={classes.container} >
-                            <Typography style={{ fontSize: 50, }} color="primary">
-                                New Client Onboard
+            <KioskLayout {...this.props} imageWidth={160} imagePadding={10}>
+                <Container component="main" maxWidth="md" className={classes.container} >
+                    <Typography style={{ fontSize: 50, }} color="primary">
+                        New Client Onboard
                             </Typography>
-                            <form>
-                                <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="mobile" label="Mobile" type="number"
-                                    onClick={() => this.setActiveInput("mobile")}
-                                    value={input["mobile"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="password" label="Password" type="password"
-                                    onClick={() => this.setActiveInput("password")}
-                                    value={input["password"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="confirmPassoword" label="Confirm Password" type="password"
-                                    onClick={() => this.setActiveInput("confirmPassoword")}
-                                    value={input["confirmPassoword"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <TextField style={{ backgroundColor: "#f2f1ed", fontSize: "30px" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="displayName" label="Display Name"
-                                    onClick={() => this.setActiveInput("displayName")}
-                                    value={input["displayName"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <TextField style={{ backgroundColor: "#f2f1ed", fontSize: "30px" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="email" label="Email"
-                                    onClick={() => this.setActiveInput("email")}
-                                    value={input["email"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="nric" label="NRIC"
-                                    onClick={() => this.setActiveInput("nric")}
-                                    value={input["nric"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <Typography variant='h3' color='primary' gutterBottom>
-                                    Gender
+                    <form>
+                        <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
+                            InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            variant="outlined" margin="normal" fullWidth
+                            name="mobile" label="Mobile" type="number"
+                            onClick={() => this.setActiveInput("mobile")}
+                            value={input["mobile"] || ""}
+                            onChange={e => this.onChangeInput(e)}
+                        />
+                        <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
+                            InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            variant="outlined" margin="normal" fullWidth
+                            name="password" label="Password" type="password"
+                            onClick={() => this.setActiveInput("password")}
+                            value={input["password"] || ""}
+                            onChange={e => this.onChangeInput(e)}
+                        />
+                        <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
+                            InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            variant="outlined" margin="normal" fullWidth
+                            name="confirmPassoword" label="Confirm Password" type="password"
+                            onClick={() => this.setActiveInput("confirmPassoword")}
+                            value={input["confirmPassoword"] || ""}
+                            onChange={e => this.onChangeInput(e)}
+                        />
+                        <TextField style={{ backgroundColor: "#f2f1ed", fontSize: "30px" }} autoComplete='off'
+                            InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            variant="outlined" margin="normal" fullWidth
+                            name="displayName" label="Display Name"
+                            onClick={() => this.setActiveInput("displayName")}
+                            value={input["displayName"] || ""}
+                            onChange={e => this.onChangeInput(e)}
+                        />
+                        <TextField style={{ backgroundColor: "#f2f1ed", fontSize: "30px" }} autoComplete='off'
+                            InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            variant="outlined" margin="normal" fullWidth
+                            name="email" label="Email"
+                            onClick={() => this.setActiveInput("email")}
+                            value={input["email"] || ""}
+                            onChange={e => this.onChangeInput(e)}
+                        />
+                        <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
+                            InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            variant="outlined" margin="normal" fullWidth
+                            name="nric" label="NRIC"
+                            onClick={() => this.setActiveInput("nric")}
+                            value={input["nric"] || ""}
+                            onChange={e => this.onChangeInput(e)}
+                        />
+                        <Typography variant='h3' color='primary' gutterBottom>
+                            Gender
                                 </Typography>
-                                <Select className={classes.select}
-                                    onChange={this.handleGenderSelection}
-                                    options={genderOptions}
-                                    value={this.state.gender}
-                                    styles={{
-                                        control: base => ({
-                                            ...base,
-                                            fontSize: mainFontSize,
-                                        }),
-                                        menu: base => ({
-                                            ...base,
-                                            fontSize: mainFontSize,
-                                        })
-                                    }}
-                                />
+                        <Select className={classes.select}
+                            onChange={this.handleGenderSelection}
+                            options={genderOptions}
+                            value={this.state.gender}
+                            styles={{
+                                control: base => ({
+                                    ...base,
+                                    fontSize: mainFontSize,
+                                }),
+                                menu: base => ({
+                                    ...base,
+                                    fontSize: mainFontSize,
+                                })
+                            }}
+                        />
 
-                                <Button variant="contained" color="primary" fullWidth className={classes.submit}
-                                    style={{ fontSize: mainFontSize }} onClick={this.submit}
-                                >
-                                    Register
+                        <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                            style={{ fontSize: mainFontSize }} onClick={this.submit}
+                        >
+                            Register
                                 </Button>
-                                <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
-                                    onClick={() => { window.history.back(); }} style={{ fontSize: mainFontSize }}
-                                >
-                                    Cancel
+                        <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
+                            onClick={() => { window.history.back(); }} style={{ fontSize: mainFontSize }}
+                        >
+                            Cancel
                                 </Button>
-                            </form>
-                            )}
-                        </Container>
-                    </Paper>
-                </Animated>
+                    </form>
+                </Container>
                 <Dialog
                     fullWidth
                     maxWidth="xl"
@@ -353,7 +345,7 @@ class Register extends React.Component {
                         </div>
                     </DialogContent>
                 </Dialog>
-            </div>
+            </KioskLayout>
         );
     }
 }

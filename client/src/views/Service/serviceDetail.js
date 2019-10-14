@@ -2,7 +2,7 @@ import React from 'react';
 import Picky from 'react-picky';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress
+    Typography, Button, CssBaseline, Container, LinearProgress, Paper, Box
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
@@ -38,7 +38,7 @@ class ClientDetail extends React.Component {
     }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/staffs');
+        const response = await fetchAPI('GET', 'staffMgt/workingStaff');
         if (this.props.location.state.data.staff === "All Staff") {
             this.setState({ arrayValue: response });
         } else {
@@ -62,6 +62,8 @@ class ClientDetail extends React.Component {
         return (
             <AppLayout title="Service Details" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
+                    <Paper>
+                        <Box p={2}>
                     <Typography>
                         <h3>
                             Service Details
@@ -146,6 +148,8 @@ class ClientDetail extends React.Component {
                             </Form>
                         )}
                     />
+                    </Box>
+                    </Paper>
                 </Container>
             </AppLayout>
         );

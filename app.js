@@ -28,7 +28,13 @@ app.disable('x-powered-by');
 app.use(morgan('dev'));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: false }));
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'client/build'))); 
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(function (req, res, next) {
+  if(req.method === 'GET' && !req.originalUrl.toLowerCase().startsWith('/api')){
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+  }else{ next() }
+});
 
 // setup mongoose
 mongoose.connect(process.env.MongoDB_ConnectionString, { useNewUrlParser: true });
@@ -42,7 +48,6 @@ var pjson = require('./package.json');
 app.locals.ver = pjson.version;
 
 //routing
-app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', indexRouter);
 app.use('/api/kiosk', apiKioskRouter);
 app.use(`/api/auth`, apiAuthRouter);

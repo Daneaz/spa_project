@@ -36,7 +36,7 @@ class Login extends React.Component {
 
     const { classes } = this.props;
 
-    let { from } = this.props.location.state || { from: { pathname: "/" } };
+    let { from } = this.props.location.state || { from: { pathname: "/dashboard" } };
     let { redirectToReferrer } = this.state;
     if (redirectToReferrer) return <Redirect to={from} />;
 
@@ -86,13 +86,14 @@ class Login extends React.Component {
                   name="password" label="Password" type="password"
                 />
                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
-                  disabled={isSubmitting} onClick={submitForm}
+                  disabled={isSubmitting} type="submit"
                 >
                   Login
               </Button>
                 {isSubmitting && <LinearProgress />}
               </Form>
             )} />
+            <small>{process.env.REACT_APP_VERSION}</small>
         </div>
       </Container>
     )

@@ -3,6 +3,9 @@ import React from 'react'
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from "moment";
+import {
+    Paper, Box
+} from '@material-ui/core';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -39,7 +42,7 @@ class Schedule extends React.Component {
         let resourceList = staffList.map(function (staff) {
             return { resourceId: staff._id, resourceTitle: staff.displayName };
         })
-        this.setState({resourceMap: resourceList});
+        this.setState({ resourceMap: resourceList });
     }
 
     resizeEvent = ({ event, start, end }) => {
@@ -86,7 +89,7 @@ class Schedule extends React.Component {
             allDay = false
         }
 
-        const updatedEvent = { ...event, start, resourceId,  end, allDay }
+        const updatedEvent = { ...event, start, resourceId, end, allDay }
 
         const nextEvents = [...events]
         nextEvents.splice(idx, 1, updatedEvent)
@@ -99,25 +102,29 @@ class Schedule extends React.Component {
     render() {
         return (
             <AppLayout title="Clients" {...this.props} >
-                <DragAndDropCalendar
-                    selectable
-                    localizer={localizer}
-                    events={this.state.events}
-                    onEventDrop={this.moveEvent}
-                    resizable
-                    onEventResize={this.resizeEvent}
-                    onSelectSlot={this.newEvent}
-                    onDragStart={console.log}
-                    defaultView={Views.DAY}
-                    views={['day']}
-                    defaultDate={new Date()}
-                    step={15}
-                    timeslots={4}
-                    resources={this.state.resourceMap}
-                    resourceIdAccessor="resourceId"
-                    resourceTitleAccessor="resourceTitle"
-                    // style={{ height: "100vh" }}
-                />
+                <Paper>
+                    <Box p={2}>
+                        <DragAndDropCalendar
+                            selectable
+                            localizer={localizer}
+                            events={this.state.events}
+                            onEventDrop={this.moveEvent}
+                            resizable
+                            onEventResize={this.resizeEvent}
+                            onSelectSlot={this.newEvent}
+                            onDragStart={console.log}
+                            defaultView={Views.DAY}
+                            views={['day']}
+                            defaultDate={new Date()}
+                            step={15}
+                            timeslots={4}
+                            resources={this.state.resourceMap}
+                            resourceIdAccessor="resourceId"
+                            resourceTitleAccessor="resourceTitle"
+                        // style={{ height: "100vh" }}
+                        />
+                    </Box>
+                </Paper>
             </AppLayout>
         );
     }

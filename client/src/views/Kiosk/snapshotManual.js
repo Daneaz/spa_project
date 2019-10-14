@@ -1,11 +1,12 @@
 import React from 'react';
 import { Animated } from "react-animated-css";
-import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid, Typography } from '@material-ui/core';
+import { Paper, Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import Webcam from 'react-webcam';
 import Swal from 'sweetalert2';
 import { faceAPIAddPerson } from './faceAPI';
 import { fetchAPI, getClient, removeClient } from '../../utils';
+import KioskLayout from './Component/KioskLayout';
 
 const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 
@@ -15,7 +16,6 @@ const videoConstraints = {
     facingMode: 'user',
 };
 
-const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
 
 const styles = theme => ({
     root: {
@@ -53,31 +53,28 @@ class FacialLogin extends React.Component {
     };
 
     createUser() {
-        const user = getClient();
-        fetchAPI('POST', 'kiosk/clients', user).then(respObj => {
+        const userid = getClient();
+        let data = {
+            imagebase64: this.state.imageUrl,
+            id: userid
+        };
+        fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
             if (respObj && respObj.ok) {
-                let data = {};
-                data.imagebase64 = this.state.imageUrl;
-                data.id = respObj.user._id;
-                fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
-                    if (respObj && respObj.ok) {
-                        faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`, data.id);
-                        removeClient();
-                        this.props.history.push('/start')
-                    } else {
-                        Swal.fire({
-                            type: 'error', text: 'Please try again.',
-                            title: respObj.error
-                        })
-                    }
-                })
+                faceAPIAddPerson(`${STORAGE_URL}/${data.id}.jpg`, data.id);
+                removeClient();
+                this.props.history.push('/start')
             } else {
                 Swal.fire({
                     type: 'error', text: 'Please try again.',
                     title: respObj.error
                 })
             }
-        })
+        }).catch(error => {
+            Swal.fire({
+                type: 'error', text: 'Please try again.',
+                title: error
+            })
+        });
     }
 
     render() {
@@ -124,25 +121,21 @@ class FacialLogin extends React.Component {
             ]
         }
         return (
-            <div>
-                <Animated animationIn="fadeIn" animationOut="fadeOut" >
-                    <Paper style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <Webcam
-                                style={showWebcam}
-                                audio={false}
-                                height={600}
-                                ref={this.webcam}
-                                screenshotFormat="image/png"
-                                width={800}
-                                videoConstraints={videoConstraints}
-                            />
-                            <canvas ref={this.canvasPicWebCam} width={800} height={600} style={showCanvas} />
-                            {button}
-                        </div>
-                    </Paper>
-                </Animated>
-            </div >
+            <KioskLayout {...this.props} imageWidth={320} imagePadding={40} skip={true}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Webcam
+                        style={showWebcam}
+                        audio={false}
+                        height={480}
+                        ref={this.webcam}
+                        screenshotFormat="image/jpg"
+                        width={600}
+                        videoConstraints={videoConstraints}
+                    />
+                    <canvas ref={this.canvasPicWebCam} width={600} height={480} style={showCanvas} />
+                    {button}
+                </div>
+            </KioskLayout>
         );
     }
 }

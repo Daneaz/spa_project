@@ -90,8 +90,9 @@ class Service extends React.Component {
         tempStaffs = "All Staff";
       } else {
         service.staff.map(staff => {
-          tempStaffs += staff.displayName + ',';
+          tempStaffs += staff.displayName + ', ';
         });
+        tempStaffs = tempStaffs.slice(0, -2);
       }
       service.staff = tempStaffs;
     });

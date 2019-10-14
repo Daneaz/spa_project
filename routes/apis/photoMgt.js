@@ -72,7 +72,7 @@ const listBlobs = async (containerName) => {
 };
 
 const downloadBlob = async (containerName, blobName) => {
-    const dowloadFilePath = path.resolve('./' + blobName.replace('.png', '.downloaded.png'));
+    const dowloadFilePath = path.resolve('./' + blobName.replace('.jpg', '.downloaded.jpg'));
     return new Promise((resolve, reject) => {
         blobService.getBlobToLocalFile(containerName, blobName, blobName, (err, data) => {
             if (err) {

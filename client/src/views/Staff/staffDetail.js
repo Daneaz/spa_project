@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle
+    Typography, Button, CssBaseline, Container, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Box
 } from '@material-ui/core';
 import InfiniteCalendar, { Calendar, defaultMultipleDateInterpolation, withMultipleDates } from 'react-infinite-calendar';
 import 'react-infinite-calendar/styles.css'
@@ -105,154 +105,158 @@ class ClientDetail extends React.Component {
         return (
             <AppLayout title="Staff Details" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
-                    <Typography>
-                        <h3>
-                            Personal Infomation
+                    <Paper>
+                        <Box p={2}>
+                            <Typography>
+                                <h3>
+                                    Personal Infomation
                         </h3>
-                    </Typography>
-                    <CssBaseline />
-                    <Formik
-                        initialValues={{ username: this.props.location.state.data.username, displayName: this.props.location.state.data.displayName, mobile: this.props.location.state.data.mobile, email: this.props.location.state.data.email }}
-                        validate={values => {
-                            const errors = {};
-                            if (!values.username) { errors.username = 'Please enter username' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
-                            if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.email) { errors.email = 'Please enter email address' }
-                            if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
-                            return errors;
-                        }}
-                        onSubmit={async (values, { setSubmitting }) => {
-                            try {
-                                if (!this.state.selectedOption)
-                                    throw new Error('Please select a role')
-                                else {
-                                    values.role = {};
-                                    values.role.name = this.state.selectedOption.value;
-                                    values.offDays = this.state.offDays;
-                                    values.leaveDays = this.state.selectedLeaves;
-                                }
-                                const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
+                            </Typography>
+                            <CssBaseline />
+                            <Formik
+                                initialValues={{ username: this.props.location.state.data.username, displayName: this.props.location.state.data.displayName, mobile: this.props.location.state.data.mobile, email: this.props.location.state.data.email }}
+                                validate={values => {
+                                    const errors = {};
+                                    if (!values.username) { errors.username = 'Please enter username' }
+                                    if (!values.displayName) { errors.displayName = 'Please enter password' }
+                                    if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
+                                    if (!values.email) { errors.email = 'Please enter email address' }
+                                    if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
+                                    return errors;
+                                }}
+                                onSubmit={async (values, { setSubmitting }) => {
+                                    try {
+                                        if (!this.state.selectedOption)
+                                            throw new Error('Please select a role')
+                                        else {
+                                            values.role = {};
+                                            values.role.name = this.state.selectedOption.value;
+                                            values.offDays = this.state.offDays;
+                                            values.leaveDays = this.state.selectedLeaves;
+                                        }
+                                        const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
 
-                                if (respObj && respObj.ok) {
-                                    window.history.back();
-                                } else { throw new Error('Update failed') }
-                            } catch (err) {
-                                Swal.fire({
-                                    type: 'error', text: 'Please try again.',
-                                    title: err.message
-                                })
-                            }
-                            setSubmitting(false);
-                        }}
-                        render={({ submitForm, isSubmitting, values, setFieldValue, errors, setErrors }) => (
-                            <Form>
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth autoFocus
-                                    name="username" label="Username" disabled
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="password" label="New Passowrd" type="password"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="confirmPassoword" label="Confirm Password" type="password"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="displayName" label="Display Name"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="mobile" label="Mobile" type="number"
-                                />
-                                <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth
-                                    name="email" label="Email"
-                                />
-                                <Typography>
-                                    <h5>
-                                        Role
-                                    </h5>
-                                </Typography>
-                                <Select className={classes.select}
-                                    onChange={this.handleChange}
-                                    options={options}
-                                    value={this.state.selectedOption}
-                                />
-
-                                <Typography>
-                                    <h5>
-                                        On Leave
-                                    </h5>
-                                </Typography>
-                                <Button variant="outlined" color="primary" onClick={this.handleLeaveClickOpen}>
-                                    Please Select Leave Days...
-                                </Button>
-                                <Dialog open={this.state.leaveOpen} onClose={this.handleLeaveClose} aria-labelledby="form-dialog-title">
-                                    <DialogTitle id="form-dialog-title">Leave</DialogTitle>
-                                    <DialogContent>
-                                        <InfiniteCalendar id="leaveCalendar"
-                                            Component={withMultipleDates(Calendar)}
-                                            selected={this.state.selectedLeaves}
-                                            minDate={new Date()}
-                                            disabledDays={this.state.offDays}
-                                            interpolateSelection={defaultMultipleDateInterpolation}
-                                            onSelect={(selectedDate) => { this.handleLeaveSelection(selectedDate) }}
+                                        if (respObj && respObj.ok) {
+                                            window.history.back();
+                                        } else { throw new Error('Update failed') }
+                                    } catch (err) {
+                                        Swal.fire({
+                                            type: 'error', text: 'Please try again.',
+                                            title: err.message
+                                        })
+                                    }
+                                    setSubmitting(false);
+                                }}
+                                render={({ submitForm, isSubmitting, values, setFieldValue, errors, setErrors }) => (
+                                    <Form>
+                                        <Field
+                                            component={TextField} variant="outlined" margin="normal" fullWidth autoFocus
+                                            name="username" label="Username" disabled
                                         />
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={this.handleLeaveClose} color="primary">
-                                            Done
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
-
-                                <Typography>
-                                    <h5>
-                                        Weekly Off Day
-                                    </h5>
-                                </Typography>
-                                <Button variant="outlined" color="primary" onClick={this.handleOffClickOpen}>
-                                    Please Select Off Days...
-                                </Button>
-                                <Dialog open={this.state.offOpen} onClose={this.handleOffClose} aria-labelledby="form-dialog-title">
-                                    <DialogTitle id="form-dialog-title">Off</DialogTitle>
-                                    <DialogContent>
-                                        <InfiniteCalendar id="offDayCalendar"
-                                            Component={withMultipleDates(Calendar)}
-                                            selected={this.state.selectedLeaves}
-                                            interpolateSelection={defaultMultipleDateInterpolation}
-                                            minDate={new Date()}
-                                            disabledDays={this.state.offDays}
-                                            onSelect={(selectedDate) => { this.handleOffSelection(selectedDate) }}
+                                        <Field
+                                            component={TextField} variant="outlined" margin="normal" fullWidth
+                                            name="password" label="New Passowrd" type="password"
                                         />
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={this.handleOffReset} color="secondary">
-                                            Reset
-                                        </Button>
-                                        <Button onClick={this.handleOffClose} color="primary">
-                                            Done
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                                        <Field
+                                            component={TextField} variant="outlined" margin="normal" fullWidth
+                                            name="confirmPassoword" label="Confirm Password" type="password"
+                                        />
+                                        <Field
+                                            component={TextField} variant="outlined" margin="normal" fullWidth
+                                            name="displayName" label="Display Name"
+                                        />
+                                        <Field
+                                            component={TextField} variant="outlined" margin="normal" fullWidth
+                                            name="mobile" label="Mobile" type="number"
+                                        />
+                                        <Field
+                                            component={TextField} variant="outlined" margin="normal" fullWidth
+                                            name="email" label="Email"
+                                        />
+                                        <Typography>
+                                            <h5>
+                                                Role
+                                    </h5>
+                                        </Typography>
+                                        <Select className={classes.select}
+                                            onChange={this.handleChange}
+                                            options={options}
+                                            value={this.state.selectedOption}
+                                        />
 
-                                <Button variant="contained" color="primary" fullWidth className={classes.submit}
-                                    disabled={isSubmitting} onClick={submitForm}
-                                >
-                                    Update
+                                        <Typography>
+                                            <h5>
+                                                On Leave
+                                    </h5>
+                                        </Typography>
+                                        <Button variant="outlined" color="primary" onClick={this.handleLeaveClickOpen}>
+                                            Please Select Leave Days...
                                 </Button>
-                                <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
-                                    onClick={() => { window.history.back(); }}
-                                >
-                                    Cancel
+                                        <Dialog open={this.state.leaveOpen} onClose={this.handleLeaveClose} aria-labelledby="form-dialog-title">
+                                            <DialogTitle id="form-dialog-title">Leave</DialogTitle>
+                                            <DialogContent>
+                                                <InfiniteCalendar id="leaveCalendar"
+                                                    Component={withMultipleDates(Calendar)}
+                                                    selected={this.state.selectedLeaves}
+                                                    minDate={new Date()}
+                                                    disabledDays={this.state.offDays}
+                                                    interpolateSelection={defaultMultipleDateInterpolation}
+                                                    onSelect={(selectedDate) => { this.handleLeaveSelection(selectedDate) }}
+                                                />
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button onClick={this.handleLeaveClose} color="primary">
+                                                    Done
+                                        </Button>
+                                            </DialogActions>
+                                        </Dialog>
+
+                                        <Typography>
+                                            <h5>
+                                                Weekly Off Day
+                                    </h5>
+                                        </Typography>
+                                        <Button variant="outlined" color="primary" onClick={this.handleOffClickOpen}>
+                                            Please Select Off Days...
                                 </Button>
-                                {isSubmitting && <LinearProgress />}
-                            </Form>
-                        )}
-                    />
+                                        <Dialog open={this.state.offOpen} onClose={this.handleOffClose} aria-labelledby="form-dialog-title">
+                                            <DialogTitle id="form-dialog-title">Off</DialogTitle>
+                                            <DialogContent>
+                                                <InfiniteCalendar id="offDayCalendar"
+                                                    Component={withMultipleDates(Calendar)}
+                                                    selected={this.state.selectedLeaves}
+                                                    interpolateSelection={defaultMultipleDateInterpolation}
+                                                    minDate={new Date()}
+                                                    disabledDays={this.state.offDays}
+                                                    onSelect={(selectedDate) => { this.handleOffSelection(selectedDate) }}
+                                                />
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button onClick={this.handleOffReset} color="secondary">
+                                                    Reset
+                                        </Button>
+                                                <Button onClick={this.handleOffClose} color="primary">
+                                                    Done
+                                        </Button>
+                                            </DialogActions>
+                                        </Dialog>
+
+                                        <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                                            disabled={isSubmitting} onClick={submitForm}
+                                        >
+                                            Update
+                                </Button>
+                                        <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
+                                            onClick={() => { window.history.back(); }}
+                                        >
+                                            Cancel
+                                </Button>
+                                        {isSubmitting && <LinearProgress />}
+                                    </Form>
+                                )}
+                            />
+                        </Box>
+                    </Paper>
                 </Container>
             </AppLayout>
         );

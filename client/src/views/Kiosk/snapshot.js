@@ -1,18 +1,17 @@
 import React from 'react';
-import { Animated } from "react-animated-css";
-import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid, Typography } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import * as faceapi from 'face-api.js';
 import Webcam from 'react-webcam';
 import { fetchAPI, getClient, removeClient } from '../../utils';
 import { faceAPIAddPerson } from './faceAPI';
 import Swal from 'sweetalert2';
+import KioskLayout from './Component/KioskLayout';
 
 const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 const MODEL_URL = '/models'
 
 let faceBox = { detected: false, topLeftX: 0, topLeftY: 0, bottomRightX: 0, bottomRightY: 0 };
-const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
 
 const videoConstraints = {
     width: 800,
@@ -37,7 +36,7 @@ class Snapshot extends React.Component {
             takingPicture: true,
             timerOn: false,
             timerTime: 3000,
-            imageUrl:'',
+            imageUrl: '',
         }
         this.webcam = React.createRef();
         this.canvas = React.createRef();
@@ -92,7 +91,7 @@ class Snapshot extends React.Component {
         else { return ((v > 480) ? 480 : v) }
     }
 
-    
+
 
     startDetection = () => {
         try {
@@ -126,7 +125,7 @@ class Snapshot extends React.Component {
                                 faceBox.bottomRightY = this.getBR((box.y + box.height), false);
                             }
                             canvas.getContext('2d').drawImage(video, 0, 0);
-                            this.capture(canvas.toDataURL())
+                            this.capture(canvas.toDataURL('image/jpeg', 0.5))
                             return;
                         }
                         return setTimeout(() => this.startDetection(), 300);
@@ -177,32 +176,28 @@ class Snapshot extends React.Component {
     }
 
     createUser() {
-        const user = getClient();
-        fetchAPI('POST', 'kiosk/clients', user).then(respObj => {
+        const userid = getClient();
+        let data = {
+            imagebase64: this.state.imageUrl,
+            id: userid
+        };
+        fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
             if (respObj && respObj.ok) {
-                console.log(respObj.user._id);
-                let data = {};
-                data.imagebase64 = this.state.imageUrl;
-                data.id = respObj.user._id;
-                fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
-                    if (respObj && respObj.ok) {
-                        faceAPIAddPerson(`${STORAGE_URL}/${data.id}.png`, data.id);
-                        removeClient();
-                        this.props.history.push('/start')
-                    } else {
-                        Swal.fire({
-                            type: 'error', text: 'Please try again.',
-                            title: respObj.error
-                        })
-                    }
-                })
+                faceAPIAddPerson(`${STORAGE_URL}/${data.id}.jpg`, data.id);
+                removeClient();
+                this.props.history.push('/start')
             } else {
                 Swal.fire({
                     type: 'error', text: 'Please try again.',
                     title: respObj.error
                 })
             }
-        })
+        }).catch(error => {
+            Swal.fire({
+                type: 'error', text: 'Please try again.',
+                title: error
+            })
+        });
     }
 
     render() {
@@ -214,15 +209,17 @@ class Snapshot extends React.Component {
             displayText = `Face not detected, adjust your position...`
         }
         if (this.state.takingPicture) {
-            button = (<Button variant="contained" color="primary" fullWidth className={classes.submit}
-                style={{ display: 'block', fontSize: 40 }} onClick={() => {
-                    this.setState({ takingPicture: false })
-                    // this.capture();
-                    this.props.history.push('/snapshotmanual');
-                }}
-            >
-                Manual Mode
-                </Button>);
+            button = (
+                <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                    style={{ display: 'block', fontSize: 40 }} onClick={() => {
+                        this.setState({ takingPicture: false })
+                        // this.capture();
+                        this.props.history.push('/snapshotmanual');
+                    }}
+                >
+                    Manual Mode
+                </Button>
+            );
         } else {
             button = [
                 <Button key="btnRetake" variant="contained" color="primary" fullWidth className={classes.submit}
@@ -239,38 +236,33 @@ class Snapshot extends React.Component {
         }
 
         return (
-            <div>
-                <Animated animationIn="fadeIn" animationOut="fadeOut" >
-                    <Paper style={{ zIndex: -1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                        <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }}>
-                            <div id="photoTaking" >
-                                <div style={{ height: 600, width: 800, alignItems: 'center' }}>
-                                    {/* <video id="webcam" onLoadedMetadata={this.startDetection} autoPlay muted playsInline style={{ height: 600, width: 800, position: 'absolute', zIndex: 1 }} /> */}
-                                    <Webcam
-                                        style={{ position: 'absolute', zIndex: 1 }}
-                                        audio={false}
-                                        height={600}
-                                        ref={this.webcam}
-                                        screenshotFormat="image/jpeg"
-                                        width={800}
-                                        videoConstraints={videoConstraints}
-                                    />
-                                    <canvas id='videoOverlay' ref={this.canvas} style={{ height: 600, width: 800, position: 'relative', zIndex: 2 }} />
-                                </div>
-                                <div>
-                                    <Typography style={{ fontSize: 40 }} align="center" color="primary" >
-                                        {displayText}
-                                    </Typography>
-                                </div>
-                            </div>
-                            <div id="photoShowing" style={{ display: "none" }}>
-                                <canvas id='showPhoto' style={{ height: 600, width: 800 }} />
-                            </div>
-                            {button}
+            <KioskLayout {...this.props} imageWidth={320} imagePadding={40} skip={true}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div id="photoTaking" >
+                        <div style={{ height: 480, width: 600, alignItems: 'center' }}>
+                            <Webcam
+                                style={{ position: 'absolute', zIndex: 1 }}
+                                audio={false}
+                                height={480}
+                                ref={this.webcam}
+                                screenshotFormat="image/jpeg"
+                                width={600}
+                                videoConstraints={videoConstraints}
+                            />
+                            <canvas id='videoOverlay' ref={this.canvas} style={{ height: 480, width: 600, position: 'relative', zIndex: 2 }} />
                         </div>
-                    </Paper>
-                </Animated>
-            </div >
+                        <div>
+                            <Typography style={{ fontSize: 30 }} align="center" color="primary" >
+                                {displayText}
+                            </Typography>
+                        </div>
+                    </div>
+                    <div id="photoShowing" style={{ display: "none" }}>
+                        <canvas id='showPhoto' style={{ height: 480, width: 600 }} />
+                    </div>
+                    {button}
+                </div>
+            </KioskLayout>
         );
     }
 }

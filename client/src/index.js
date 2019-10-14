@@ -28,11 +28,12 @@ import ServiceDetail from './views/Service/serviceDetail';
 import Message from './views/message';
 import Report from './views/report';
 import Setting from './views/setting';
-import Schedule  from './views/Schedule/Schedule';
+import Schedule from './views/Schedule/Schedule';
 
 //Kiosk
 import Start from './views/Kiosk/start';
 import FacialLogin from './views/Kiosk/facialLogin';
+import MobileLogin from './views/Kiosk/mobileLogin';
 import Register from './views/Kiosk/register';
 import Snapshot from './views/Kiosk/snapshot';
 import SnapshotManual from './views/Kiosk/snapshotManual';
@@ -66,8 +67,16 @@ function Routers() {
         <ThemeProvider theme={theme}>
             <Router>
                 <Switch>
+                    <Route exact path="/start" component={Start} />
+                    <Route exact path="/faciallogin" component={FacialLogin} />
+                    <Route exact path="/mobilelogin" component={MobileLogin} />
+                    <Route exact path="/register" component={Register} />
+                    <Route exact path="/snapshot" component={Snapshot} />
+                    <Route exact path="/snapshotmanual" component={SnapshotManual} />
+                    
+
                     <Route path="/login" component={Login} />
-                    <PrivateRoute exact path="/" component={Dashboard} />
+                    <Route exact path="/" component={Start} />
                     <PrivateRoute exact path="/dashboard" component={Dashboard} />
                     <PrivateRoute exact path="/calendar" component={Calendar} />
 
@@ -90,15 +99,7 @@ function Routers() {
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
 
                     <PrivateRoute exact path="/setting" component={Setting} />
-                    
-                    <Route exact path="/start" component={Start} />
-                    <Route exact path="/faciallogin" component={FacialLogin} />
-                    <Route exact path="/register" component={Register} />
-                    <Route exact path="/snapshot" component={Snapshot} />
-                    <Route exact path="/snapshotmanual" component={SnapshotManual} />
-                    
 
-                    
                     <Route component={ErrorPage} />
                 </Switch>
             </Router>

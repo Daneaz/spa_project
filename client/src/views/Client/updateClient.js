@@ -47,14 +47,13 @@ class UpdateClient extends React.Component {
                         </h3>
                     </Typography>
                     <CssBaseline />
+
                     <Formik
-                        initialValues={{ mobile: this.props.location.state.data.mobile, displayName: this.props.location.state.data.displayName, email: this.props.location.state.data.email, nric: this.props.location.state.data.nric }}
+                        initialValues={{ mobile: this.props.location.state.data.mobile, displayName: this.props.location.state.data.displayName, email: this.props.location.state.data.email, nric: this.props.location.state.data.nric, credit: this.props.location.state.data.credit }}
                         validate={values => {
                             const errors = {};
                             if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
                             if (!values.displayName) { errors.displayName = 'Please enter password' }
-                            if (!values.email) { errors.email = 'Please enter email address' }
-                            if (!values.nric) {errors.nric = 'Please enter NRIC'}
                             if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
                             return errors;
                         }}
@@ -62,14 +61,25 @@ class UpdateClient extends React.Component {
                             try {
                                 values.gender = this.state.gender.value
                                 const respObj = await fetchAPI('PATCH', `clientMgt/clients/${this.props.location.state.data._id}`, values);
-
                                 if (respObj && respObj.ok) {
-                                    window.history.back();
-                                } else { throw new Error('Update failed') }
+                                    const { history } = this.props;
+
+                                    history.push({
+                                        pathname: "/clientdetail",
+                                        state: {
+                                            data: respObj.client
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        type: 'error', text: respObj.error,
+                                        title: "Fail!"
+                                    })
+                                }
                             } catch (err) {
                                 Swal.fire({
-                                    type: 'error', text: 'Please try again.',
-                                    title: err.message
+                                    type: 'error', text: err.message,
+                                    title: "Fail!"
                                 })
                             }
                             setSubmitting(false);

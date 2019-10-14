@@ -65,25 +65,25 @@ const styles = theme => ({
         padding: theme.spacing(3),
     },
     activeListItem: {
-        borderLeft: `4px solid ${theme.palette.primary.main}`,
-        borderRadius: '4px',
-        backgroundColor: theme.palette.primary.light,
+        //borderLeft: `4px solid ${theme.palette.primary.main}`,
+        //borderRadius: '4px',
+        backgroundColor: theme.palette.grey[300],
         '& $listItemText': {
             color: theme.palette.text.primary
         },
         '& $listItemIcon': {
-            color: theme.palette.primary.main,
+            color: theme.palette.text.primary,
             marginLeft: '-4px'
         }
     },
     listItem: {
         cursor: 'pointer',
         '&:hover': {
-            backgroundColor: theme.palette.primary.light,
-            borderLeft: `4px solid ${theme.palette.primary.main}`,
-            borderRadius: '4px',
+            backgroundColor: theme.palette.grey[300],
+            //borderLeft: `4px solid ${theme.palette.primary.main}`,
+            //borderRadius: '4px',
             '& $listItemIcon': {
-                color: theme.palette.primary.main,
+                color: theme.palette.text.primary,
                 marginLeft: '-4px'
             }
         },
@@ -204,7 +204,7 @@ function NavMenu(props) {
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}
                     component={NavLink}
-                    to="/message"
+                    to="/message" style={{display: "none"}}
                 >
                     <ListItemIcon className={props.classes.listItemIcon}>
                         <MessageIcon />
@@ -219,7 +219,7 @@ function NavMenu(props) {
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}
                     component={NavLink}
-                    to="/report"
+                    to="/report" style={{display: "none"}}
                 >
                     <ListItemIcon className={props.classes.listItemIcon}>
                         <BarChartIcon />
@@ -234,7 +234,7 @@ function NavMenu(props) {
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}
                     component={NavLink}
-                    to="/setting"
+                    to="/setting" style={{display: "none"}}
                 >
                     <ListItemIcon className={props.classes.listItemIcon}>
                         <SettingsIcon />

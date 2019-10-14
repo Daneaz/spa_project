@@ -1,12 +1,14 @@
 import React from 'react';
 import { Animated } from "react-animated-css";
-import { Switch, Paper, Box, Zoom, Fade, FormControlLabel, Button, IconButton, ButtonBase, Grid } from '@material-ui/core';
+import { ButtonBase, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { removeToken, removeLocalStorage, removeUser } from '../../utils';
+import KioskLayout from './Component/KioskLayout';
 
-const BackGroundImage = '/static/images/Gerberas_Stones_Spa.jpg';
+const BackGroundImage = '/static/images/kiosk_bg.png';
 const LoginImage = '/static/images/login.png';
 const RegisterImage = '/static/images/register.png';
+
 
 const styles = theme => ({
     root: {
@@ -82,7 +84,7 @@ class FacialLogin extends React.Component {
             history.push('/register');
         }, 500);
     }
-    
+
     handleFacialLoginClick = () => {
         const { history } = this.props;
         this.setState({ visible: false })
@@ -95,64 +97,58 @@ class FacialLogin extends React.Component {
         const { classes } = this.props;
         const { visible } = this.state;
         return (
-            <div>
-                <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                    <Paper style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                        <div>
-                            <Grid
-                                container
-                                spacing={5}
-                                direction="row"
-                                justify="center"
-                                alignItems="center"
+            <KioskLayout {...this.props} imageWidth={320} imagePadding={50} homePage={true} >
+                <Grid
+                    container
+                    spacing={5}
+                    direction="row"
+                    justify="center"
+                    alignItems="center"
+                >
+                    <Grid item>
+                        <Animated animationInDelay={500} animationIn="bounceInLeft" animationOut="fadeOut" isVisible={visible}>
+                            <ButtonBase
+                                focusRipple
+                                className={classes.image}
+                                focusVisibleClassName={classes.focusVisible}
+                                style={{
+                                    width: 300,
+                                    height: 360,
+                                }}
+                                onClick={this.handleRegisterClick}
                             >
-                                <Grid item>
-                                    <Animated animationInDelay={500} animationIn="bounceInLeft" animationOut="fadeOut" isVisible={visible}>
-                                        <ButtonBase
-                                            focusRipple
-                                            className={classes.image}
-                                            focusVisibleClassName={classes.focusVisible}
-                                            style={{
-                                                width: 450,
-                                                height: 450,
-                                            }}
-                                            onClick={this.handleRegisterClick}
-                                        >
-                                            <span
-                                                className={classes.imageSrc}
-                                                style={{
-                                                    backgroundImage: `url(${RegisterImage})`,
-                                                }}
-                                            />
-                                        </ButtonBase>
-                                    </Animated>
-                                </Grid>
-                                <Grid item>
-                                    <Animated animationInDelay={500} animationIn="bounceInRight" animationOut="fadeOut" isVisible={visible}>
-                                        <ButtonBase
-                                            focusRipple
-                                            className={classes.image}
-                                            focusVisibleClassName={classes.focusVisible}
-                                            style={{
-                                                width: 450,
-                                                height: 450,
-                                            }}
-                                            onClick={this.handleFacialLoginClick}
-                                        >
-                                            <span
-                                                className={classes.imageSrc}
-                                                style={{
-                                                    backgroundImage: `url(${LoginImage})`,
-                                                }}
-                                            />
-                                        </ButtonBase>
-                                    </Animated>
-                                </Grid>
-                            </Grid>
-                        </div>
-                    </Paper>
-                </Animated>
-            </div>
+                                <span
+                                    className={classes.imageSrc}
+                                    style={{
+                                        backgroundImage: `url(${RegisterImage})`,
+                                    }}
+                                />
+                            </ButtonBase>
+                        </Animated>
+                    </Grid>
+                    <Grid item>
+                        <Animated animationInDelay={500} animationIn="bounceInRight" animationOut="fadeOut" isVisible={visible}>
+                            <ButtonBase
+                                focusRipple
+                                className={classes.image}
+                                focusVisibleClassName={classes.focusVisible}
+                                style={{
+                                    width: 300,
+                                    height: 360,
+                                }}
+                                onClick={this.handleFacialLoginClick}
+                            >
+                                <span
+                                    className={classes.imageSrc}
+                                    style={{
+                                        backgroundImage: `url(${LoginImage})`,
+                                    }}
+                                />
+                            </ButtonBase>
+                        </Animated>
+                    </Grid>
+                </Grid>
+            </KioskLayout>
         );
     }
 }
