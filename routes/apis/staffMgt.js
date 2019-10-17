@@ -2,7 +2,7 @@
 var express = require('express');
 var router = express.Router();
 let createError = require('http-errors');
-
+let Booking = require('../../models/bookings');
 let StaffRole = require('../../models/auth/staffrole');
 let Staff = require('../../models/auth/staff');
 let auth = require('../../services/auth');
@@ -226,6 +226,8 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
         //load data from db
         let sStaff = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false });
 
+        let oldLeaves = sStaff.leaveDays;
+
         sStaff.updatedBy = staff._id;
         sStaff.username = rawNewStaff.username || sStaff.username;
         sStaff.email = rawNewStaff.email || sStaff.email;
@@ -233,7 +235,6 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
         sStaff.mobile = rawNewStaff.mobile || sStaff.mobile;
         sStaff.offDays = rawNewStaff.offDays || sStaff.offDays;
         sStaff.leaveDays = rawNewStaff.leaveDays || sStaff.leaveDays;
-
 
         //load fields by biz logic
         if (rawNewStaff.Password) { sStaff.password = auth.hash(rawNewStaff.Password); }
@@ -244,6 +245,38 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
 
         //save user 
         let doc = await sStaff.save();
+        if (oldLeaves.length != 0) {
+            //TODO Delete all leaves 
+            let bookings = await Booking.find({ "delFlag": false, staff: doc._id, serviceName: "On Leave" })
+
+            for (let i = 0; i < bookings.length; i++) {
+                let booking = await Booking.findOne({ "_id": bookings[i].id });
+                booking.updatedBy = staff._id;
+                booking.delFlag = true;
+                // //save booking 
+                await booking.save();
+            }
+
+        }
+        // new Date(start.getTime() + parseInt(serviceDuration) * 60000)
+        if (rawNewStaff.leaveDays.length != 0) {
+            // TODO Create bookings based on leaveDays
+            let start, end;
+            for (let i = 0; i < rawNewStaff.leaveDays.length; i++) {
+                start = new Date(rawNewStaff.leaveDays[i])
+                end = new Date(start.getTime() + parseInt(24) * 60000 * 60 - 1000)
+                let booking = new Booking({
+                    serviceName: "On Leave",
+                    start: start,
+                    end: end,
+                    staff: doc._id,
+                })
+                booking.createdBy = staff._id;
+                booking.updatedBy = staff._id;
+                await booking.save();
+                logger.audit("Booking Mgt", "Create", `A new leave has been created by ${staff.displayName}`);
+            }
+        }
         let rsObj = { ok: "Staff has been updated.", id: doc._id };
         logger.audit("Staff Mgt", "Update", doc._id, staff.id, `Staff has been updated by ${staff.displayName}`);
         res.json(rsObj);

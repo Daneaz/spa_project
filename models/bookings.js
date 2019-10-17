@@ -11,7 +11,7 @@ var BookingSchema = new Schema({
     start: { type: Date, required: true, index: true },
     end: { type: Date, required: true, index: true },
     staff: { type: Schema.Types.ObjectId, ref: 'Staff', required: true },
-    resource: { type: Object, required: true },
+    resource: { type: Object },
     allDay: { type: Boolean, index: true, default: false },
     delFlag: { type: Boolean, index: true, default: false },
 }, { timestamps: true });

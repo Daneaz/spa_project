@@ -8,6 +8,7 @@ import { withStyles } from '@material-ui/styles';
 import {
   Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, Input, MenuItem, FormControl, Select, Paper, Box
 } from '@material-ui/core';
+import Swal from 'sweetalert2';
 import AppLayout from '../layout/app'
 import { fetchAPI } from '../utils';
 
@@ -71,7 +72,7 @@ class CalendarView extends React.Component {
   };
 
   handleSelectClientChange = (event, child) => {
-    this.setState({ 
+    this.setState({
       selectedClient: event.target.value,
       selectedClientName: child.props.children,
     });
@@ -102,7 +103,7 @@ class CalendarView extends React.Component {
       end: endtime,
       staff: this.state.selectedStaff,
       resource: {
-        client:this.state.selectedClient,
+        client: this.state.selectedClient,
         service: this.state.selectedService
       }
     }
@@ -116,7 +117,7 @@ class CalendarView extends React.Component {
         end: endtime,
         resourceId: this.state.selectedStaff,
         resource: {
-          client:this.state.selectedClient,
+          client: this.state.selectedClient,
           service: this.state.selectedService
         }
       }
@@ -205,15 +206,21 @@ class CalendarView extends React.Component {
 
   handleEditEvent = (event) => {
 
-    this.setState({
-      editEvent: true,
-      eventOpen: true,
-      selectedEvent: event,
-      selectedStaff: event.resourceId,
-      selectedClient: event.resource.client,
-      selectedService: event.resource.service
-    });
-
+    if (event.resource && event.resource.client) {
+      this.setState({
+        editEvent: true,
+        eventOpen: true,
+        selectedEvent: event,
+        selectedStaff: event.resourceId,
+        selectedClient: event.resource.client,
+        selectedService: event.resource.service
+      });
+    } else {
+      Swal.fire({
+        type: 'error',
+        title: "Unable to edit leave from booking. Please edit in staff page!!!"
+      })
+    }
   }
 
   handleUpdateEvent = async () => {
@@ -233,7 +240,7 @@ class CalendarView extends React.Component {
       end: endtime,
       staff: this.state.selectedStaff,
       resource: {
-        client:this.state.selectedClient,
+        client: this.state.selectedClient,
         service: this.state.selectedService
       }
     }
@@ -252,7 +259,7 @@ class CalendarView extends React.Component {
         end: endtime,
         resourceId: this.state.selectedStaff,
         resource: {
-          client:this.state.selectedClient,
+          client: this.state.selectedClient,
           service: this.state.selectedService
         }
       }
