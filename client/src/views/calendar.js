@@ -37,6 +37,7 @@ class CalendarView extends React.Component {
       selectedStaff: {},
       selectedService: {},
       selectedClient: {},
+      selectedClientName: {},
       events: [],
       newEvent: {},
       editEvent: false,
@@ -69,8 +70,11 @@ class CalendarView extends React.Component {
     this.setState({ selectedService: event.target.value });
   };
 
-  handleSelectClientChange = (event) => {
-    this.setState({ selectedClient: event.target.value });
+  handleSelectClientChange = (event, child) => {
+    this.setState({ 
+      selectedClient: event.target.value,
+      selectedClientName: child.props.children,
+    });
   };
 
   handleEventConfirm = () => {
@@ -92,21 +96,29 @@ class CalendarView extends React.Component {
     }
     let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
     let values = {
-      serviceName: `${serviceName} ${this.state.selectedClient}`,
+      serviceName: `${serviceName} ${this.state.selectedClientName}`,
       allDay: event.slots.length == 1,
       start: event.start,
       end: endtime,
       staff: this.state.selectedStaff,
+      resource: {
+        client:this.state.selectedClient,
+        service: this.state.selectedService
+      }
     }
     const respObj = await fetchAPI('POST', 'bookingMgt/bookings', values);
     if (respObj && respObj.ok) {
       let booking = {
         id: respObj.id,
-        title: `${serviceName} ${this.state.selectedClient}`,
+        title: `${serviceName} ${this.state.selectedClientName}`,
         allDay: event.slots.length == 1,
         start: event.start,
         end: endtime,
         resourceId: this.state.selectedStaff,
+        resource: {
+          client:this.state.selectedClient,
+          service: this.state.selectedService
+        }
       }
       this.setState({
         events: this.state.events.concat([booking]),
@@ -192,22 +204,14 @@ class CalendarView extends React.Component {
   }
 
   handleEditEvent = (event) => {
-    let title = event.title.split(' ');
-    let clientName = title[title.length - 1]
-    let serviceName = event.title.replace(` ${clientName}`, '');
-    this.state.serviceList.map(service => {
-      if (service.name === serviceName) {
-        serviceName = service._id;
-      }
-    })
 
     this.setState({
       editEvent: true,
       eventOpen: true,
       selectedEvent: event,
       selectedStaff: event.resourceId,
-      selectedClient: clientName,
-      selectedService: serviceName
+      selectedClient: event.resource.client,
+      selectedService: event.resource.service
     });
 
   }
@@ -224,10 +228,14 @@ class CalendarView extends React.Component {
     }
     let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
     let values = {
-      serviceName: `${serviceName} ${this.state.selectedClient}`,
+      serviceName: `${serviceName} ${this.state.selectedClientName}`,
       start: event.start,
       end: endtime,
       staff: this.state.selectedStaff,
+      resource: {
+        client:this.state.selectedClient,
+        service: this.state.selectedService
+      }
     }
     const respObj = await fetchAPI('PATCH', `bookingMgt/bookings/${event.id}`, values);
     if (respObj && respObj.ok) {
@@ -239,10 +247,14 @@ class CalendarView extends React.Component {
       });
       let booking = {
         id: respObj.id,
-        title: `${serviceName} ${this.state.selectedClient}`,
+        title: `${serviceName} ${this.state.selectedClientName}`,
         start: event.start,
         end: endtime,
         resourceId: this.state.selectedStaff,
+        resource: {
+          client:this.state.selectedClient,
+          service: this.state.selectedService
+        }
       }
       this.setState({
         events: this.state.events.concat([booking]),
@@ -304,7 +316,7 @@ class CalendarView extends React.Component {
                     input={<Input id="age-native-simple" />}
                   >
                     {this.state.clientList.map(client => (
-                      <MenuItem value={client.displayName}>
+                      <MenuItem value={client._id}>
                         {client.displayName}
                       </MenuItem>
                     ))}

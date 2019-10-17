@@ -21,6 +21,7 @@ router.get('/bookings', async (reqe, res, next) => {
                 "id": "$_id",
                 "title": "$serviceName",
                 "resourceId": "$staff",
+                "resource": "$client",
                 "start": 1,
                 "end": 1,
                 "allDay": 1,
@@ -70,6 +71,7 @@ router.patch('/bookings/:id', async (reqe, res, next) => {
         booking.end = rawBooking.end || booking.end;
         booking.staff = rawBooking.staff || booking.staff;
         booking.allDay = rawBooking.allDay || booking.allDay;
+        booking.resource = rawBooking.resource || booking.resource;
 
         //save booking 
         let doc = await booking.save();
