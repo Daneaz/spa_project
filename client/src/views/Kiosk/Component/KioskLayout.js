@@ -13,7 +13,7 @@ const HomeButton = (props) => {
             </IconButton>
         )
     } else {
-        return '';
+        return null;
     }
 }
 
@@ -25,7 +25,7 @@ const SkipButton = (props) => {
             </Button>
         )
     } else {
-        return '';
+        return null;
     }
 }
 
@@ -38,7 +38,7 @@ const WelcomeMessage = (props) => {
         );
     }
     else {
-        return '';
+        return null;
     }
 }
 
