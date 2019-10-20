@@ -10,7 +10,7 @@ import { getUser } from './utils';
 import Login from './views/login';
 import ErrorPage from './views/error';
 import Dashboard from './views/dashboard';
-import Calendar from './views/calendar';
+import Calendar from './views/Appointment/calendar';
 
 import Client from './views/Client/client';
 import NewClient from './views/Client/newClient';

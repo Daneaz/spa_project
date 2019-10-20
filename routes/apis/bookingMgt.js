@@ -33,6 +33,34 @@ router.get('/bookings', async (reqe, res, next) => {
     res.send(bookings);
 });
 
+/* GET available staff list. */
+router.post('/availablestaff', async (reqe, res, next) => {
+    //get raw data from data
+    let service = reqe.body;
+    let startTime = new Date(service.start)
+    let endTime = new Date(service.end)
+    let staffs = service.staff;
+    let staffList = []
+    let todayDate = new Date(startTime.toDateString());
+    for (let i = 0; i < staffs.length; i++) {
+        let bookings = await Booking.find({ staff: staffs[i]._id, start: { $gte: todayDate }, delFlag: false });
+        if (bookings.length <= 0) {
+            staffList.push(staffs[i])
+            continue;
+        }
+        let conflit = false;
+        for (let j = 0; j < bookings.length; j++) {
+            if ((bookings[j].end > startTime && startTime > bookings[j].start) || (bookings[j].end > endTime && endTime > bookings[j].start)) {
+                conflit = true
+            }
+        }
+        if (!conflit) {
+            staffList.push(staffs[i])
+        }
+    }
+    res.send(staffList);
+});
+
 /* POST Create booking. */
 router.post('/bookings', async (reqe, res, next) => {
     try {
