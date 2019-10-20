@@ -4,8 +4,7 @@ let createError = require('http-errors');
 
 
 let Staff = require('../../models/auth/staff');
-let Booking = require('../../models/bookings');
-let auth = require('../../services/auth');
+let Booking = require('../../models/booking');
 let logger = require('../../services/logger');
 
 /* GET booking list. */
@@ -22,6 +21,8 @@ router.get('/bookings', async (reqe, res, next) => {
                 "title": "$serviceName",
                 "resourceId": "$staff",
                 "resource": "$client",
+                "client": 1,
+                "service": 1,
                 "start": 1,
                 "end": 1,
                 "allDay": 1,
@@ -46,7 +47,7 @@ router.post('/bookings', async (reqe, res, next) => {
 
         //save client 
         let doc = await booking.save();
-        let rsObj = { ok: "Booking has been created.", id: doc._id };
+        let rsObj = { ok: "Booking has been created.", booking: doc };
         logger.audit("Booking Mgt", "Create", doc._id, staff.id, `A new booking has been created by ${staff.displayName}`);
         res.json(rsObj);
 
@@ -71,11 +72,12 @@ router.patch('/bookings/:id', async (reqe, res, next) => {
         booking.end = rawBooking.end || booking.end;
         booking.staff = rawBooking.staff || booking.staff;
         booking.allDay = rawBooking.allDay || booking.allDay;
-        booking.resource = rawBooking.resource || booking.resource;
+        booking.client = rawBooking.client || booking.client;
+        booking.service = rawBooking.service || booking.service;
 
         //save booking 
         let doc = await booking.save();
-        let rsObj = { ok: "Booking has been updated.", id: doc._id };
+        let rsObj = { ok: "Booking has been updated.", booking: doc };
         logger.audit("Booking Mgt", "Update", doc._id, staff.id, `Booking has been updated by ${staff.displayName}`);
         res.json(rsObj);
 

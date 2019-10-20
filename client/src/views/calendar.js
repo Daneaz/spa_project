@@ -102,24 +102,22 @@ class CalendarView extends React.Component {
       start: event.start,
       end: endtime,
       staff: this.state.selectedStaff,
-      resource: {
-        client: this.state.selectedClient,
-        service: this.state.selectedService
-      }
+      client: this.state.selectedClient,
+      service: this.state.selectedService
+      
     }
     const respObj = await fetchAPI('POST', 'bookingMgt/bookings', values);
     if (respObj && respObj.ok) {
+      let bookingObj = respObj.booking
       let booking = {
-        id: respObj.id,
-        title: `${serviceName} ${this.state.selectedClientName}`,
-        allDay: event.slots.length == 1,
-        start: event.start,
-        end: endtime,
-        resourceId: this.state.selectedStaff,
-        resource: {
-          client: this.state.selectedClient,
-          service: this.state.selectedService
-        }
+        id: bookingObj._id,
+        title: bookingObj.serviceName,
+        allDay: bookingObj.allDay,
+        start: new Date (bookingObj.start),
+        end: new Date (bookingObj.end),
+        resourceId: bookingObj.staff,
+        client: bookingObj.client,
+        service: bookingObj.service
       }
       this.setState({
         events: this.state.events.concat([booking]),
@@ -206,14 +204,14 @@ class CalendarView extends React.Component {
 
   handleEditEvent = (event) => {
 
-    if (event.resource && event.resource.client) {
+    if (event.client && event.service) {
       this.setState({
         editEvent: true,
         eventOpen: true,
         selectedEvent: event,
         selectedStaff: event.resourceId,
-        selectedClient: event.resource.client,
-        selectedService: event.resource.service
+        selectedClient: event.client,
+        selectedService: event.service
       });
     } else {
       Swal.fire({
@@ -239,10 +237,9 @@ class CalendarView extends React.Component {
       start: event.start,
       end: endtime,
       staff: this.state.selectedStaff,
-      resource: {
-        client: this.state.selectedClient,
-        service: this.state.selectedService
-      }
+      client: this.state.selectedClient,
+      service: this.state.selectedService
+      
     }
     const respObj = await fetchAPI('PATCH', `bookingMgt/bookings/${event.id}`, values);
     if (respObj && respObj.ok) {
@@ -252,16 +249,16 @@ class CalendarView extends React.Component {
         events.splice(idx, 1);
         return { events };
       });
+      let bookingObj = respObj.booking
       let booking = {
-        id: respObj.id,
-        title: `${serviceName} ${this.state.selectedClientName}`,
-        start: event.start,
-        end: endtime,
-        resourceId: this.state.selectedStaff,
-        resource: {
-          client: this.state.selectedClient,
-          service: this.state.selectedService
-        }
+        id: bookingObj._id,
+        title: bookingObj.serviceName,
+        allDay: bookingObj.allDay,
+        start: new Date (bookingObj.start),
+        end: new Date (bookingObj.end),
+        resourceId: bookingObj.staff,
+        client: bookingObj.client,
+        service: bookingObj.service
       }
       this.setState({
         events: this.state.events.concat([booking]),
