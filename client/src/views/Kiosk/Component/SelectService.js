@@ -91,7 +91,7 @@ class SelectService extends React.Component {
                 let start = new Date();
                 let end = new Date(start.getTime() + parseInt(this.state.selectedServiceData.duration) * 60000)
                 let values = {
-                    serviceName: `${this.state.selectedServiceData.name} ${client.displayName}`,
+                    title: `${this.state.selectedServiceData.name} ${client.displayName}`,
                     start: start,
                     end: end,
                     staff: this.state.selectedStaff,

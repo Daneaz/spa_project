@@ -33,6 +33,7 @@ class SelectService extends React.Component {
             end: null,
             staff: null,
             service: null,
+            serviceName: null,
         },
     };
 
@@ -48,17 +49,17 @@ class SelectService extends React.Component {
         }
     }
 
-    handleSelectStaffChange = async (event) => {
+    handleSelectStaffChange = (event) => {
         let booking = { ...this.state.booking }
         booking.staff = event.target.value
-        await this.setState({
+        this.props.addBooking(booking);
+        this.setState({
             selectedStaff: event.target.value,
             booking: booking,
         });
-        this.props.addBooking(this.state.booking);
     };
 
-    handleSelectServiceChange = async (event, child) => {
+    handleSelectServiceChange = (event, child) => {
         this.setState({ selectedStaff: '' });
         let index = child.props.id;
         let value = this.state.serviceList[index]
@@ -74,26 +75,27 @@ class SelectService extends React.Component {
             }
             let booking = { ...this.state.booking }
             booking.service = event.target.value
+            booking.serviceName= value.name
             booking.end = value.end
             booking.staff = null
-            await this.setState({
+            this.props.addBooking(booking);
+            this.setState({
                 selectedServiceData: this.state.serviceList[index],
                 selectedService: event.target.value,
                 staffList: staffAvailable,
                 booking: booking,
             });
-            this.props.addBooking(this.state.booking);
         });
     };
 
-    handleTimeChange = async (time) => {
+    handleTimeChange = (time) => {
         let booking = { ...this.state.booking }
-        booking.start = this.state.selectedTime
-        await this.setState({
+        booking.start = time
+        this.props.addBooking(booking);
+        this.setState({
             selectedTime: time,
             booking: booking,
         })
-        this.props.addBooking(this.state.booking);
     };
 
     render() {
