@@ -18,14 +18,13 @@ router.get('/bookings', async (reqe, res, next) => {
         {
             $project: {
                 "id": "$_id",
-                "title": "$serviceName",
                 "resourceId": "$staff",
                 "resource": "$client",
+                "title": 1,
                 "client": 1,
                 "service": 1,
                 "start": 1,
                 "end": 1,
-                "allDay": 1,
             }
         }
     ])
@@ -82,6 +81,24 @@ router.post('/bookings', async (reqe, res, next) => {
     } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
 });
 
+/* POST Create booking. */
+router.post('/bookinglist', async (reqe, res, next) => {
+    try {
+
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.bookingMgt.create) { next(createError(403)); return; }
+
+        //load main fields
+        Booking.insertMany(reqe.body).then(doc =>{
+            let rsObj = { ok: "Booking has been created.", booking: doc };
+            logger.audit("Booking Mgt", "Create", doc._id, staff.id, `A new booking has been created by ${staff.displayName}`);
+            res.json(rsObj);
+        }).catch(err =>{
+            res.status(400).json({ error: `Cannot create booking, ${err.message}` })
+        })
+    } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
+});
+
 /* PATCH update booking. */
 router.patch('/bookings/:id', async (reqe, res, next) => {
     try {
@@ -95,11 +112,10 @@ router.patch('/bookings/:id', async (reqe, res, next) => {
         let booking = await Booking.findOne({ "_id": reqe.params.id, "delFlag": false });
 
         booking.updatedBy = staff._id;
-        booking.serviceName = rawBooking.serviceName || booking.serviceName;
+        booking.title = rawBooking.title || booking.title;
         booking.start = rawBooking.start || booking.start;
         booking.end = rawBooking.end || booking.end;
         booking.staff = rawBooking.staff || booking.staff;
-        booking.allDay = rawBooking.allDay || booking.allDay;
         booking.client = rawBooking.client || booking.client;
         booking.service = rawBooking.service || booking.service;
 

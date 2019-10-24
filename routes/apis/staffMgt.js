@@ -247,7 +247,7 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
         let doc = await sStaff.save();
         if (oldLeaves.length != 0) {
             //TODO Delete all leaves 
-            let bookings = await Booking.find({ "delFlag": false, staff: doc._id, serviceName: "On Leave" })
+            let bookings = await Booking.find({ "delFlag": false, staff: doc._id, title: "On Leave" })
 
             for (let i = 0; i < bookings.length; i++) {
                 let booking = await Booking.findOne({ "_id": bookings[i].id });
@@ -256,7 +256,6 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
                 // //save booking 
                 await booking.save();
             }
-
         }
         // new Date(start.getTime() + parseInt(serviceDuration) * 60000)
         if (rawNewStaff.leaveDays.length != 0) {
@@ -266,7 +265,7 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
                 start = new Date(rawNewStaff.leaveDays[i])
                 end = new Date(start.getTime() + parseInt(24) * 60000 * 60 - 1000)
                 let booking = new Booking({
-                    serviceName: "On Leave",
+                    title: "On Leave",
                     start: start,
                     end: end,
                     staff: doc._id,

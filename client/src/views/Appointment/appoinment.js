@@ -83,13 +83,13 @@ class CalendarView extends React.Component {
     });
   }
 
-  handleSelectStaffChange = (event) => {
-    this.setState({ selectedStaff: event.target.value });
-  };
+  // handleSelectStaffChange = (event) => {
+  //   this.setState({ selectedStaff: event.target.value });
+  // };
 
-  handleSelectServiceChange = (event) => {
-    this.setState({ selectedService: event.target.value });
-  };
+  // handleSelectServiceChange = (event) => {
+  //   this.setState({ selectedService: event.target.value });
+  // };
 
   handleSelectClientChange = (event, child) => {
     this.setState({
@@ -98,52 +98,46 @@ class CalendarView extends React.Component {
     });
   };
 
-  handleEventConfirm = () => {
-    this.setState({
-      eventOpen: false,
-    });
-    this.submitNewBooking(this.state.newEvent)
-  }
+  // handleEventConfirm = () => {
+  //   this.setState({
+  //     eventOpen: false,
+  //   });
+  //   this.submitNewBooking(this.state.newEvent)
+  // }
 
 
-  async submitNewBooking(event) {
-    let serviceName;
-    let serviceDuration;
-    for (let service of this.state.serviceList) {
-      if (service._id === this.state.selectedService) {
-        serviceName = service.name;
-        serviceDuration = service.duration
+  submitNewBooking(event) {
+    fetchAPI('POST', 'bookingMgt/bookinglist', event).then(respObj => {
+      if (respObj && respObj.ok) {
+        let resBookings = respObj.booking
+        resBookings.map(resBooking => {
+          let booking = {
+            id: resBooking._id,
+            title: resBooking.title,
+            start: new Date(resBooking.start),
+            end: new Date(resBooking.end),
+            resourceId: resBooking.staff,
+            client: resBooking.client,
+            service: resBooking.service
+          }
+          this.setState({
+            events: this.state.events.concat([booking]),
+          })
+        })
+
+      } else {
+        Swal.fire({
+          type: 'error',
+          title: 'Fail to create booking'
+        })
       }
-    }
-    let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
-    let values = {
-      serviceName: `${serviceName} ${this.state.selectedClientName}`,
-      allDay: event.slots.length == 1,
-      start: event.start,
-      end: endtime,
-      staff: this.state.selectedStaff,
-      client: this.state.selectedClient,
-      service: this.state.selectedService
-
-    }
-    const respObj = await fetchAPI('POST', 'bookingMgt/bookings', values);
-    if (respObj && respObj.ok) {
-      let bookingObj = respObj.booking
-      let booking = {
-        id: bookingObj._id,
-        title: bookingObj.serviceName,
-        allDay: bookingObj.allDay,
-        start: new Date(bookingObj.start),
-        end: new Date(bookingObj.end),
-        resourceId: bookingObj.staff,
-        client: bookingObj.client,
-        service: bookingObj.service
-      }
-      this.setState({
-        events: this.state.events.concat([booking]),
+    }).catch(err => {
+      Swal.fire({
+        type: 'error',
+        title: err
       })
-      this.handleEventClose();
-    } else { throw new Error('Fail to create booking') }
+    })
+
 
   }
 
@@ -160,25 +154,17 @@ class CalendarView extends React.Component {
     });
   }
 
-  moveEvent = ({ event, start, end, resourceId, isAllDay: droppedOnAllDaySlot }) => {
+  moveEvent = ({ event, start, end, resourceId }) => {
     const { events } = this.state
 
     const idx = events.indexOf(event)
-    let allDay = event.allDay
 
-    if (!event.allDay && droppedOnAllDaySlot) {
-      allDay = true
-    } else if (event.allDay && !droppedOnAllDaySlot) {
-      allDay = false
-    }
-
-    const updatedEvent = { ...event, start, resourceId, end, allDay }
+    const updatedEvent = { ...event, start, resourceId, end }
 
     const nextEvents = [...events]
     nextEvents.splice(idx, 1, updatedEvent)
 
     let values = {
-      allDay: allDay,
       start: updatedEvent.start,
       end: updatedEvent.end,
       staff: updatedEvent.resourceId,
@@ -243,51 +229,50 @@ class CalendarView extends React.Component {
     }
   }
 
-  handleUpdateEvent = async () => {
-    let event = this.state.selectedEvent;
-    let serviceName;
-    let serviceDuration;
-    for (let service of this.state.serviceList) {
-      if (service._id === this.state.selectedService) {
-        serviceName = service.name;
-        serviceDuration = service.duration
-      }
-    }
-    let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
-    let values = {
-      serviceName: `${serviceName} ${this.state.selectedClientName}`,
-      start: event.start,
-      end: endtime,
-      staff: this.state.selectedStaff,
-      client: this.state.selectedClient,
-      service: this.state.selectedService
+  // handleUpdateEvent = async () => {
+  //   let event = this.state.selectedEvent;
+  //   let serviceName;
+  //   let serviceDuration;
+  //   for (let service of this.state.serviceList) {
+  //     if (service._id === this.state.selectedService) {
+  //       serviceName = service.name;
+  //       serviceDuration = service.duration
+  //     }
+  //   }
+  //   let endtime = new Date((event.start).getTime() + parseInt(serviceDuration) * 60000)
+  //   let values = {
+  //     serviceName: `${serviceName} ${this.state.selectedClientName}`,
+  //     start: event.start,
+  //     end: endtime,
+  //     staff: this.state.selectedStaff,
+  //     client: this.state.selectedClient,
+  //     service: this.state.selectedService
 
-    }
-    const respObj = await fetchAPI('PATCH', `bookingMgt/bookings/${event.id}`, values);
-    if (respObj && respObj.ok) {
-      this.setState((prevState, props) => {
-        const events = [...prevState.events]
-        const idx = events.indexOf(event)
-        events.splice(idx, 1);
-        return { events };
-      });
-      let bookingObj = respObj.booking
-      let booking = {
-        id: bookingObj._id,
-        title: bookingObj.serviceName,
-        allDay: bookingObj.allDay,
-        start: new Date(bookingObj.start),
-        end: new Date(bookingObj.end),
-        resourceId: bookingObj.staff,
-        client: bookingObj.client,
-        service: bookingObj.service
-      }
-      this.setState({
-        events: this.state.events.concat([booking]),
-      })
-      this.handleEventClose();
-    } else { throw new Error('Fail to create booking') }
-  }
+  //   }
+  //   const respObj = await fetchAPI('PATCH', `bookingMgt/bookings/${event.id}`, values);
+  //   if (respObj && respObj.ok) {
+  //     this.setState((prevState, props) => {
+  //       const events = [...prevState.events]
+  //       const idx = events.indexOf(event)
+  //       events.splice(idx, 1);
+  //       return { events };
+  //     });
+  //     let bookingObj = respObj.booking
+  //     let booking = {
+  //       id: bookingObj._id,
+  //       title: bookingObj.serviceName,
+  //       start: new Date(bookingObj.start),
+  //       end: new Date(bookingObj.end),
+  //       resourceId: bookingObj.staff,
+  //       client: bookingObj.client,
+  //       service: bookingObj.service
+  //     }
+  //     this.setState({
+  //       events: this.state.events.concat([booking]),
+  //     })
+  //     this.handleEventClose();
+  //   } else { throw new Error('Fail to create booking') }
+  // }
 
   deleteEvent = async () => {
     let event = this.state.selectedEvent;
@@ -311,19 +296,16 @@ class CalendarView extends React.Component {
   }
 
   addBookingCallback = (dataFromSelectedService) => {
-    if (this.state.bookingList.length > 0) {
-      this.state.bookingList.map((booking, i) => {
-        if (booking.id === dataFromSelectedService.id) {
-          let newBookingList = [...this.state.bookingList]
-          newBookingList[i] = dataFromSelectedService
-          this.setState({ bookingList: newBookingList })
-        } else {
-          this.setState({
-            bookingList: this.state.bookingList.concat(dataFromSelectedService)
-          })
-        }
-      })
-    } else {
+    let flag = false
+    this.state.bookingList.map((booking, i) => {
+      if (booking.id === dataFromSelectedService.id) {
+        let newBookingList = [...this.state.bookingList]
+        newBookingList[i] = dataFromSelectedService
+        this.setState({ bookingList: newBookingList })
+        flag = true
+      }
+    })
+    if (!flag) {
       this.setState({
         bookingList: this.state.bookingList.concat(dataFromSelectedService)
       })
@@ -364,6 +346,12 @@ class CalendarView extends React.Component {
       }
       
       this.handleEventClose()
+      let bookings = bookingList.map(booking => {
+        booking.client = this.state.selectedClient
+        booking.title = `${booking.serviceName} ${this.state.selectedClientName}`
+        return booking
+      })
+      this.submitNewBooking(bookings)
     }
   }
 
