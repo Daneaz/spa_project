@@ -40,10 +40,22 @@ class SelectService extends React.Component {
     async componentWillMount() {
         try {
             let serviceList = await fetchAPI('GET', 'kiosk/services')
-            this.setState({
-                serviceList: serviceList,
-                staffList: serviceList[0].staff
-            });
+            if (this.props.edit) {
+                let booking = this.props.booking
+                this.setState({
+                    serviceList: serviceList,
+                    staffList: serviceList[0].staff,
+                    booking: booking,
+                    selectedService: booking.service,
+                    selectedStaff: booking.staff,
+                    selectedTime: booking.start
+                });
+            } else {
+                this.setState({
+                    serviceList: serviceList,
+                    staffList: serviceList[0].staff,
+                });
+            }
         } catch (error) {
             console.log(error);
         }
@@ -75,7 +87,7 @@ class SelectService extends React.Component {
             }
             let booking = { ...this.state.booking }
             booking.service = event.target.value
-            booking.serviceName= value.name
+            booking.serviceName = value.name
             booking.end = value.end
             booking.staff = null
             this.props.addBooking(booking);

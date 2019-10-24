@@ -57,9 +57,10 @@ class CalendarView extends React.Component {
       selectedService: {},
       selectedClient: {},
       selectedClientName: {},
+      appointment: [],
       events: [],
       newEvent: {},
-      editEvent: false,
+      editFlag: false,
       selectedEvent: {},
       serviceCount: 1,
       bookingList: [],
@@ -118,7 +119,8 @@ class CalendarView extends React.Component {
             end: new Date(resBooking.end),
             resourceId: resBooking.staff,
             client: resBooking.client,
-            service: resBooking.service
+            service: resBooking.service,
+            appointment: resBooking.appointment
           }
           this.setState({
             events: this.state.events.concat([booking]),
@@ -144,7 +146,7 @@ class CalendarView extends React.Component {
   handleEventClose = () => {
 
     this.setState({
-      editEvent: false,
+      editFlag: false,
       eventOpen: false,
       selectedStaff: {},
       selectedService: {},
@@ -210,17 +212,22 @@ class CalendarView extends React.Component {
     }
   }
 
-  handleEditEvent = (event) => {
+  handleEditEvent = async (event) => {
 
     if (event.client && event.service) {
-      this.setState({
-        editEvent: true,
-        eventOpen: true,
+      let appointment = await fetchAPI('GET', `bookingMgt/appointment/${event.appointment}`)
+      await this.setState({
+        serviceCount: appointment.bookings.length,
+        appointment: appointment,
         selectedEvent: event,
         selectedStaff: event.resourceId,
         selectedClient: event.client,
         selectedService: event.service
       });
+      this.setState({
+        editFlag: true,
+        eventOpen: true,
+      })
     } else {
       Swal.fire({
         type: 'error',
@@ -344,7 +351,7 @@ class CalendarView extends React.Component {
           return
         }
       }
-      
+
       this.handleEventClose()
       let bookings = bookingList.map(booking => {
         booking.client = this.state.selectedClient
@@ -399,11 +406,16 @@ class CalendarView extends React.Component {
             >
 
               {
-                Array.from(Array(this.state.serviceCount).keys()).map((_, i) =>
-                  <SelectService id={i}
-                    bookingList={this.state.bookingList}
-                    addBooking={this.addBookingCallback} />
-                )
+                this.state.editFlag ?
+                  Array.from(Array(this.state.serviceCount).keys()).map((_, i) =>
+                    <SelectService id={i} addBooking={this.addBookingCallback}
+                      edit={this.state.editFlag} booking={this.state.appointment.bookings[i]} />
+                  )
+                  :
+                  Array.from(Array(this.state.serviceCount).keys()).map((_, i) =>
+                    <SelectService id={i} addBooking={this.addBookingCallback}
+                      edit={this.state.editFlag} />
+                  )
               }
 
               <FormControl className={classes.formControl}>
@@ -424,26 +436,54 @@ class CalendarView extends React.Component {
               <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">
                 <AddIcon fontSize="large" />
               </IconButton>
-              <Grid
-                container
-                direction="row"
-                justify="center"
-                alignItems="flex-end"
-                spacing={10}>
-                <Grid item xs={3}>
-                  <Button fullWidth variant="contained" color="secondary"
-                    onClick={this.handleEventClose}>
-                    Cancel
-                    </Button>
-                </Grid>
-                <Grid item xs={3}>
-                  <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
-                    Confirm
-                    </Button>
-                </Grid>
-              </Grid>
+
+              {
+                this.state.editFlag ?
+                  <div>
+                    <Grid
+                      container
+                      direction="row"
+                      justify="center"
+                      alignItems="flex-end"
+                      spacing={10}>
+                      <Grid item xs={6}>
+                        <Button fullWidth variant="contained" color="secondary"
+                          onClick={this.handleEventClose}>
+                          Cancel
+                        </Button>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
+                          Confirm
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </div>
+                  :
+                  <div>
+                    <Grid
+                      container
+                      direction="row"
+                      justify="center"
+                      alignItems="flex-end"
+                      spacing={10}>
+                      <Grid item xs={6}>
+                        <Button fullWidth variant="contained" color="secondary"
+                          onClick={this.handleEventClose}>
+                          Cancel
+                        </Button>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
+                          Update
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </div>
+
+              }
             </Grid>
-            {/* <form className={classes.container}>
+          {/* <form className={classes.container}>
                 <FormControl className={classes.formControl}>
                   <InputLabel htmlFor="age-native-simple">Customer Name</InputLabel>
                   <Select
@@ -488,8 +528,8 @@ class CalendarView extends React.Component {
                 </FormControl>
 
               </form> */}
-            {/* </DialogContent> */}
-            {/* <DialogActions>
+          {/* </DialogContent> */}
+          {/* <DialogActions>
               {this.state.editEvent ?
                 <Button onClick={this.deleteEvent} color="secondary">
                   Delete
@@ -510,7 +550,7 @@ class CalendarView extends React.Component {
           </Dialog>
         </Box>
         </Paper>
-      </AppLayout>
+      </AppLayout >
 
 
     );

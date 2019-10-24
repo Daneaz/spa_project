@@ -5,59 +5,76 @@ let createError = require('http-errors');
 
 let Staff = require('../../models/auth/staff');
 let Booking = require('../../models/booking');
+let Appointment = require('../../models/appointment');
 let logger = require('../../services/logger');
 
 /* GET booking list. */
 router.get('/bookings', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.bookingMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.bookingMgt.list) { next(createError(403)); return; }
 
-    // return and rename the data as calender needs
-    let bookings = await Booking.aggregate([
-        { $match: { delFlag: false } },
-        {
-            $project: {
-                "id": "$_id",
-                "resourceId": "$staff",
-                "resource": "$client",
-                "title": 1,
-                "client": 1,
-                "service": 1,
-                "start": 1,
-                "end": 1,
+        // return and rename the data as calender needs
+        let bookings = await Booking.aggregate([
+            { $match: { delFlag: false } },
+            {
+                $project: {
+                    "id": "$_id",
+                    "resourceId": "$staff",
+                    "resource": "$client",
+                    "appointment": 1,
+                    "title": 1,
+                    "client": 1,
+                    "service": 1,
+                    "start": 1,
+                    "end": 1,
+                }
             }
-        }
-    ])
+        ])
+        res.send(bookings);
+    } catch(err) { res.status(400).json({ error: `Cannot get bookings, ${err.message}` }) }
+});
 
-    res.send(bookings);
+/* GET booking list. */
+router.get('/appointment/:id', async (reqe, res, next) => {
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.bookingMgt.list) { next(createError(403)); return; }
+
+        // return and rename the data as calender needs
+        let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false }).populate("bookings");
+        res.send(appointment);
+    } catch(err) { res.status(400).json({ error: `Cannot get appointment, ${err.message}` }) }
 });
 
 /* GET available staff list. */
 router.post('/availablestaff', async (reqe, res, next) => {
-    //get raw data from data
-    let service = reqe.body;
-    let startTime = new Date(service.start)
-    let endTime = new Date(service.end)
-    let staffs = service.staff;
-    let staffList = []
-    let todayDate = new Date(startTime.toDateString());
-    for (let i = 0; i < staffs.length; i++) {
-        let bookings = await Booking.find({ staff: staffs[i]._id, start: { $gte: todayDate }, delFlag: false });
-        if (bookings.length <= 0) {
-            staffList.push(staffs[i])
-            continue;
-        }
-        let conflit = false;
-        for (let j = 0; j < bookings.length; j++) {
-            if ((bookings[j].end > startTime && startTime > bookings[j].start) || (bookings[j].end > endTime && endTime > bookings[j].start)) {
-                conflit = true
+    try {
+        //get raw data from data
+        let service = reqe.body;
+        let startTime = new Date(service.start)
+        let endTime = new Date(service.end)
+        let staffs = service.staff;
+        let staffList = []
+        let todayDate = new Date(startTime.toDateString());
+        for (let i = 0; i < staffs.length; i++) {
+            let bookings = await Booking.find({ staff: staffs[i]._id, start: { $gte: todayDate }, delFlag: false });
+            if (bookings.length <= 0) {
+                staffList.push(staffs[i])
+                continue;
+            }
+            let conflit = false;
+            for (let j = 0; j < bookings.length; j++) {
+                if ((bookings[j].end > startTime && startTime > bookings[j].start) || (bookings[j].end > endTime && endTime > bookings[j].start)) {
+                    conflit = true
+                }
+            }
+            if (!conflit) {
+                staffList.push(staffs[i])
             }
         }
-        if (!conflit) {
-            staffList.push(staffs[i])
-        }
-    }
-    res.send(staffList);
+        res.send(staffList);
+    } catch(err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
 });
 
 /* POST Create booking. */
@@ -87,15 +104,27 @@ router.post('/bookinglist', async (reqe, res, next) => {
 
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.bookingMgt.create) { next(createError(403)); return; }
+        (new Appointment).save().then(app => {
+            //load main fields
+            reqe.body.map(booking => {
+                booking.appointment = app._id
+                return booking
+            })
+            Booking.insertMany(reqe.body).then(doc => {
+                let bookingids = doc.map(booking => {
+                    return booking._id
+                })
+                app.bookings = bookingids
+                app.save()
+                let rsObj = { ok: "Booking has been created.", booking: doc }
+                logger.audit("Booking Mgt", "Create", doc._id, staff.id, `A new booking has been created by ${staff.displayName}`)
+                res.json(rsObj)
+            }).catch(err => {
+                res.status(400).json({ error: `Cannot create booking, ${err.message}` })
+            })
 
-        //load main fields
-        Booking.insertMany(reqe.body).then(doc =>{
-            let rsObj = { ok: "Booking has been created.", booking: doc };
-            logger.audit("Booking Mgt", "Create", doc._id, staff.id, `A new booking has been created by ${staff.displayName}`);
-            res.json(rsObj);
-        }).catch(err =>{
-            res.status(400).json({ error: `Cannot create booking, ${err.message}` })
         })
+
     } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
 });
 
