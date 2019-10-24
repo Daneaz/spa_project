@@ -132,14 +132,14 @@ function NavMenu(props) {
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}
                     component={NavLink}
-                    to="/calendar"
+                    to="/appointment"
                 >
                     <ListItemIcon className={props.classes.listItemIcon}>
                         <CalendarIcon />
                     </ListItemIcon>
                     <ListItemText
                         classes={{ primary: props.classes.listItemText }}
-                        primary="Calendar"
+                        primary="Appointment"
                     />
                 </ListItem>
                 <ListItem

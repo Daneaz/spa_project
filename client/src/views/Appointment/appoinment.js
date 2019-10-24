@@ -362,7 +362,7 @@ class CalendarView extends React.Component {
           return
         }
       }
-      console.log(this.state.bookingList)
+      
       this.handleEventClose()
     }
   }
