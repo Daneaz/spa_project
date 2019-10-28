@@ -29,19 +29,22 @@ class SelectService extends React.Component {
         selectedTime: new Date(),
         booking: {
             id: this.props.id,
-            start: new Date(),
+            start: this.props.start,
             end: null,
             staff: null,
             service: null,
-            serviceName: null,
         },
     };
 
     async componentWillMount() {
         try {
             let serviceList = await fetchAPI('GET', 'kiosk/services')
-            if (this.props.edit) {
+            if (this.props.edit && this.props.booking) {
                 let booking = this.props.booking
+                booking.start = new Date(this.props.booking.start)
+                booking.end = new Date(this.props.booking.end)
+                booking.id = this.props.booking._id
+                this.props.addBooking(booking)
                 this.setState({
                     serviceList: serviceList,
                     staffList: serviceList[0].staff,
@@ -52,6 +55,7 @@ class SelectService extends React.Component {
                 });
             } else {
                 this.setState({
+                    selectedTime: this.props.start,
                     serviceList: serviceList,
                     staffList: serviceList[0].staff,
                 });
@@ -77,7 +81,7 @@ class SelectService extends React.Component {
         let value = this.state.serviceList[index]
         value.start = this.state.selectedTime
         value.end = new Date((value.start).getTime() + value.duration * 60000);
-        fetchAPI('POST', 'bookingMgt/availablestaff', this.state.serviceList[index]).then(async (staffAvailable) => {
+        fetchAPI('POST', 'appointmentMgt/availablestaff', this.state.serviceList[index]).then(async (staffAvailable) => {
             if (staffAvailable.length === 0) {
                 staffAvailable = [
                     {
@@ -87,7 +91,6 @@ class SelectService extends React.Component {
             }
             let booking = { ...this.state.booking }
             booking.service = event.target.value
-            booking.serviceName = value.name
             booking.end = value.end
             booking.staff = null
             this.props.addBooking(booking);

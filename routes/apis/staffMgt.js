@@ -26,7 +26,7 @@ const init = async () => {
                 edit: true,
                 delete: true
             },
-            bookingMgt: {
+            appointmentMgt: {
                 list: true,
                 create: true,
                 edit: true,

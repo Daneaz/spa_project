@@ -20,7 +20,7 @@ var StaffRoleSchema = new Schema({
         edit    : { type: Boolean, index: true, default: false },
         delete  : { type: Boolean, index: true, default: false }
     },
-    bookingMgt  : {
+    appointmentMgt  : {
         list    : { type: Boolean, index: true, default: false },
         create  : { type: Boolean, index: true, default: false },
         edit    : { type: Boolean, index: true, default: false },
