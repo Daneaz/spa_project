@@ -314,10 +314,15 @@ router.get('/roles', async (reqe, res, next) => {
     if (!user.role.staffMgt.list) { next(createError(403)); return; }
 
     //get raw data from data
-    let rawRoles = await StaffRole.find({ "delFlag": false }).lean()
-        .select({
-            "name": 1
-        });
+    let rawRoles = await StaffRole.aggregate([
+        { $match: { delFlag: false } },
+        {
+            $project: {
+                "value": "$_id",
+                "label": "$name",
+            }
+        }
+    ])
     res.send(rawRoles);
 });
 

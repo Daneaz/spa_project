@@ -2,11 +2,12 @@ import React from 'react'
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from "moment";
+import ReactSelect from 'react-select'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { withStyles } from '@material-ui/styles';
 import {
-  Button, Dialog, DialogActions, DialogContent, DialogTitle, InputLabel, Input, MenuItem, FormControl, Select, Paper, Box, Slide, AppBar, Toolbarm, IconButton, Toolbar,
+  Button, Dialog, TextField, InputLabel, MenuItem, FormControl, Select, Paper, Box, Slide, AppBar, Chip, IconButton, Toolbar,
   Typography, Grid
 } from '@material-ui/core';
 
@@ -17,6 +18,7 @@ import AppLayout from '../../layout/app'
 import { fetchAPI } from '../../utils';
 import SelectService from './Component/SelectService'
 import './sweetalert.scss'
+
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar)
 
@@ -71,6 +73,9 @@ class CalendarView extends React.Component {
     const serviceList = await fetchAPI('GET', 'serviceMgt/services');
     const events = await fetchAPI('GET', 'appointmentMgt/bookings');
     const clientList = await fetchAPI('GET', 'clientMgt/clients');
+    let options = clientList.map(client => {
+      return { value: client._id, label: client.displayName };
+    })
     events.map(event => {
       event.start = new Date(event.start);
       event.end = new Date(event.end);
@@ -78,14 +83,14 @@ class CalendarView extends React.Component {
     this.setState({
       staffList: staffList,
       serviceList: serviceList,
-      clientList: clientList,
+      clientList: options,
       events: events,
     });
   }
 
-  handleSelectClientChange = (event) => {
+  handleSelectClientChange = (selectedOption) => {
     this.setState({
-      selectedClient: event.target.value
+      selectedClient: selectedOption
     });
   };
 
@@ -122,7 +127,7 @@ class CalendarView extends React.Component {
         }
       }
       let bookings = bookingList.map(booking => {
-        booking.client = this.state.selectedClient
+        booking.client = this.state.selectedClient.value
         return booking
       })
       if (!this.state.editFlag) {
@@ -160,7 +165,7 @@ class CalendarView extends React.Component {
                 break
               }
             }
-            if(idx !=null) {
+            if (idx != null) {
               const nextEvents = [...events]
               nextEvents.splice(idx, 1, booking)
               this.setState({
@@ -300,13 +305,18 @@ class CalendarView extends React.Component {
 
     if (event.client && event.service) {
       let appointment = await fetchAPI('GET', `appointmentMgt/appointment/${event.appointment}`)
+      console.log(this.state.clientList)
+      console.log(event.client)
+      let idx = this.state.clientList.findIndex(client => {
+        return client.value === event.client
+      })
       await this.setState({
         serviceCount: appointment.bookings.length,
         appointment: appointment,
         start: event.start,
         selectedEvent: event,
         selectedStaff: event.resourceId,
-        selectedClient: event.client,
+        selectedClient: this.state.clientList[idx],
         selectedService: event.service
       });
       this.setState({
@@ -354,17 +364,14 @@ class CalendarView extends React.Component {
   }
 
   addBookingCallback = (dataFromSelectedService) => {
-    // flag to check if the user editing the booking which havent sumbit to backend
-    let flag = false
-    this.state.bookingList.map((booking, i) => {
-      if (booking.id === dataFromSelectedService.id) {
-        let newBookingList = [...this.state.bookingList]
-        newBookingList[i] = dataFromSelectedService
-        this.setState({ bookingList: newBookingList })
-        flag = true
-      }
+    let idx = this.state.bookingList.findIndex(booking => {
+      return booking.id === dataFromSelectedService.id
     })
-    if (!flag) {
+    if (idx !== -1) {
+      let newBookingList = [...this.state.bookingList]
+      newBookingList[idx] = dataFromSelectedService
+      this.setState({ bookingList: newBookingList })
+    } else {
       this.setState({
         bookingList: this.state.bookingList.concat(dataFromSelectedService)
       })
@@ -418,7 +425,7 @@ class CalendarView extends React.Component {
                 this.state.editFlag ?
                   Array.from(Array(this.state.serviceCount).keys()).map((_, i) =>
                     <SelectService id={i} addBooking={this.addBookingCallback}
-                      edit={this.state.editFlag} booking={this.state.appointment.bookings[i]} start={this.state.start}/>
+                      edit={this.state.editFlag} booking={this.state.appointment.bookings[i]} start={this.state.start} />
                   )
                   :
                   Array.from(Array(this.state.serviceCount).keys()).map((_, i) =>
@@ -429,17 +436,11 @@ class CalendarView extends React.Component {
 
               <FormControl className={classes.formControl}>
                 <InputLabel htmlFor="age-native-simple">Customer Name</InputLabel>
-                <Select
-                  value={this.state.selectedClient}
+                <ReactSelect
                   onChange={this.handleSelectClientChange}
-                  input={<Input id="age-native-simple" />}
-                >
-                  {this.state.clientList.map(client => (
-                    <MenuItem value={client._id}>
-                      {client.displayName}
-                    </MenuItem>
-                  ))}
-                </Select>
+                  options={this.state.clientList}
+                  value={this.state.selectedClient}
+                />
               </FormControl>
 
               <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">

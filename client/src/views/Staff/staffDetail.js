@@ -39,9 +39,10 @@ class ClientDetail extends React.Component {
     };
 
     async componentDidMount() {
-        const roles = await fetchAPI('GET', 'staffMgt/roles');
+        const roleList = await fetchAPI('GET', 'staffMgt/roles');
+        console.log(roleList)
         this.setState({
-            roleList: roles,
+            roleList: roleList,
         });
     }
 
@@ -99,9 +100,6 @@ class ClientDetail extends React.Component {
 
     render() {
         const { classes } = this.props;
-        let options = this.state.roleList.map(function (role) {
-            return { value: role.name, label: role.name };
-        })
         return (
             <AppLayout title="Staff Details" {...this.props} >
                 <Container component="main" maxWidth="md" className={classes.container} >
@@ -180,7 +178,7 @@ class ClientDetail extends React.Component {
                                         </Typography>
                                         <Select className={classes.select}
                                             onChange={this.handleChange}
-                                            options={options}
+                                            options={this.state.roleList}
                                             value={this.state.selectedOption}
                                         />
 
