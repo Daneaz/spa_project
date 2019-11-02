@@ -10,7 +10,7 @@ import {
   Button, Dialog, TextField, InputLabel, MenuItem, FormControl, Select, Paper, Box, Slide, AppBar, Chip, IconButton, Toolbar,
   Typography, Grid
 } from '@material-ui/core';
-
+import { green } from '@material-ui/core/colors';
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 import Swal from 'sweetalert2';
@@ -22,11 +22,9 @@ import './sweetalert.scss'
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar)
 
-
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
 
 const styles = theme => ({
   container: {
@@ -378,6 +376,10 @@ class CalendarView extends React.Component {
     }
   }
 
+  handleCheckOut = () => {  
+
+  }
+  
   render() {
     const { classes } = this.props;
     return (
@@ -449,41 +451,51 @@ class CalendarView extends React.Component {
 
               {
                 !this.state.editFlag ?
-                  <div>
+                  (
                     <Grid
                       container
                       direction="row"
                       justify="center"
                       alignItems="flex-end"
                       spacing={10}>
-                      <Grid item xs={12}>
+                      <Grid item xs={3}>
                         <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
                           Confirm
                         </Button>
                       </Grid>
+                      <Grid item xs={3}>
+                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                          Express Checkout
+                        </ColorButton>
+                      </Grid>
                     </Grid>
-                  </div>
+                  )
                   :
-                  <div>
+                  (
                     <Grid
                       container
                       direction="row"
                       justify="center"
                       alignItems="flex-end"
                       spacing={10}>
-                      <Grid item xs={6}>
+                      <Grid item xs={3}>
                         <Button fullWidth variant="contained" color="secondary"
                           onClick={this.deleteAppointment}>
                           Delete
                         </Button>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={3}>
                         <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
                           Update
                         </Button>
                       </Grid>
+                      <Grid item xs={3}>
+                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                          Checkout
+                        </ColorButton>
+                      </Grid>
                     </Grid>
-                  </div>
+                  )
               }
             </Grid>
           </Dialog>
@@ -495,5 +507,15 @@ class CalendarView extends React.Component {
     );
   }
 }
+
+const ColorButton = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[600]),
+    backgroundColor: green[600],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+}))(Button);
 
 export default withStyles(styles)(CalendarView);
