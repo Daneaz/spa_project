@@ -63,13 +63,13 @@ class SelectService extends React.Component {
                                 <FormControl className={classes.serviceControl} >
                                     <InputLabel htmlFor="age-native-simple" >Service Category</InputLabel>
                                     <Select
-                                        value={this.props.service}
-                                        onChange={this.props.changeService}
+                                        value={this.props.category}
+                                        onChange={this.props.changeCategory}
                                         input={<Input id="age-native-simple" />}
                                     >
-                                        {this.props.serviceList.map((service, i) => (
-                                            <MenuItem id={i} value={service._id}>
-                                                {`${service.name} ( ${service.duration} mins $${service.price} )`}
+                                        {this.props.categoryList.map((category, i) => (
+                                            <MenuItem id={i} value={category.value}>
+                                                {category.label}
                                             </MenuItem>
                                         ))}
                                     </Select>

@@ -24,6 +24,7 @@ import StaffDetail from './views/Staff/staffDetail';
 import Service from './views/Service/service';
 import NewService from './views/Service/newService';
 import ServiceDetail from './views/Service/serviceDetail';
+import NewCategory from './views/Service/newCategory'
 
 import Message from './views/message';
 import Report from './views/report';
@@ -36,6 +37,7 @@ import MobileLogin from './views/Kiosk/mobileLogin';
 import Register from './views/Kiosk/register';
 import Snapshot from './views/Kiosk/snapshot';
 import SnapshotManual from './views/Kiosk/snapshotManual';
+
 
 function PrivateRoute({ component: Component, ...rest }) {
     return (
@@ -94,6 +96,7 @@ function Routers() {
                     <PrivateRoute exact path="/service" component={Service} />
                     <PrivateRoute exact path="/newservice" component={NewService} />
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
+                    <PrivateRoute exact path="/newcategory" component={NewCategory} />
 
                     <PrivateRoute exact path="/setting" component={Setting} />
 

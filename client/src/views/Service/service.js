@@ -8,6 +8,7 @@ import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import AddIcon from "@material-ui/icons/Add";
+import CategoryIcon from "@material-ui/icons/Category";
 import Swal from 'sweetalert2';
 import { fetchAPI } from '../../utils';
 import AppLayout from '../../layout/app'
@@ -30,6 +31,14 @@ const columns = [
     label: "Service Name",
     options: {
       filter: false,
+      sort: true,
+    }
+  },
+  {
+    name: "category.name",
+    label: "Category",
+    options: {
+      filter: true,
       sort: true,
     }
   },
@@ -102,9 +111,14 @@ class Service extends React.Component {
     });
   }
 
-  handleAddStaff = () => {
+  handleAddService = () => {
     const { history } = this.props;
     history.push('/newservice');
+  }
+
+  handleAddCategory = () => {
+    const { history } = this.props;
+    history.push('/newcategory');
   }
 
   handleRowClick = (rowMeta) => {
@@ -148,11 +162,18 @@ class Service extends React.Component {
                 options={{
                   customToolbar: () => {
                     return (
-                      <Tooltip title={"Add Service"}>
-                        <IconButton onClick={this.handleAddStaff}>
-                          <AddIcon />
-                        </IconButton>
-                      </Tooltip>
+                      <React.Fragment>
+                        <Tooltip title={"Add Category"}>
+                          <IconButton onClick={this.handleAddCategory}>
+                            <CategoryIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={"Add Service"}>
+                          <IconButton onClick={this.handleAddService}>
+                            <AddIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </React.Fragment>
                     );
                   },
                   onRowClick: (rowData, rowMeta) => {
@@ -162,7 +183,6 @@ class Service extends React.Component {
                     this.handleRowDelete(rowsDeleted.data);
                   },
                   filterType: 'checkbox',
-                  filter: false,
                 }}
               />
             </MuiThemeProvider>

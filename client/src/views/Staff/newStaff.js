@@ -33,7 +33,7 @@ const styles = theme => ({
 class NewStaff extends React.Component {
 
     state = {
-        selectedOption: {value:"Manager", label:"Manager"},
+        selectedOption: {},
         roleList: [],
         selectedLeaves: [],
         selectedOff: [],
@@ -44,7 +44,10 @@ class NewStaff extends React.Component {
 
     async componentDidMount() {
         const roleList = await fetchAPI('GET', 'staffMgt/roles');
-        this.setState({ roleList: roleList });
+        this.setState({
+            roleList: roleList,
+            selectedOption: roleList[0]
+        });
     }
 
     handleChange = selectedOption => {
@@ -118,7 +121,7 @@ class NewStaff extends React.Component {
                             if (!values.username) { errors.username = 'Please enter username' }
                             if (!values.password) { errors.password = 'Please enter password' }
                             if (!values.confirmPassoword) { errors.confirmPassoword = 'Please enter password' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
+                            if (!values.displayName) { errors.displayName = 'Please enter display name' }
                             if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
                             if (!values.email) { errors.email = 'Please enter email address' }
                             if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
@@ -126,15 +129,11 @@ class NewStaff extends React.Component {
                         }}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                if (!this.state.selectedOption)
-                                    throw new Error('Please select a role')
-                                else {
-                                    values.role = {};
-                                    values.role.name = this.state.selectedOption.value;
-                                    values.offDays = this.state.offDays;
-                                    values.leaveDays = this.state.selectedLeaves;
-                                }
-                            const respObj = await fetchAPI('POST', 'staffMgt/staffs', values);
+                                values.role = this.state.selectedOption.value;
+                                values.offDays = this.state.offDays;
+                                values.leaveDays = this.state.selectedLeaves;
+
+                                const respObj = await fetchAPI('POST', 'staffMgt/staffs', values);
 
                                 if (respObj && respObj.ok) {
                                     window.history.back();

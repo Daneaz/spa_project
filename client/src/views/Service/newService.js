@@ -1,9 +1,10 @@
 import React from 'react';
+import Select from 'react-select';
 import Picky from 'react-picky';
 import 'react-picky/dist/picky.css';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress
+    Typography, Button, CssBaseline, Container, LinearProgress,
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
@@ -34,7 +35,9 @@ class NewStaff extends React.Component {
         super(props);
         this.state = {
             staffList: [],
-            arrayValue: []
+            arrayValue: [],
+            categoryList: [],
+            selectedCategory: null,
         };
         this.selectMultipleOption = this.selectMultipleOption.bind(this);
     }
@@ -45,7 +48,18 @@ class NewStaff extends React.Component {
 
     async componentDidMount() {
         const response = await fetchAPI('GET', 'staffMgt/workingStaff');
-        this.setState({ staffList: response });
+        const categoryList = await fetchAPI('GET', 'serviceMgt/category');
+        this.setState({
+            staffList: response,
+            categoryList: categoryList,
+            selectedCategory: categoryList[0]
+        });
+    }
+
+    handleChangeCategory = (event) => {
+        this.setState({
+            selectedCategory: event
+        });
     }
 
     render() {
@@ -70,21 +84,32 @@ class NewStaff extends React.Component {
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
                                 let rawStaffList = this.state.arrayValue;
-                                if (!rawStaffList)
-                                    throw new Error('Please select a staff')
-                                else {
+                                if (!rawStaffList) {
+                                    Swal.fire({
+                                        type: 'error', text: 'Please try again.',
+                                        title: "Please select a staff"
+                                    })
+                                    return
+                                } else {
                                     let staffList = [];
                                     for (let i = 0; i < rawStaffList.length; i++) {
                                         staffList.push(rawStaffList[i]._id)
                                     }
                                     values.staff = staffList;
                                 }
+                                values.category = this.state.selectedCategory.value;
+
                                 const respObj = await fetchAPI('POST', 'serviceMgt/services', values);
 
                                 if (respObj && respObj.ok) {
 
                                     window.history.back();
-                                } else { throw new Error('Fail to add service') }
+                                } else {
+                                    Swal.fire({
+                                        type: 'error', text: 'Please try again.',
+                                        title: "Fail to add service"
+                                    })
+                                }
                             } catch (err) {
                                 Swal.fire({
                                     type: 'error', text: 'Please try again.',
@@ -95,10 +120,12 @@ class NewStaff extends React.Component {
                         }}
                         render={({ submitForm, isSubmitting, values, setFieldValue, errors, setErrors }) => (
                             <Form>
+
                                 <Field
-                                    component={TextField} variant="outlined" margin="normal" fullWidth autoFocus
+                                    component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="name" label="Service Name"
                                 />
+
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="price" label="Price ($)" type="number"
@@ -108,9 +135,19 @@ class NewStaff extends React.Component {
                                     name="duration" label="Duration (min)" type="number"
                                 />
                                 <Typography>
-                                    <h4>
+                                    <h5>
+                                        Category
+                                    </h5>
+                                </Typography>
+                                <Select className={classes.select}
+                                    onChange={this.handleChangeCategory}
+                                    options={this.state.categoryList}
+                                    value={this.state.selectedCategory}
+                                />
+                                <Typography>
+                                    <h5>
                                         Select staff who perform this service.
-                                    </h4>
+                                    </h5>
                                 </Typography>
                                 <Picky
                                     value={this.state.arrayValue}
@@ -124,6 +161,7 @@ class NewStaff extends React.Component {
                                     includeFilter={true}
                                     dropdownHeight={600}
                                 />
+
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >

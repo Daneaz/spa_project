@@ -49,6 +49,8 @@ class CalendarView extends React.Component {
     super(props)
     this.state = {
       eventOpen: false,
+      categoryList: [],
+      availableServiceList: [],
       staffList: [],
       serviceStaffList: [],
       serviceList: [],
@@ -71,6 +73,7 @@ class CalendarView extends React.Component {
     const serviceList = await fetchAPI('GET', 'serviceMgt/services');
     const events = await fetchAPI('GET', 'appointmentMgt/bookings');
     const clientList = await fetchAPI('GET', 'clientMgt/clients');
+    const categoryList = await fetchAPI('GET', 'serviceMgt/category')
     let options = clientList.map(client => {
       return { value: client._id, label: client.displayName };
     })
@@ -80,11 +83,11 @@ class CalendarView extends React.Component {
     })
     this.setState({
       staffList: staffList,
-      serviceStaffList: staffList,
       serviceList: serviceList,
       clientList: options,
       events: events,
       appointment: null,
+      categoryList: categoryList,
     });
   }
 
@@ -271,6 +274,8 @@ class CalendarView extends React.Component {
       eventOpen: false,
       selectedClient: null,
       bookings: [],
+      availableServiceList: [],
+      serviceStaffList: []
     });
   }
 
@@ -337,7 +342,7 @@ class CalendarView extends React.Component {
       let idx = this.state.clientList.findIndex(client => {
         return client.value === event.client
       })
-
+      
       this.setState({
         selectedClient: this.state.clientList[idx],
         bookings: appointment.bookings,
@@ -424,6 +429,13 @@ class CalendarView extends React.Component {
     const booking = { ...this.state.bookings[bookingIndex] }
     if (type === "Time") {
       booking.start = event
+    } else if (type === "Category") {
+      booking.category = event.target.value
+      fetchAPI('GET', `appointmentMgt/availableservice/${booking.category}`).then((availableServiceList) => {
+        this.setState({
+          availableServiceList: availableServiceList,
+        });
+      })
     } else if (type === "Service") {
       let index = child.props.id;
       let service = this.state.serviceList[index]
@@ -510,23 +522,27 @@ class CalendarView extends React.Component {
               {
                 !this.state.editFlag ?
                   this.state.bookings.map((booking, index) =>
-                    <SelectService key={booking._id}
+                    <SelectService key={booking._id} category={booking.category}
                       staff={booking.staff} service={booking.service} start={booking.start}
-                      staffList={this.state.serviceStaffList} serviceList={this.state.serviceList}
+                      staffList={this.state.serviceStaffList} serviceList={this.state.availableServiceList}
+                      categoryList={this.state.categoryList}
                       changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
                       changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
                       changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
+                      changeCategory={(event) => this.handleChangeBooking(event, booking._id, "Category")}
                       removeBooking={() => this.handleRemoveBooking(index)}
                     />
                   )
                   :
                   this.state.bookings.map((booking, index) =>
-                    <SelectService key={booking._id}
+                    <SelectService key={booking._id} category={booking.category}
                       staff={booking.staff} service={booking.service} start={booking.start}
                       staffList={this.state.staffList} serviceList={this.state.serviceList}
+                      categoryList={this.state.categoryList}
                       changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
                       changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
                       changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
+                      changeCategory={(event) => this.handleChangeBooking(event, booking._id, "Category")}
                       removeBooking={() => this.handleRemoveBooking(index)}
                     />
                   )

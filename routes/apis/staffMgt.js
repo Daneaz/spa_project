@@ -200,10 +200,6 @@ router.post('/staffs', async (reqe, res, next) => {
         //load fields by biz logic
         newStaff.password = auth.hash(rawNewStaff.password);
 
-        let sRole = await StaffRole.findOne({ "name": rawNewStaff.role.name, "delFlag": false });
-        newStaff.role = sRole._id;
-
-
         //save user 
         let doc = await newStaff.save();
         let rsObj = { ok: "Staff has been created.", id: doc._id };
@@ -235,13 +231,9 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
         sStaff.mobile = rawNewStaff.mobile || sStaff.mobile;
         sStaff.offDays = rawNewStaff.offDays || sStaff.offDays;
         sStaff.leaveDays = rawNewStaff.leaveDays || sStaff.leaveDays;
-
+        sStaff.role = rawNewStaff.role || sStaff.role;
         //load fields by biz logic
         if (rawNewStaff.Password) { sStaff.password = auth.hash(rawNewStaff.Password); }
-        if (rawNewStaff.role.name) {
-            let sRole = await StaffRole.findOne({ "name": rawNewStaff.role.name, "delFlag": false });
-            sStaff.role = sRole._id;
-        }
 
         //save user 
         let doc = await sStaff.save();

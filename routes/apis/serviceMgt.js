@@ -4,6 +4,7 @@ var router = express.Router();
 let createError = require('http-errors');
 
 let Service = require('../../models/service');
+let Category = require('../../models/category');
 let Staff = require('../../models/auth/staff');
 
 let logger = require('../../services/logger');
@@ -15,13 +16,7 @@ router.get('/services', async (reqe, res, next) => {
 
     //get raw data from data
     let services = await Service.find({ "delFlag": false }).lean()
-        .populate("staff")
-        .select({
-            "name": 1,
-            "duration": 1,
-            "price": 1,
-            "staff": 1,
-        });
+        .populate("staff").populate("category")
     res.send(services);
 });
 
@@ -32,13 +27,7 @@ router.get('/services/:id', async (reqe, res, next) => {
 
     //get raw data from data
     let services = await Service.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
-        .populate("staff")
-        .select({
-            "name": 1,
-            "duration": 1,
-            "price": 1,
-            "staff": 1,
-        });
+        .populate("staff").populate("category")
     res.send(services);
 });
 
@@ -84,7 +73,7 @@ router.patch('/services/:id', async (reqe, res, next) => {
         newService.price = rawNewStaff.price || newService.price;
         newService.duration = rawNewStaff.duration || newService.duration;
         newService.staff = rawNewStaff.staff || newService.staff;
-
+        newService.category = rawNewStaff.category || newService.category;
         //save service 
         let doc = await newService.save();
         let rsObj = { ok: "Service has been updated.", id: doc._id };
@@ -105,16 +94,58 @@ router.delete('/services', async (reqe, res, next) => {
         //save service
         let deleteId = [];
         let delObj = { updatedBy: user._id, delFlag: true };
-        reqe.body.forEach(async function(deleteObj) {
+        reqe.body.forEach(async function (deleteObj) {
             let doc = await Service.findOneAndUpdate({ "_id": deleteObj._id, "delFlag": false }, delObj);
             deleteId.push(doc._id);
             logger.audit("Service Mgt", "Delete", doc._id, user.id, `Service has been deleted by ${user.displayName}`);
         });
-        
-        let rsObj = { ok: "Service has been deleted.", id: deleteId};
+
+        let rsObj = { ok: "Service has been deleted.", id: deleteId };
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot delete service, ${err.message}` }) }
 
+});
+
+/* Get Category. */
+router.get('/category', async (reqe, res, next) => {
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
+
+    //get raw data from data
+    let category = await Category.aggregate([
+        { $match: { delFlag: false } },
+        {
+            $project: {
+                "value": "$_id",
+                "label": "$name",
+            }
+        }
+    ])
+    res.send(category);
+});
+
+/* Create Category. */
+router.post('/category', async (reqe, res, next) => {
+    try {
+
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.serviceMgt.create) { next(createError(403)); return; }
+
+        let rawNewCategory = reqe.body;
+
+        let sCategory = await Category.findOne({ "name": rawNewCategory.name }).lean().select({ "name": 1 });
+        if (sCategory != null) { throw new Error('Service name is already taken.') }
+
+        //load main fields
+        let newCategory = new Category(rawNewCategory);
+
+        //save service 
+        let doc = await newCategory.save();
+        let rsObj = { ok: "Category has been created.", id: doc._id };
+        logger.audit("Service Mgt", "Create", doc._id, staff.id, `A new category has been created by ${staff.displayName}`);
+        res.json(rsObj);
+
+    } catch (err) { res.status(400).json({ error: `Cannot create category, ${err.message}` }) }
 });
 module.exports = router;

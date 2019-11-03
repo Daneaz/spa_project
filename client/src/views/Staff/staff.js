@@ -8,7 +8,8 @@ import AppLayout from '../../layout/app'
 import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
-import AddIcon from "@material-ui/icons/Add";
+import RoleIcon from "@material-ui/icons/Add";
+import AddIcon from "@material-ui/icons/PersonAdd";
 import { fetchAPI } from '../../utils';
 
 const styles = theme => ({
@@ -88,6 +89,10 @@ class Staff extends React.Component {
     history.push('/newstaff');
   }
 
+  handleAddRole = () => {
+
+  }
+
   handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
@@ -128,11 +133,18 @@ class Staff extends React.Component {
               options={{
                 customToolbar: () => {
                   return (
-                    <Tooltip title={"Add Staff"}>
-                      <IconButton onClick={this.handleAddStaff}>
-                        <AddIcon />
-                      </IconButton>
-                    </Tooltip>
+                    <React.Fragment>
+                      <Tooltip title={"Add Role"}>
+                        <IconButton onClick={this.handleAddRole}>
+                          <RoleIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={"Add Staff"}>
+                        <IconButton onClick={this.handleAddStaff}>
+                          <AddIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </React.Fragment>
                   );
                 },
                 onRowClick: (rowData, rowMeta) => {

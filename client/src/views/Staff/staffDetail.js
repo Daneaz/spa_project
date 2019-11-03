@@ -124,19 +124,20 @@ class ClientDetail extends React.Component {
                                 }}
                                 onSubmit={async (values, { setSubmitting }) => {
                                     try {
-                                        if (!this.state.selectedOption)
-                                            throw new Error('Please select a role')
-                                        else {
-                                            values.role = {};
-                                            values.role.name = this.state.selectedOption.value;
-                                            values.offDays = this.state.offDays;
-                                            values.leaveDays = this.state.selectedLeaves;
-                                        }
+                                        values.role = this.state.selectedOption.value;
+                                        values.offDays = this.state.offDays;
+                                        values.leaveDays = this.state.selectedLeaves;
+
                                         const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
 
                                         if (respObj && respObj.ok) {
                                             window.history.back();
-                                        } else { throw new Error('Update failed') }
+                                        } else {
+                                            Swal.fire({
+                                                type: 'error', text: 'Please try again.',
+                                                title: respObj.err.message
+                                            })
+                                        }
                                     } catch (err) {
                                         Swal.fire({
                                             type: 'error', text: 'Please try again.',

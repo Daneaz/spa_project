@@ -8,6 +8,7 @@ var Schema = mongoose.Schema;
 
 var ServiceSchema = new Schema({
     name: { type: String, unique: true, required: true },
+    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
     duration: { type: Number },
     price: { type: Number },
     staff: [

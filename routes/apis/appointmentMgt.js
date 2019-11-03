@@ -18,7 +18,40 @@ router.get('/appointment/:id', async (reqe, res, next) => {
         if (!staff.role.appointmentMgt.list) { next(createError(403)); return; }
 
         // return and rename the data as calender needs
-        let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false }).populate("bookings");
+        let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false })
+            .populate({ 
+                path: "bookings", 
+                populate :{
+                    path: 'service',
+                }
+            });
+        // let appointment = await Appointment.aggregate([
+        //     {
+        //         $match: {
+        //             _id: ObjectId(reqe.params.id),
+        //             delFlag: false
+        //         }
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: "bookings",
+        //             localField: "bookings",
+        //             foreignField: "_id",
+        //             as: "bookingList"
+        //         }
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: "services",
+        //             localField: "bookingList.service",
+        //             foreignField: "_id",
+        //             as: "bookingList"
+        //         }
+        //     }
+        //     // {
+        //     //     $unwind: { path: "$bookingList" }
+        //     // }
+        // ])
 
         res.send(appointment);
     } catch (err) { res.status(400).json({ error: `Cannot get appointment, ${err.message}` }) }
@@ -206,6 +239,16 @@ router.post('/availablestaff', async (reqe, res, next) => {
         }
         res.send(staffList);
     } catch (err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
+});
+
+/* Get Category. */
+router.get('/availableservice/:id', async (reqe, res, next) => {
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
+
+    //get raw data from data
+    let availableservice = await Service.find({ delFlag: false, category: reqe.params.id })
+    res.send(availableservice);
 });
 
 /* POST Create booking. */

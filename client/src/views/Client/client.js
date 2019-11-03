@@ -7,7 +7,7 @@ import AppLayout from '../../layout/app'
 import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
-import AddIcon from "@material-ui/icons/Add";
+import AddIcon from "@material-ui/icons/PersonAdd";
 import Swal from 'sweetalert2';
 import { fetchAPI } from '../../utils';
 
