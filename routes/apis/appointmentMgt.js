@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 let createError = require('http-errors');
-
+var mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 let Staff = require('../../models/auth/staff');
 let Client = require('../../models/auth/client');
@@ -18,6 +19,7 @@ router.get('/appointment/:id', async (reqe, res, next) => {
 
         // return and rename the data as calender needs
         let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false }).populate("bookings");
+
         res.send(appointment);
     } catch (err) { res.status(400).json({ error: `Cannot get appointment, ${err.message}` }) }
 });
@@ -65,7 +67,7 @@ router.patch('/appointment/:id', async (reqe, res, next) => {
         Appointment.findOne({ "_id": reqe.params.id, "delFlag": false }).then(appointment => {
             Booking.updateMany({ appointment: appointment._id }, { delFlag: true }).then(() => {
                 let newbookings = reqe.body.map(async (booking) => {
-                    if (booking._id) {
+                    if (booking._id.length > 20) {
                         let client = await Client.findById(booking.client)
                         let service = await Service.findById(booking.service)
                         return new Promise((resolve, reject) => {
@@ -93,13 +95,13 @@ router.patch('/appointment/:id', async (reqe, res, next) => {
                     } else {
                         let client = await Client.findById(booking.client)
                         let service = await Service.findById(booking.service)
+                        delete booking._id
                         booking.appointment = appointment._id
                         booking.title = `${service.name} ${client.displayName}`
                         return new Promise((resolve, reject) => {
-                            new Booking(booking).save().then(booking => {
-                                appointment.bookings = [...appointment.bookings, booking._id]
-                                appointment.save();
-                                return resolve(booking)
+                            new Booking(booking).save().then(doc => {
+                                appointment.bookings = [...appointment.bookings, doc._id]
+                                return resolve(doc)
                             }).catch(err => {
                                 return reject(err)
                             })
@@ -107,6 +109,11 @@ router.patch('/appointment/:id', async (reqe, res, next) => {
                     }
                 })
                 Promise.all(newbookings).then(bookings => {
+                    let bookingIds = bookings.map(booking => {
+                        return booking._id
+                    })
+                    appointment.bookings = bookingIds
+                    appointment.save();
                     let rsObj = { ok: "Booking has been created.", bookings: bookings }
                     logger.audit("Booking Mgt", "Create", bookings._id, staff.id, `A new booking has been created by ${staff.displayName}`)
                     res.json(rsObj)

@@ -1,7 +1,7 @@
 import React from 'react';
 import { withStyles } from '@material-ui/styles';
 import {
-  Typography, Grid, Button
+  Grid,
 } from '@material-ui/core';
 import AppLayout from '../../layout/app'
 import MUIDataTable from "mui-datatables";
@@ -132,7 +132,6 @@ class Client extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
     return (
       <AppLayout title="Clients" {...this.props} >
         <Grid container justify="flex-end" spacing={32} >

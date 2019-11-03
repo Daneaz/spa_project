@@ -129,7 +129,6 @@ class Register extends React.Component {
     }
 
     submit = async () => {
-        const { history } = this.props;
         const { input, gender } = this.state;
         input.gender = gender.value;
 
@@ -204,7 +203,7 @@ class Register extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { input, keyboardOpen } = this.state;
+        const { input } = this.state;
         return (
             <KioskLayout {...this.props} imageWidth={160} imagePadding={10}>
                 <Container component="main" maxWidth="md" className={classes.container} >

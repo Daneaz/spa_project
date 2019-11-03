@@ -1,7 +1,7 @@
 import React from 'react';
 import { withStyles } from '@material-ui/styles';
 import {
-  Typography, Grid, Button
+  Grid,
 } from '@material-ui/core';
 import Swal from 'sweetalert2';
 import AppLayout from '../../layout/app'
@@ -117,7 +117,6 @@ class Staff extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
     return (
       <AppLayout title="Staff List" {...this.props} >
         <Grid container justify="flex-end" spacing={32} >

@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Fab, Hidden, Button, CssBaseline, Container, LinearProgress
+    Typography, Button, CssBaseline, Container, LinearProgress
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { withStyles } from '@material-ui/styles';
 import {
-  Typography, Grid
+  Grid
 } from '@material-ui/core';
 import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
@@ -136,8 +136,6 @@ class Service extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
-
     return (
       <AppLayout title="Service" {...this.props} >
         <Grid container justify="flex-end" spacing={32} >

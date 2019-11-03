@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Divider, Tabs, Tab, Typography, Box } from '@material-ui/core';
+import { Tabs, Tab, Typography, Box } from '@material-ui/core';
 
 
 function TabPanel(props) {

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Animated } from "react-animated-css";
-import { Paper, Button } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import Webcam from 'react-webcam';
 import Swal from 'sweetalert2';
@@ -79,7 +78,7 @@ class FacialLogin extends React.Component {
 
     render() {
         const { classes } = this.props;
-        let showCanvas, showWebcam, showRetake, showTake, button;
+        let showCanvas, showWebcam, button;
         if (this.state.takingPicture) {
             showWebcam = { display: 'block' }
             showCanvas = { display: 'none' }

@@ -5,7 +5,6 @@ import { withStyles } from '@material-ui/styles';
 import { removeToken, removeLocalStorage, removeUser } from '../../utils';
 import KioskLayout from './Component/KioskLayout';
 
-const BackGroundImage = '/static/images/kiosk_bg.png';
 const LoginImage = '/static/images/login.png';
 const RegisterImage = '/static/images/register.png';
 

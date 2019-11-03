@@ -1,8 +1,8 @@
 import React from 'react';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, Grid, Avatar, Paper, Divider, List, ListItem, ListItemAvatar, Dialog, DialogActions, DialogContent, DialogContentText,
-    DialogTitle, TextField, ListItemText, ButtonGroup
+    Typography, Button, Grid, Avatar, Paper, Divider, List, ListItem, ListItemAvatar, Dialog, DialogActions, DialogContent,
+    DialogTitle, TextField, ButtonGroup
 } from '@material-ui/core';
 import { fetchAPI, getAvatarLetter } from '../../utils';
 import AppLayout from '../../layout/app'
@@ -87,7 +87,7 @@ class ClientDetail extends React.Component {
         let values = {
             credit: this.state.credit
         }
-        fetchAPI('PATCH', `clientMgt/addcredit/${this, this.state.client._id}`, values).then(respObj => {
+        fetchAPI('PATCH', `clientMgt/addcredit/${this.state.client._id}`, values).then(respObj => {
             if (respObj && respObj.ok) {
                 this.setState({ client: respObj.client })
                 Swal.fire({

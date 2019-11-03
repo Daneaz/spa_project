@@ -49,7 +49,7 @@ const KioskLayout = (props) => {
         <div>
             <Animated animationIn="fadeIn" animationOut="fadeOut">
                 <Paper style={{ zIndex: -1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: "100vh", backgroundImage: `url(${BackGroundImage})` }}>
-                    <img src='/static/images/logo.png' style={{ width: props.imageWidth, position: 'fixed', top: props.imagePadding }} />
+                    <img src='/static/images/logo.png' alt="" style={{ width: props.imageWidth, position: 'fixed', top: props.imagePadding }} />
                     <WelcomeMessage {...props} displayName={props.displayName} />
                     <HomeButton {...props} homePage={props.homePage} />
                     <SkipButton {...props} skip={props.skip} />

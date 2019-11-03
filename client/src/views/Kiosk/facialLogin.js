@@ -1,5 +1,4 @@
 import React from 'react';
-import { Animated } from "react-animated-css";
 import {
     Button, Typography,
 } from '@material-ui/core';
@@ -72,8 +71,8 @@ class FacialLogin extends React.Component {
                 .then(() => {
                     setTimeout(() => this.startDetection(), 1000);
                 })).catch(error => {
-            console.log(error);
-        })
+                    console.log(error);
+                })
     }
 
     componentWillUnmount() {
@@ -195,9 +194,9 @@ class FacialLogin extends React.Component {
                     console.log(respObj)
                     setToken(respObj.token);
                     setClient(respObj.user);
-                    this.setState({ 
+                    this.setState({
                         displayName: respObj.user.displayName,
-                        login : true,
+                        login: true,
                     })
                 } else {
                     Swal.fire({
@@ -378,7 +377,6 @@ class FacialLogin extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         let displayText;
         if (this.state.timerOn) {
             displayText = `Identifying, please keep still`
@@ -390,7 +388,7 @@ class FacialLogin extends React.Component {
             <KioskLayout {...this.props} imageWidth={200} imagePadding={40} displayName={this.state.displayName}>
                 <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }}>
                     {!this.state.login ?
-                        <div style={{ display: "block", flexDirection: 'column', alignItems: 'center', display: 'flex' }} >
+                        <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }} >
                             <div style={{ height: 480, width: 600, alignItems: 'center' }}>
                                 <Webcam
                                     style={{ position: 'absolute', zIndex: 1 }}
@@ -414,7 +412,7 @@ class FacialLogin extends React.Component {
                         </div> : null
                     }
                     {this.state.login ?
-                            <SelectService {...this.props}/>
+                        <SelectService {...this.props} />
                         : null
                     }
                 </div>

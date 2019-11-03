@@ -7,7 +7,7 @@ import {
 
 import { Formik, Field, Form } from 'formik';
 import { TextField } from 'formik-material-ui';
-import { fetchAPI, setToken, setUser, removeToken, removeUser } from '../../utils';
+import { fetchAPI } from '../../utils';
 import Swal from 'sweetalert2';
 import AppLayout from '../../layout/app'
 import InfiniteCalendar, { Calendar, defaultMultipleDateInterpolation, withMultipleDates } from 'react-infinite-calendar';
