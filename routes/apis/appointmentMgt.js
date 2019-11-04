@@ -25,34 +25,6 @@ router.get('/appointment/:id', async (reqe, res, next) => {
                     path: 'service',
                 }
             });
-        // let appointment = await Appointment.aggregate([
-        //     {
-        //         $match: {
-        //             _id: ObjectId(reqe.params.id),
-        //             delFlag: false
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: "bookings",
-        //             localField: "bookings",
-        //             foreignField: "_id",
-        //             as: "bookingList"
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: "services",
-        //             localField: "bookingList.service",
-        //             foreignField: "_id",
-        //             as: "bookingList"
-        //         }
-        //     }
-        //     // {
-        //     //     $unwind: { path: "$bookingList" }
-        //     // }
-        // ])
-
         res.send(appointment);
     } catch (err) { res.status(400).json({ error: `Cannot get appointment, ${err.message}` }) }
 });
