@@ -45,28 +45,27 @@ const styles = theme => ({
 
 class CalendarView extends React.Component {
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      eventOpen: false,
-      categoryList: [],
-      staffList: [],
-      serviceStaffList: [],
-      serviceList: [],
-      clientList: [],
-      selectedClient: null,
-      events: [],
-      editFlag: false,
-      bookings: [{
-        _id: null,
-        start: null,
-        end: null,
-        staff: null,
-        service: null,
-        availableServiceList: []
-      }],
-    }
+  state = {
+    eventOpen: false,
+    categoryList: [],
+    staffList: [],
+    serviceStaffList: [],
+    serviceList: [],
+    clientList: [],
+    selectedClient: null,
+    events: [],
+    editFlag: false,
+    bookings: [{
+      _id: null,
+      start: null,
+      end: null,
+      staff: null,
+      service: null,
+      availableServiceList: []
+    }],
+    checkout: false,
   }
+
 
   async componentDidMount() {
     const staffList = await fetchAPI('GET', 'staffMgt/workingStaff');
@@ -214,7 +213,15 @@ class CalendarView extends React.Component {
               })
             }
           })
-
+          if (this.state.checkout) {
+            const { history } = this.props;
+            history.push({
+              pathname: "/checkout",
+              state: {
+                appointmentId: respObj.appointmentId
+              }
+            });
+          }
         } else {
           Swal.fire({
             type: 'error',
@@ -251,6 +258,15 @@ class CalendarView extends React.Component {
             events: this.state.events.concat([booking]),
           })
         })
+        if (this.state.checkout) {
+          const { history } = this.props;
+          history.push({
+            pathname: "/checkout",
+            state: {
+              appointmentId: respObj.appointmentId
+            }
+          });
+        }
       } else {
         Swal.fire({
           type: 'error',
@@ -344,11 +360,8 @@ class CalendarView extends React.Component {
       let idx = this.state.clientList.findIndex(client => {
         return client.value === event.client
       })
-
       for (let i = 0; i < appointment.bookings.length; i++) {
         appointment.bookings[i].availableServiceList = await fetchAPI('GET', `appointmentMgt/availableservice/${appointment.bookings[i].service.category}`)
-        appointment.bookings[i].category = appointment.bookings[i].service.category
-        appointment.bookings[i].service = appointment.bookings[i].service._id
       }
       this.setState({
         selectedClient: this.state.clientList[idx],
@@ -477,8 +490,8 @@ class CalendarView extends React.Component {
   }
 
   handleCheckOut = () => {
-    const { appointment } = this.state
-
+    this.setState({ checkout: true })
+    this.handleConfirmBookings();
   }
 
   render() {
@@ -509,7 +522,7 @@ class CalendarView extends React.Component {
             <AppBar className={classes.titleBar}>
               <Toolbar>
                 <Typography variant="h6" className={classes.title}>
-                  New Appointment
+                  {!this.state.editFlag ? "New Appointment" : "Update Appointment"}
                 </Typography>
                 <IconButton edge="start" color="inherit" onClick={this.handleEventClose} aria-label="close">
                   <CloseIcon />
@@ -539,8 +552,8 @@ class CalendarView extends React.Component {
                     )
                     :
                     this.state.bookings.map((booking, index) =>
-                      <SelectService key={booking._id} category={booking.category}
-                        staff={booking.staff} service={booking.service} start={booking.start}
+                      <SelectService key={booking._id} category={booking.service.category}
+                        staff={booking.staff} service={booking.service._id} start={booking.start}
                         staffList={this.state.staffList} serviceList={booking.availableServiceList}
                         categoryList={this.state.categoryList}
                         changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
@@ -578,7 +591,7 @@ class CalendarView extends React.Component {
                       spacing={10}>
                       <Grid item xs={3}>
                         <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
-                          Confirm
+                          Save Appointment
                         </Button>
                       </Grid>
                       <Grid item xs={3}>
@@ -604,7 +617,7 @@ class CalendarView extends React.Component {
                       </Grid>
                       <Grid item xs={3}>
                         <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
-                          Update
+                          Update Appointment
                         </Button>
                       </Grid>
                       <Grid item xs={3}>

@@ -36,13 +36,13 @@ router.post('/appointment', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.appointmentMgt.create) { next(createError(403)); return; }
         //Create an empty appointment to get the id.
-        (new Appointment).save().then(async (app) => {
+        (new Appointment).save().then(async (appointment) => {
 
             let bookings = reqe.body
             for (let i = 0; i < bookings.length; i++) {
                 let client = await Client.findById(bookings[i].client)
                 let service = await Service.findById(bookings[i].service)
-                bookings[i].appointment = app._id
+                bookings[i].appointment = appointment._id
                 bookings[i].title = `${service.name} ${client.displayName}`
             }
 
@@ -51,9 +51,9 @@ router.post('/appointment', async (reqe, res, next) => {
                 let bookingids = bookings.map(booking => {
                     return booking._id
                 })
-                app.bookings = bookingids
-                app.save()
-                let rsObj = { ok: "Booking has been created.", bookings: bookings }
+                appointment.bookings = bookingids
+                appointment.save()
+                let rsObj = { ok: "Booking has been created.", bookings: bookings, appointmentId: appointment._id }
                 logger.audit("Booking Mgt", "Create", bookings._id, staff.id, `A new booking has been created by ${staff.displayName}`)
                 res.json(rsObj)
             }).catch(err => {
@@ -119,7 +119,7 @@ router.patch('/appointment/:id', async (reqe, res, next) => {
                     })
                     appointment.bookings = bookingIds
                     appointment.save();
-                    let rsObj = { ok: "Booking has been created.", bookings: bookings }
+                    let rsObj = { ok: "Booking has been created.", bookings: bookings, appointmentId: appointment._id }
                     logger.audit("Booking Mgt", "Create", bookings._id, staff.id, `A new booking has been created by ${staff.displayName}`)
                     res.json(rsObj)
                 })

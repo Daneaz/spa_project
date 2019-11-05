@@ -32,6 +32,12 @@ const init = async () => {
                 edit: true,
                 delete: true
             },
+            invoiceMgt: {
+                list: true,
+                create: true,
+                edit: true,
+                delete: true
+            },
         });
         await roleClient.save();
 

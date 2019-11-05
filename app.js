@@ -19,7 +19,9 @@ var apiKioskRouter = require('./routes/apis/kiosk');
 var apiUserMgtRouter = require('./routes/apis/staffMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
 var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
-var apiappointmentMgtRouter = require('./routes/apis/appointmentMgt');
+var apiAppointmentMgtRouter = require('./routes/apis/appointmentMgt');
+var apiInvoiceMgtRouter = require('./routes/apis/invoiceMgt');
+
 
 var app = express();
 
@@ -58,7 +60,10 @@ app.use(auth.checkJwt);
 app.use('/api/staffMgt', apiUserMgtRouter);
 app.use('/api/clientMgt', apiClientMgtRouter);
 app.use('/api/serviceMgt', apiServiceMgtRouter);
-app.use('/api/appointmentMgt', apiappointmentMgtRouter);
+app.use('/api/appointmentMgt', apiAppointmentMgtRouter);
+app.use('/api/invoiceMgt', apiInvoiceMgtRouter);
+
+
 
 
 // catch 404 and forward to error handler

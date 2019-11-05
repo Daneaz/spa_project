@@ -40,7 +40,7 @@ class ClientDetail extends React.Component {
 
     async componentDidMount() {
         const roleList = await fetchAPI('GET', 'staffMgt/roles');
-        console.log(roleList)
+
         this.setState({
             roleList: roleList,
         });

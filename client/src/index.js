@@ -10,7 +10,9 @@ import { getUser } from './utils';
 import Login from './views/login';
 import ErrorPage from './views/error';
 import Dashboard from './views/dashboard';
+
 import Appointment from './views/Appointment/appointment';
+import Checkout from './views/Appointment/checkout'
 
 import Client from './views/Client/client';
 import NewClient from './views/Client/newClient';
@@ -79,7 +81,9 @@ function Routers() {
                     <Route path="/login" component={Login} />
                     <Route exact path="/" component={Start} />
                     <PrivateRoute exact path="/dashboard" component={Dashboard} />
+
                     <PrivateRoute exact path="/appointment" component={Appointment} />
+                    <PrivateRoute exact path="/checkout" component={Checkout} />
 
                     <PrivateRoute exact path="/message" component={Message} />
                     <PrivateRoute exact path="/report" component={Report} />
