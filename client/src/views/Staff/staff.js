@@ -134,11 +134,6 @@ class Staff extends React.Component {
                 customToolbar: () => {
                   return (
                     <React.Fragment>
-                      <Tooltip title={"Add Role"}>
-                        <IconButton onClick={this.handleAddRole}>
-                          <RoleIcon />
-                        </IconButton>
-                      </Tooltip>
                       <Tooltip title={"Add Staff"}>
                         <IconButton onClick={this.handleAddStaff}>
                           <AddIcon />

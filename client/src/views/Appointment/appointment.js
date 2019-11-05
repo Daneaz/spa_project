@@ -7,7 +7,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { withStyles } from '@material-ui/styles';
 import {
-  Button, Dialog, FormControl, Paper, Box, Slide, AppBar, IconButton, Toolbar, Typography, Grid,
+  Button, Dialog, FormControl, Paper, Box, Slide, AppBar, IconButton, Toolbar, Typography, Grid, DialogContent
 } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import AddIcon from '@material-ui/icons/Add';
@@ -516,105 +516,106 @@ class CalendarView extends React.Component {
                 </IconButton>
               </Toolbar>
             </AppBar>
+            <DialogContent dividers="paper">
+              <Grid
+                container
+                direction="column"
+                justify="center"
+                alignItems="center"
+                style={{ minHeight: 500 }}>
+                {
+                  !this.state.editFlag ?
+                    this.state.bookings.map((booking, index) =>
+                      <SelectService key={booking._id} category={booking.category}
+                        staff={booking.staff} service={booking.service} start={booking.start}
+                        staffList={this.state.serviceStaffList} serviceList={booking.availableServiceList}
+                        categoryList={this.state.categoryList}
+                        changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
+                        changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
+                        changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
+                        changeCategory={(event) => this.handleChangeBooking(event, booking._id, "Category")}
+                        removeBooking={() => this.handleRemoveBooking(index)}
+                      />
+                    )
+                    :
+                    this.state.bookings.map((booking, index) =>
+                      <SelectService key={booking._id} category={booking.category}
+                        staff={booking.staff} service={booking.service} start={booking.start}
+                        staffList={this.state.staffList} serviceList={booking.availableServiceList}
+                        categoryList={this.state.categoryList}
+                        changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
+                        changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
+                        changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
+                        changeCategory={(event) => this.handleChangeBooking(event, booking._id, "Category")}
+                        removeBooking={() => this.handleRemoveBooking(index)}
+                      />
+                    )
+                }
 
-            <Grid
-              container
-              direction="column"
-              justify="center"
-              alignItems="center"
-              style={{ minHeight: 500 }}>
+                <FormControl className={classes.formControl}>
+                  <ReactSelect
+                    onChange={this.handleSelectClientChange}
+                    options={this.state.clientList}
+                    value={this.state.selectedClient}
+                    placeholder={"Please Select a Customer..."}
+                  />
+                </FormControl>
+
+                <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">
+                  <AddIcon fontSize="large" />
+                </IconButton>
+
+              </Grid>
+
               {
                 !this.state.editFlag ?
-                  this.state.bookings.map((booking, index) =>
-                    <SelectService key={booking._id} category={booking.category}
-                      staff={booking.staff} service={booking.service} start={booking.start}
-                      staffList={this.state.serviceStaffList} serviceList={booking.availableServiceList}
-                      categoryList={this.state.categoryList}
-                      changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
-                      changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
-                      changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
-                      changeCategory={(event) => this.handleChangeBooking(event, booking._id, "Category")}
-                      removeBooking={() => this.handleRemoveBooking(index)}
-                    />
+                  (
+                    <Grid
+                      container
+                      direction="row"
+                      justify="center"
+                      alignItems="flex-end"
+                      spacing={10}>
+                      <Grid item xs={3}>
+                        <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
+                          Confirm
+                        </Button>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                          Express Checkout
+                        </ColorButton>
+                      </Grid>
+                    </Grid>
                   )
                   :
-                  this.state.bookings.map((booking, index) =>
-                    <SelectService key={booking._id} category={booking.category}
-                      staff={booking.staff} service={booking.service} start={booking.start}
-                      staffList={this.state.staffList} serviceList={booking.availableServiceList}
-                      categoryList={this.state.categoryList}
-                      changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
-                      changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
-                      changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
-                      changeCategory={(event) => this.handleChangeBooking(event, booking._id, "Category")}
-                      removeBooking={() => this.handleRemoveBooking(index)}
-                    />
+                  (
+                    <Grid
+                      container
+                      direction="row"
+                      justify="center"
+                      alignItems="flex-end"
+                      spacing={10}>
+                      <Grid item xs={3}>
+                        <Button fullWidth variant="contained" color="secondary"
+                          onClick={this.deleteAppointment}>
+                          Delete
+                        </Button>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
+                          Update
+                        </Button>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                          Checkout
+                        </ColorButton>
+                      </Grid>
+                    </Grid>
                   )
               }
-
-              <FormControl className={classes.formControl}>
-                <ReactSelect
-                  onChange={this.handleSelectClientChange}
-                  options={this.state.clientList}
-                  value={this.state.selectedClient}
-                  placeholder={"Please Select a Customer..."}
-                />
-              </FormControl>
-
-              <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">
-                <AddIcon fontSize="large" />
-              </IconButton>
-
-            </Grid>
-
-            {
-              !this.state.editFlag ?
-                (
-                  <Grid
-                    container
-                    direction="row"
-                    justify="center"
-                    alignItems="flex-end"
-                    spacing={10}>
-                    <Grid item xs={3}>
-                      <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
-                        Confirm
-                        </Button>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
-                        Express Checkout
-                        </ColorButton>
-                    </Grid>
-                  </Grid>
-                )
-                :
-                (
-                  <Grid
-                    container
-                    direction="row"
-                    justify="center"
-                    alignItems="flex-end"
-                    spacing={10}>
-                    <Grid item xs={3}>
-                      <Button fullWidth variant="contained" color="secondary"
-                        onClick={this.deleteAppointment}>
-                        Delete
-                        </Button>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
-                        Update
-                        </Button>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
-                        Checkout
-                        </ColorButton>
-                    </Grid>
-                  </Grid>
-                )
-            }
+            </DialogContent>
           </Dialog>
         </Box>
         </Paper>
