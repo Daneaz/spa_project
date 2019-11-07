@@ -95,22 +95,13 @@ class Invoice extends React.Component {
         });
     }
 
-    handleAddService = () => {
-        const { history } = this.props;
-        history.push('/newservice');
-    }
-
-    handleAddCategory = () => {
-        const { history } = this.props;
-        history.push('/newcategory');
-    }
-
-    handleRowClick = (rowMeta) => {
+    handleRowClick = async(rowMeta) => {
+        let invoice = await fetchAPI('GET', `invoiceMgt/invoice/${this.state.invoiceList[rowMeta.dataIndex]._id}`)
         const { history } = this.props;
         history.push({
             pathname: "/invoice/detail",
             state: {
-                appointmentId: this.state.invoiceList[rowMeta.dataIndex].appointment
+                invoice: invoice
             }
         });
     }

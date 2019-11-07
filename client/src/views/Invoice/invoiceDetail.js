@@ -7,7 +7,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 
 import Swal from 'sweetalert2';
-import Invoice from '../Appointment/Component/invoice'
+import Invoice from './Component/invoice'
 import { fetchAPI } from '../../utils';
 
 const styles = theme => ({
@@ -26,7 +26,7 @@ const styles = theme => ({
     },
 });
 
-class Checkout extends React.Component {
+class InvoiceDetail extends React.Component {
 
     state = {
         bookingList: [],
@@ -40,18 +40,31 @@ class Checkout extends React.Component {
     }
 
     async componentDidMount() {
-        let appointment = await fetchAPI('GET', `invoiceMgt/invoice/${this.props.location.state.appointmentId}`)
-        let subtotal = 0
-        appointment.bookings.map(booking => {
-            subtotal += parseFloat(booking.service.price)
-        })
-        this.setState({
-            bookingList: appointment.bookings,
-            client: appointment.bookings[0].client,
-            subtotal: subtotal,
-            total: subtotal,
-            isCheckout: appointment.checkout,
-        })
+        if (this.props.location.state.appointment) {
+            let appointment = this.props.location.state.appointment
+            let subtotal = 0
+            appointment.bookings.map(booking => {
+                subtotal += parseFloat(booking.service.price)
+            })
+            this.setState({
+                bookingList: appointment.bookings,
+                client: appointment.bookings[0].client,
+                subtotal: subtotal,
+                total: subtotal,
+                isCheckout: appointment.checkout,
+            })
+        } else {
+            let invoice = this.props.location.state.invoice
+            this.setState({
+                bookingList: invoice.appointment.bookings,
+                client: invoice.client.displayName,
+                subtotal: invoice.subtotal,
+                total: invoice.total,
+                addon: invoice.addon,
+                discount: invoice.discount,
+                isCheckout: true,
+            })
+        }
     }
 
     handleChange = (event, type) => {
@@ -79,7 +92,6 @@ class Checkout extends React.Component {
             confirmButtonText: 'Confirm',
             reverseButtons: true,
             preConfirm: () => {
-                console.log(this.state.client)
                 let values = {
                     subtotal: this.state.subtotal,
                     client: this.state.client._id,
@@ -88,15 +100,12 @@ class Checkout extends React.Component {
                     total: this.state.total,
                     remark: this.state.remark,
                     paymentType: type,
-                    appointment: this.props.location.state.appointmentId,
+                    appointment: this.state.bookingList[0].appointment,
                 }
                 fetchAPI('POST', `invoiceMgt/invoice`, values).then(invoice => {
                     const { history } = this.props;
                     history.push({
                         pathname: "/invoice",
-                        state: {
-                            invoice: invoice._id
-                        }
                     });
                 })
             }
@@ -226,4 +235,4 @@ class Checkout extends React.Component {
     }
 }
 
-export default withStyles(styles)(Checkout);
+export default withStyles(styles)(InvoiceDetail);

@@ -1,14 +1,7 @@
 import React from 'react';
-import DateFnsUtils from '@date-io/date-fns';
 import {
     Grid, TextField, Paper, ListItem,
-    InputLabel, FormControl, Select, Input, MenuItem,
 } from '@material-ui/core';
-import {
-    MuiPickersUtilsProvider,
-    KeyboardTimePicker,
-} from '@material-ui/pickers';
-import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
@@ -20,7 +13,7 @@ const styles = theme => ({
     },
 });
 
-class Checkout extends React.Component {
+class Invoice extends React.Component {
 
     render() {
         const { classes } = this.props;
@@ -48,4 +41,4 @@ class Checkout extends React.Component {
         )
     }
 }
-export default withStyles(styles)(Checkout);
+export default withStyles(styles)(Invoice);

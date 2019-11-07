@@ -27,7 +27,7 @@ import NewService from './views/Service/newService';
 import ServiceDetail from './views/Service/serviceDetail';
 import NewCategory from './views/Service/newCategory'
 
-import Invoice from './views/Invoice/invoice'
+import Invoice from './views/Invoice/invoices'
 import InvoiceDetail from './views/Invoice/invoiceDetail'
 
 import Message from './views/message';

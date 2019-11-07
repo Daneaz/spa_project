@@ -221,15 +221,7 @@ class CalendarView extends React.Component {
               })
             }
           })
-          if (this.state.checkout) {
-            const { history } = this.props;
-            history.push({
-              pathname: "/invoice/detail",
-              state: {
-                appointmentId: respObj.appointmentId
-              }
-            });
-          }
+          this.navigateToCheckoutDetail(respObj.appointmentId)
         } else {
           Swal.fire({
             type: 'error',
@@ -266,15 +258,7 @@ class CalendarView extends React.Component {
             events: this.state.events.concat([booking]),
           })
         })
-        if (this.state.checkout) {
-          const { history } = this.props;
-          history.push({
-            pathname: "/invoice/detail",
-            state: {
-              appointmentId: respObj.appointmentId
-            }
-          });
-        }
+        this.navigateToCheckoutDetail(respObj.appointmentId)
       } else {
         Swal.fire({
           type: 'error',
@@ -502,6 +486,19 @@ class CalendarView extends React.Component {
   handleCheckOut = () => {
     this.setState({ checkout: true })
     this.handleConfirmBookings();
+  }
+
+  navigateToCheckoutDetail = async(id) => {
+    if (this.state.checkout) {
+      let appointment = await fetchAPI('GET', `invoiceMgt/appointment/${id}`)
+      const { history } = this.props;
+      history.push({
+        pathname: "/invoice/detail",
+        state: {
+          appointment: appointment
+        }
+      });
+    }
   }
 
   render() {

@@ -11,7 +11,7 @@ let logger = require('../../services/logger');
 
 
 /* GET appointment infomation for invoice . */
-router.get('/invoice/:id', async (reqe, res, next) => {
+router.get('/appointment/:id', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
     if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
@@ -35,6 +35,32 @@ router.get('/invoice/:id', async (reqe, res, next) => {
     res.send(appointment);
 });
 
+/* GET invoice infomation. */
+router.get('/invoice/:id', async (reqe, res, next) => {
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
+
+    let invoice = await Invoice.findOne({ "_id": reqe.params.id, "delFlag": false })
+        .populate({
+            path: "appointment",
+            populate: {
+                path: 'bookings',
+                populate: {
+                    path: 'service',
+                }
+            }
+        }).populate({
+            path: "appointment",
+            populate: {
+                path: 'bookings',
+                populate: {
+                    path: 'staff',
+                }
+            }
+        }).populate("client")
+    res.send(invoice);
+});
+
 /* GET invoice list . */
 router.get('/invoicelist', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
@@ -56,8 +82,8 @@ router.post('/invoice', async (reqe, res, next) => {
         invoice.createdBy = staff._id;
         invoice.updatedBy = staff._id;
 
-        Appointment.findByIdAndUpdate(reqe.body.appointment, { checkout: true }).then(async result => {
-            if (result) {
+        Appointment.findByIdAndUpdate(reqe.body.appointment, { checkout: true }, { new: true }).then(async result => {
+            if (result.checkout) {
                 let doc = await invoice.save();
                 let rsObj = { ok: "Invoice has been created.", invoice: doc };
                 logger.audit("Invoice Mgt", "Create", doc._id, staff.id, `A new invoice has been created by ${staff.displayName}`);
