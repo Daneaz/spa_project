@@ -43,7 +43,13 @@ const styles = theme => ({
   },
 });
 
+const minTime = new Date();
+minTime.setHours(10, 0, 0);
+const maxTime = new Date();
+maxTime.setHours(23, 0, 0);
+
 class CalendarView extends React.Component {
+
 
   state = {
     eventOpen: false,
@@ -64,6 +70,8 @@ class CalendarView extends React.Component {
       availableServiceList: []
     }],
     checkout: false,
+    minTime: minTime,
+    maxTime: maxTime,
   }
 
 
@@ -216,7 +224,7 @@ class CalendarView extends React.Component {
           if (this.state.checkout) {
             const { history } = this.props;
             history.push({
-              pathname: "/checkout",
+              pathname: "/invoice/detail",
               state: {
                 appointmentId: respObj.appointmentId
               }
@@ -261,7 +269,7 @@ class CalendarView extends React.Component {
         if (this.state.checkout) {
           const { history } = this.props;
           history.push({
-            pathname: "/checkout",
+            pathname: "/invoice/detail",
             state: {
               appointmentId: respObj.appointmentId
             }
@@ -362,6 +370,8 @@ class CalendarView extends React.Component {
       })
       for (let i = 0; i < appointment.bookings.length; i++) {
         appointment.bookings[i].availableServiceList = await fetchAPI('GET', `appointmentMgt/availableservice/${appointment.bookings[i].service.category}`)
+        appointment.bookings[i].category = appointment.bookings[i].service.category
+        appointment.bookings[i].service = appointment.bookings[i].service._id
       }
       this.setState({
         selectedClient: this.state.clientList[idx],
@@ -511,11 +521,13 @@ class CalendarView extends React.Component {
             defaultView={Views.DAY}
             views={['day', 'week']}
             defaultDate={new Date()}
-            step={15}
+            step={10}
             timeslots={4}
             resources={this.state.staffList}
             resourceIdAccessor="_id"
             resourceTitleAccessor="displayName"
+            min={this.state.minTime}
+            max={this.state.maxTime}
           // style={{ height: "100vh" }}
           />
           <Dialog fullScreen open={this.state.eventOpen} onClose={this.handleEventClose} TransitionComponent={Transition} >
@@ -552,8 +564,8 @@ class CalendarView extends React.Component {
                     )
                     :
                     this.state.bookings.map((booking, index) =>
-                      <SelectService key={booking._id} category={booking.service.category}
-                        staff={booking.staff} service={booking.service._id} start={booking.start}
+                      <SelectService key={booking._id} category={booking.category}
+                        staff={booking.staff} service={booking.service} start={booking.start}
                         staffList={this.state.staffList} serviceList={booking.availableServiceList}
                         categoryList={this.state.categoryList}
                         changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
@@ -621,7 +633,7 @@ class CalendarView extends React.Component {
                         </Button>
                       </Grid>
                       <Grid item xs={3}>
-                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut} disabled={this.state.appointment.checkout}>
                           Checkout
                         </ColorButton>
                       </Grid>

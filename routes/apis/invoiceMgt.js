@@ -8,10 +8,12 @@ let Invoice = require('../../models/invoice');
 let Appointment = require('../../models/appointment');
 let logger = require('../../services/logger');
 
+
+
 /* GET appointment infomation for invoice . */
 router.get('/invoice/:id', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.invoiceMgt.create) { next(createError(403)); return; }
+    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
     let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false })
         .populate({
@@ -24,10 +26,47 @@ router.get('/invoice/:id', async (reqe, res, next) => {
             populate: {
                 path: 'staff',
             }
+        }).populate({
+            path: "bookings",
+            populate: {
+                path: 'client',
+            }
         })
-    res.send(appointment.bookings);
+    res.send(appointment);
 });
 
+/* GET invoice list . */
+router.get('/invoicelist', async (reqe, res, next) => {
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
+    let invoices = await Invoice.find({ "delFlag": false })
+        .populate("client")
+    res.send(invoices);
+});
+
+/* POST Create invoice . */
+router.post('/invoice', async (reqe, res, next) => {
+    try {
+
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.invoiceMgt.create) { next(createError(403)); return; }
+
+        let invoice = new Invoice(reqe.body);
+        invoice.createdBy = staff._id;
+        invoice.updatedBy = staff._id;
+
+        Appointment.findByIdAndUpdate(reqe.body.appointment, { checkout: true }).then(async result => {
+            if (result) {
+                let doc = await invoice.save();
+                let rsObj = { ok: "Invoice has been created.", invoice: doc };
+                logger.audit("Invoice Mgt", "Create", doc._id, staff.id, `A new invoice has been created by ${staff.displayName}`);
+                res.json(rsObj);
+            }
+        })
+
+    } catch (err) { res.status(400).json({ error: `Cannot create invoice, ${err.message}` }) }
+
+});
 
 module.exports = router;

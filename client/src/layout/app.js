@@ -20,6 +20,7 @@ import {
     Message as MessageIcon,
     AccountCircle as AccountCircleIcon,
     Settings as SettingsIcon,
+    Payment as InvoiceIcon
 } from '@material-ui/icons';
 import { removeToken, removeUser, getAvatarLetter } from '../utils';
 const logo = '/static/images/logo.png';
@@ -184,6 +185,22 @@ function NavMenu(props) {
                         primary="Services"
                     />
                 </ListItem>
+
+                <ListItem
+                    activeClassName={props.classes.activeListItem}
+                    className={props.classes.listItem}
+                    component={NavLink}
+                    to="/invoice"
+                >
+                    <ListItemIcon className={props.classes.listItemIcon}>
+                        <InvoiceIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                        classes={{ primary: props.classes.listItemText }}
+                        primary="Invoice"
+                    />
+                </ListItem>
+
                 <ListItem
                     activeClassName={props.classes.activeListItem}
                     className={props.classes.listItem}

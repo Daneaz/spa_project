@@ -12,7 +12,6 @@ import ErrorPage from './views/error';
 import Dashboard from './views/dashboard';
 
 import Appointment from './views/Appointment/appointment';
-import Checkout from './views/Appointment/checkout'
 
 import Client from './views/Client/client';
 import NewClient from './views/Client/newClient';
@@ -27,6 +26,9 @@ import Service from './views/Service/service';
 import NewService from './views/Service/newService';
 import ServiceDetail from './views/Service/serviceDetail';
 import NewCategory from './views/Service/newCategory'
+
+import Invoice from './views/Invoice/invoice'
+import InvoiceDetail from './views/Invoice/invoiceDetail'
 
 import Message from './views/message';
 import Report from './views/report';
@@ -83,7 +85,6 @@ function Routers() {
                     <PrivateRoute exact path="/dashboard" component={Dashboard} />
 
                     <PrivateRoute exact path="/appointment" component={Appointment} />
-                    <PrivateRoute exact path="/checkout" component={Checkout} />
 
                     <PrivateRoute exact path="/message" component={Message} />
                     <PrivateRoute exact path="/report" component={Report} />
@@ -102,6 +103,9 @@ function Routers() {
                     <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
                     <PrivateRoute exact path="/newcategory" component={NewCategory} />
 
+                    <PrivateRoute exact path="/invoice" component={Invoice} />
+                    <PrivateRoute exact path="/invoice/detail" component={InvoiceDetail} />
+                    
                     <PrivateRoute exact path="/setting" component={Setting} />
 
                     <Route component={ErrorPage} />
