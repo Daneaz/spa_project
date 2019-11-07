@@ -95,7 +95,7 @@ class Invoice extends React.Component {
         });
     }
 
-    handleRowClick = async(rowMeta) => {
+    handleRowClick = async (rowMeta) => {
         let invoice = await fetchAPI('GET', `invoiceMgt/invoice/${this.state.invoiceList[rowMeta.dataIndex]._id}`)
         const { history } = this.props;
         history.push({

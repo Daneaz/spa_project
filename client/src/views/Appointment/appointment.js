@@ -488,14 +488,25 @@ class CalendarView extends React.Component {
     this.handleConfirmBookings();
   }
 
-  navigateToCheckoutDetail = async(id) => {
+  handleInvoice = async () => {
+    let invoice = await fetchAPI('GET', `invoiceMgt/appointmentToInvoice/${this.state.appointment._id}`)
+    const { history } = this.props;
+    history.push({
+      pathname: "/invoice/detail",
+      state: {
+        invoice: invoice
+      }
+    });
+  }
+
+  navigateToCheckoutDetail = async (id) => {
     if (this.state.checkout) {
-      let appointment = await fetchAPI('GET', `invoiceMgt/appointment/${id}`)
+      let invoice = await fetchAPI('GET', `invoiceMgt/invoice/${id}`)
       const { history } = this.props;
       history.push({
         pathname: "/invoice/detail",
         state: {
-          appointment: appointment
+          invoice: invoice
         }
       });
     }
@@ -630,9 +641,14 @@ class CalendarView extends React.Component {
                         </Button>
                       </Grid>
                       <Grid item xs={3}>
-                        <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut} disabled={this.state.appointment.checkout}>
-                          Checkout
+                        {this.state.appointment.checkout ?
+                          <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleInvoice}>
+                            Invoice
+                      </ColorButton>
+                          : <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                            Checkout
                         </ColorButton>
+                        }
                       </Grid>
                     </Grid>
                   )

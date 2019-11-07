@@ -35,6 +35,32 @@ router.get('/appointment/:id', async (reqe, res, next) => {
     res.send(appointment);
 });
 
+/* GET appointment infomation for invoice . */
+router.get('/appointmentToInvoice/:id', async (reqe, res, next) => {
+    let staff = await Staff.findById(res.locals.user.id).populate('role');
+    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
+
+    let invoice = await Invoice.findOne({ appointment: reqe.params.id, delFlag: false })
+        .populate({
+            path: "appointment",
+            populate: {
+                path: 'bookings',
+                populate: {
+                    path: 'service',
+                }
+            }
+        }).populate({
+            path: "appointment",
+            populate: {
+                path: 'bookings',
+                populate: {
+                    path: 'staff',
+                }
+            }
+        }).populate("client")
+    res.send(invoice);
+});
+
 /* GET invoice infomation. */
 router.get('/invoice/:id', async (reqe, res, next) => {
     let staff = await Staff.findById(res.locals.user.id).populate('role');
