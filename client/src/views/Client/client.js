@@ -88,6 +88,10 @@ const columns = [
   },
 ];
 
+function replaceRange(s, start, end, substitute) {
+  return s.substring(0, start) + substitute + s.substring(end);
+}
+
 class Client extends React.Component {
 
   state = {
@@ -95,8 +99,11 @@ class Client extends React.Component {
   };
 
   async componentDidMount() {
-    const response = await fetchAPI('GET', 'clientMgt/clients');
-    this.setState({ clientList: response });
+    const clientList = await fetchAPI('GET', 'clientMgt/clients');
+    clientList.map(client => {
+      return client.nric = replaceRange(client.nric, 0, 5, "*****")
+    })
+    this.setState({ clientList: clientList });
   }
 
   handleAddClient = () => {

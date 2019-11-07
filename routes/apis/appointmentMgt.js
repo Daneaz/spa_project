@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
 let createError = require('http-errors');
-var mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 
 let Staff = require('../../models/auth/staff');
 let Client = require('../../models/auth/client');

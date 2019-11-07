@@ -2,11 +2,14 @@ var express = require('express');
 var router = express.Router();
 let createError = require('http-errors');
 
-
+let Booking = require('../../models/booking');
+let Invoice = require('../../models/invoice');
 let Staff = require('../../models/auth/staff');
 let Client = require('../../models/auth/client');
 let auth = require('../../services/auth');
 let logger = require('../../services/logger');
+var mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 /* GET client list. */
 router.get('/clients', async (reqe, res, next) => {
@@ -164,6 +167,47 @@ router.delete('/clients', async (reqe, res, next) => {
 
     } catch (err) { res.status(400).json({ error: `Cannot delete Client, ${err.message}` }) }
 
+}); ``
+
+/* GET client total bookings. */
+router.get('/statistics/:id', async (reqe, res, next) => {
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+
+        let bookings = await Booking.find({ delFlag: false, client: reqe.params.id })
+        let invoice = await Invoice.aggregate([
+            {
+                $match: {
+                    client: ObjectId(reqe.params.id)
+                }
+            },
+            {
+                $group:
+                {
+                    _id: null,
+                    totalSales: { $sum: "$total" },
+                    totalCompleted: { $sum: 1 }
+                }
+            }
+        ])
+        if (invoice.length > 0) {
+            let rsObj = {
+                ok: "Client has been deleted.",
+                totalBookings: bookings.length,
+                totalCompleted: invoice[0].totalCompleted,
+                totalSales: invoice[0].totalSales
+            };
+            res.json(rsObj);
+        } else {
+            let rsObj = {
+                ok: "Client has been deleted.",
+                totalBookings: bookings.length,
+            };
+            res.json(rsObj);
+        }
+
+    } catch (err) { res.status(400).json({ error: `Cannot get statistics, ${err.message}` }) }
 });
 
 module.exports = router;

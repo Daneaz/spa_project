@@ -34,24 +34,50 @@ const styles = theme => ({
     },
 });
 
+function replaceRange(s, start, end, substitute) {
+    return s.substring(0, start) + substitute + s.substring(end);
+}
+
 class ClientDetail extends React.Component {
 
     state = {
         addCreditDialog: false,
-        credit: '',
+        credit: 0,
         client: '',
+        totalBookings: 0,
+        totalCompleted: 0,
+        totalSales: 0,
+        totalMiss: 0,
     }
 
     async componentDidMount() {
         try {
             let respObj = await fetchAPI('GET', `clientMgt/clients/${this.props.location.state.data._id}`)
+            let statistics = await fetchAPI('GET', `clientMgt/statistics/${this.props.location.state.data._id}`)
             if (respObj) {
-                this.setState({ client: respObj })
+                respObj.nric = replaceRange(respObj.nric, 0, 5, "*****")
+                this.setState({
+                    client: respObj
+                })
             } else {
                 Swal.fire({
                     type: 'error', text: "Client cannot be found",
                     title: "Fail!"
                 })
+            }
+            if (statistics && statistics.ok) {
+                if (statistics.totalCompleted) {
+                    this.setState({
+                        totalBookings: statistics.totalBookings,
+                        totalCompleted: statistics.totalCompleted,
+                        totalSales: statistics.totalSales,
+                        totalMiss: statistics.totalBookings - statistics.totalCompleted
+                    })
+                } else if (statistics.totalBookings) {
+                    this.setState({
+                        totalBookings: statistics.totalBookings,
+                    })
+                }
             }
         } catch (error) {
             Swal.fire({
@@ -119,7 +145,7 @@ class ClientDetail extends React.Component {
                                 <ListItemAvatar className={classes.listAvatar}>
                                     <Grid container direction='column' alignItems="center">
                                         {/* <Avatar alt="Remy Sharp" className={classes.bigAvatar}>{getAvatarLetter(this.props.location.state.data.displayName)} </Avatar> */}
-                                        <Typography variant='h4' style={{marginTop: "10px"}}> {this.state.client.displayName} </Typography>
+                                        <Typography variant='h4' style={{ marginTop: "10px" }}> {this.state.client.displayName} </Typography>
                                     </Grid>
                                 </ListItemAvatar>
                                 <Divider />
@@ -157,7 +183,7 @@ class ClientDetail extends React.Component {
                                     <ButtonGroup fullWidth >
                                         <Button onClick={this.handleEditClick}>Edit</Button>
                                         <Button onClick={this.handleAddCreditOpen}>Add Credit</Button>
-                                        <Button >New Appointment</Button>
+                                        <Button onClick={() => this.props.history.push("appointment")}>New Appointment</Button>
                                     </ButtonGroup>
                                 </ListItem>
                             </List>
@@ -178,7 +204,7 @@ class ClientDetail extends React.Component {
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Grid container direction='column' alignItems="center">
-                                                        <Typography variant='h5'> {0} </Typography>
+                                                        <Typography variant='h5'> ${this.state.totalSales} </Typography>
                                                         <Typography className={classes.labelColor}> Total Sales </Typography>
                                                     </Grid>
                                                 </Grid>
@@ -189,19 +215,19 @@ class ClientDetail extends React.Component {
                                             <Grid container direction='row' justify="space-evenly" alignItems="center">
                                                 <Grid item xs={3}>
                                                     <Grid container direction='column' alignItems="center">
-                                                        <Typography variant='h6'> {0} </Typography>
+                                                        <Typography variant='h6'> {this.state.totalBookings} </Typography>
                                                         <Typography className={classes.labelColor}> All Bookings </Typography>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Grid container direction='column' alignItems="center">
-                                                        <Typography variant='h6'> {0} </Typography>
+                                                        <Typography variant='h6'> {this.state.totalCompleted} </Typography>
                                                         <Typography className={classes.labelColor}> Completed </Typography>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item xs={3}>
                                                     <Grid container direction='column' alignItems="center">
-                                                        <Typography variant='h6'> {0} </Typography>
+                                                        <Typography variant='h6'> {this.state.totalMiss} </Typography>
                                                         <Typography className={classes.labelColor}> Missed </Typography>
                                                     </Grid>
                                                 </Grid>
@@ -244,7 +270,7 @@ class ClientDetail extends React.Component {
                     </Button>
                     </DialogActions>
                 </Dialog>
-            </AppLayout>
+            </AppLayout >
         );
     }
 }
