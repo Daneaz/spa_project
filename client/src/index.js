@@ -7,40 +7,40 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import 'typeface-roboto';
 
 import { getUser } from './utils';
-import Login from './views/login';
-import ErrorPage from './views/error';
-import Dashboard from './views/dashboard';
+import Login from './Container/login';
+import ErrorPage from './Container/error';
+import Dashboard from './Container/dashboard';
 
-import Appointment from './views/Appointment/appointment';
+import Appointment from './Container/Appointment/appointment';
 
-import Client from './views/Client/client';
-import NewClient from './views/Client/newClient';
-import ClientDetail from './views/Client/clientDetail';
-import UpdateClient from './views/Client/updateClient';
+import Client from './Container/Client/client';
+import NewClient from './Container/Client/newClient';
+import ClientDetail from './Container/Client/clientDetail';
+import UpdateClient from './Container/Client/updateClient';
 
-import Staff from './views/Staff/staff';
-import NewStaff from './views/Staff/newStaff';
-import StaffDetail from './views/Staff/staffDetail';
+import Staff from './Container/Staff/staff';
+import NewStaff from './Container/Staff/newStaff';
+import StaffDetail from './Container/Staff/staffDetail';
 
-import Service from './views/Service/service';
-import NewService from './views/Service/newService';
-import ServiceDetail from './views/Service/serviceDetail';
-import NewCategory from './views/Service/newCategory'
+import Service from './Container/Service/service';
+import NewService from './Container/Service/newService';
+import ServiceDetail from './Container/Service/serviceDetail';
+import NewCategory from './Container/Service/newCategory'
 
-import Invoice from './views/Invoice/invoices'
-import InvoiceDetail from './views/Invoice/invoiceDetail'
+import Invoice from './Container/Invoice/invoices'
+import InvoiceDetail from './Container/Invoice/invoiceDetail'
 
-import Message from './views/message';
-import Report from './views/report';
-import Setting from './views/setting';
+import Message from './Container/message';
+import Report from './Container/report';
+import Setting from './Container/setting';
 
 //Kiosk
-import Start from './views/Kiosk/start';
-import FacialLogin from './views/Kiosk/facialLogin';
-import MobileLogin from './views/Kiosk/mobileLogin';
-import Register from './views/Kiosk/register';
-import Snapshot from './views/Kiosk/snapshot';
-import SnapshotManual from './views/Kiosk/snapshotManual';
+import Start from './Container/Kiosk/start';
+import FacialLogin from './Container/Kiosk/facialLogin';
+import MobileLogin from './Container/Kiosk/mobileLogin';
+import Register from './Container/Kiosk/register';
+import Snapshot from './Container/Kiosk/snapshot';
+import SnapshotManual from './Container/Kiosk/snapshotManual';
 
 
 function PrivateRoute({ component: Component, ...rest }) {
