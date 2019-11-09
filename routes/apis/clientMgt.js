@@ -221,9 +221,26 @@ router.get('/appointments/:id', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-        let appointment = await Appointment.find({ delFlag: false, client: reqe.params.id })
-            .populate("bookings");
-        res.json(appointment);
+        let appointments = await Appointment.find({ delFlag: false, client: reqe.params.id })
+            .populate({
+                path: "bookings",
+                populate: {
+                    path: 'service',
+                }
+            }).populate({
+                path: "bookings",
+                populate: {
+                    path: 'staff',
+                }
+            }).populate({
+                path: "bookings",
+                populate: {
+                    path: 'client',
+                }
+            })
+
+        let rsObj = { ok: "Appointment retrieved.", appointments: appointments };
+        res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot get appointments, ${err.message}` }) }
 });

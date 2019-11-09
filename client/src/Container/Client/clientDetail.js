@@ -48,6 +48,8 @@ class ClientDetail extends React.Component {
         totalCompleted: 0,
         totalSales: 0,
         totalMiss: 0,
+        appointments: null,
+        invoices: null,
     }
 
     async componentDidMount() {
@@ -80,6 +82,17 @@ class ClientDetail extends React.Component {
                         totalBookings: statistics.totalBookings,
                     })
                 }
+            }
+            if (appointments && appointments.ok) {
+                this.setState({
+                    appointments: appointments.appointments
+                })
+            }
+
+            if (invoices && invoices.ok) {
+                this.setState({
+                    invoices: invoices
+                })
             }
 
         } catch (error) {
@@ -241,10 +254,9 @@ class ClientDetail extends React.Component {
                                     </List>
                                 </Paper>
                             </Grid>
-                            <Grid item
-                            >
-                                <Paper style={{ height: 600 }}>
-                                    <TabView appointments={this.state.appointments} invoices={this.state.invoices}></TabView>
+                            <Grid item>
+                                <Paper>
+                                    <TabView {...this.props} appointments={this.state.appointments ? this.state.appointments : null} invoices={this.state.invoices ? this.state.invoices : null}></TabView>
                                 </Paper>
                             </Grid>
                         </Grid>

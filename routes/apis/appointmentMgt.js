@@ -34,33 +34,33 @@ router.post('/appointment', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.appointmentMgt.create) { next(createError(403)); return; }
         //Create an empty appointment to get the id.
-        let bookings = reqe.body
-            (new Appointment(bookings[0].client)).save().then(async (appointment) => {
 
-                for (let i = 0; i < bookings.length; i++) {
-                    let client = await Client.findById(bookings[i].client)
-                    let service = await Service.findById(bookings[i].service)
-                    bookings[i].appointment = appointment._id
-                    bookings[i].title = `${service.name} ${client.displayName}`
-                }
+        (new Appointment({ client: reqe.body[0].client })).save().then(async (appointment) => {
+            let bookings = reqe.body
+            for (let i = 0; i < bookings.length; i++) {
+                let client = await Client.findById(bookings[i].client)
+                let service = await Service.findById(bookings[i].service)
+                bookings[i].appointment = appointment._id
+                bookings[i].title = `${service.name} ${client.displayName}`
+            }
 
-                // creating all bookings
-                Booking.insertMany(bookings).then(bookings => {
-                    let bookingids = bookings.map(booking => {
-                        return booking._id
-                    })
-                    appointment.bookings = bookingids
-
-                    appointment.save()
-                    let rsObj = { ok: "Appointment has been created.", bookings: bookings, appointmentId: appointment._id }
-                    logger.audit("Appointment Mgt", "Create", bookings._id, staff.id, `A new appointment has been created by ${staff.displayName}`)
-                    res.json(rsObj)
-                }).catch(err => {
-                    res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+            // creating all bookings
+            Booking.insertMany(bookings).then(bookings => {
+                let bookingids = bookings.map(booking => {
+                    return booking._id
                 })
+                appointment.bookings = bookingids
+
+                appointment.save()
+                let rsObj = { ok: "Appointment has been created.", bookings: bookings, appointmentId: appointment._id }
+                logger.audit("Appointment Mgt", "Create", bookings._id, staff.id, `A new appointment has been created by ${staff.displayName}`)
+                res.json(rsObj)
             }).catch(err => {
                 res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
             })
+        }).catch(err => {
+            res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+        })
     } catch (err) { res.status(400).json({ error: `Cannot create appointment, ${err.message}` }) }
 });
 

@@ -1,22 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Tabs, Tab, Typography, Box } from '@material-ui/core';
+import { withStyles } from '@material-ui/styles';
+// import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { Tabs, Tab, Typography, Box, Divider, ListItem, List } from '@material-ui/core';
+import InvoiceListView from '../Invoice/InvoiceListView'
 
-
-function appointments(props) {
-    const { appointments } = props;
+function Appointment(props) {
     return (
-        "appointments"
-    );
-}
-
-function invoices(props) {
-    const { invoices } = props;
-    return (
-        "invoices"
-    );
+        props.bookings.map(booking => {
+            return <InvoiceListView booking={booking} click={props.click} />
+        })
+    )
 }
 
 function TabPanel(props) {
@@ -49,53 +44,74 @@ function a11yProps(index) {
     };
 }
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
     root: {
         backgroundColor: theme.palette.background.paper,
         width: 500,
     },
-})); 
+});
 
-export default function FullWidthTabs() {
-    const classes = useStyles();
-    const theme = useTheme();
-    const [value, setValue] = React.useState(0);
+class TabView extends React.Component {
+    state = {
+        value: 0,
+        index: null,
+    }
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
+    handleChange = (event, newValue) => {
+        this.setState({ value: newValue })
     };
 
-    const handleChangeIndex = index => {
-        setValue(index);
+    handleChangeIndex = index => {
+        this.setState({ index: index })
     };
 
-    return (
-        <div className={classes.root}>
+    render() {
+        const { classes, appointments } = this.props
+        const { value } = this.state
 
-            <Tabs
-                value={value}
-                onChange={handleChange}
-                indicatorColor="primary"
-                textColor="primary"
-                variant="fullWidth"
-                aria-label="full width tabs example"
-            >
-                <Tab label="Appointments" {...a11yProps(0)} />
-                <Tab label="Invoices" {...a11yProps(1)} />
-            </Tabs>
-
-            <SwipeableViews
-                axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-                index={value}
-                onChangeIndex={handleChangeIndex}
-            >
-                <TabPanel value={value} index={0} dir={theme.direction}>
-                    {appointments}
-            </TabPanel>
-                <TabPanel value={value} index={1} dir={theme.direction}>
-                    {invoices}
-            </TabPanel>
-            </SwipeableViews>
-        </div>
-    );
+        return (
+            <div>
+                <Tabs
+                    value={value}
+                    onChange={this.handleChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    variant="scrollable"
+                    aria-label="full width tabs example"
+                >
+                    <Tab label="Appointments" {...a11yProps(0)} />
+                    <Tab label="Invoices" {...a11yProps(1)} />
+                </Tabs>
+                <TabPanel value={value} index={0} >
+                    {/* Appointments view */}
+                    {
+                        appointments ?
+                            appointments.map(appointment => {
+                                return (
+                                    <React.Fragment>
+                                        <Divider />
+                                        <Appointment bookings={appointment.bookings} click={() => {
+                                            const { history } = this.props;
+                                            history.push({
+                                                pathname: "/invoice/detail",
+                                                state: {
+                                                    appointment: appointment
+                                                }
+                                            });
+                                        }} />
+                                        <Divider />
+                                    </React.Fragment>
+                                )
+                            }) : null
+                    }
+                </TabPanel>
+                <TabPanel value={value} index={1} >
+                    Invoices view
+                        {/* {invoices} */}
+                </TabPanel>
+            </div>
+        );
+    }
 }
+
+export default withStyles(styles)(TabView);

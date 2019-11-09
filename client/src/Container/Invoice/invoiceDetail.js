@@ -24,6 +24,11 @@ const styles = theme => ({
         marginLeft: theme.spacing(2),
         flex: 1,
     },
+    paperMargin: {
+        margin: theme.spacing(1),
+        minWidth: 800,
+        maxWidth: 800
+    },
 });
 
 class InvoiceDetail extends React.Component {
@@ -152,11 +157,13 @@ class InvoiceDetail extends React.Component {
                     container
                     direction="column"
                     alignItems="center">
-                    {
-                        this.state.bookingList.map(booking => {
-                            return <Invoice booking={booking}> </Invoice>
-                        })
-                    }
+                    <Paper className={classes.paperMargin}>
+                        {
+                            this.state.bookingList.map(booking => {
+                                return <Invoice booking={booking}> </Invoice>
+                            })
+                        }
+                    </Paper>
                     <Paper style={{ marginTop: 10 }}>
                         <ListItem style={{ width: 800 }}>
                             <Grid

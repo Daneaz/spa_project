@@ -12,13 +12,13 @@ const styles = theme => ({
     },
 });
 
-class Invoice extends React.Component {
+class InvoiceList extends React.Component {
 
     render() {
         const { classes } = this.props;
         return (
             // <Paper className={classes.paperMargin}>
-            <ListItem >
+            <ListItem button onClick={this.props.click} >
                 <Grid
                     container
                     direction="column">
@@ -40,4 +40,4 @@ class Invoice extends React.Component {
         )
     }
 }
-export default withStyles(styles)(Invoice);
+export default withStyles(styles)(InvoiceList);
