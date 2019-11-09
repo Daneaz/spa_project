@@ -221,7 +221,7 @@ router.get('/appointments/:id', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-        let appointments = await Appointment.find({ delFlag: false, client: reqe.params.id })
+        let appointments = await Appointment.find({ delFlag: false, client: reqe.params.id, checkout: false })
             .populate({
                 path: "bookings",
                 populate: {
@@ -249,41 +249,32 @@ router.get('/appointments/:id', async (reqe, res, next) => {
 router.get('/invoices/:id', async (reqe, res, next) => {
     try {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
-        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+        if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
-        let bookings = await Booking.find({ delFlag: false, client: reqe.params.id })
-        let invoice = await Invoice.aggregate([
-            {
-                $match: {
-                    client: ObjectId(reqe.params.id)
+        let invoices = await Invoice.find({ client: reqe.params.id, delFlag: false })
+            .populate({
+                path: "appointment",
+                populate: {
+                    path: 'bookings',
+                    populate: {
+                        path: 'service',
+                    }
                 }
-            },
-            {
-                $group:
-                {
-                    _id: null,
-                    totalSales: { $sum: "$total" },
-                    totalCompleted: { $sum: 1 }
+            }).populate({
+                path: "appointment",
+                populate: {
+                    path: 'bookings',
+                    populate: {
+                        path: 'staff',
+                    }
                 }
-            }
-        ])
-        if (invoice.length > 0) {
-            let rsObj = {
-                ok: "Client has been deleted.",
-                totalBookings: bookings.length,
-                totalCompleted: invoice[0].totalCompleted,
-                totalSales: invoice[0].totalSales
-            };
-            res.json(rsObj);
-        } else {
-            let rsObj = {
-                ok: "Client has been deleted.",
-                totalBookings: bookings.length,
-            };
-            res.json(rsObj);
-        }
+            }).populate("client")
 
-    } catch (err) { res.status(400).json({ error: `Cannot get statistics, ${err.message}` }) }
+        let rsObj = { ok: "Appointment retrieved.", invoices: invoices };
+        res.json(rsObj);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 module.exports = router;

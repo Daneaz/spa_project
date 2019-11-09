@@ -66,7 +66,7 @@ class TabView extends React.Component {
     };
 
     render() {
-        const { classes, appointments } = this.props
+        const { appointments, invoices } = this.props
         const { value } = this.state
 
         return (
@@ -83,7 +83,6 @@ class TabView extends React.Component {
                     <Tab label="Invoices" {...a11yProps(1)} />
                 </Tabs>
                 <TabPanel value={value} index={0} >
-                    {/* Appointments view */}
                     {
                         appointments ?
                             appointments.map(appointment => {
@@ -106,8 +105,26 @@ class TabView extends React.Component {
                     }
                 </TabPanel>
                 <TabPanel value={value} index={1} >
-                    Invoices view
-                        {/* {invoices} */}
+                    {
+                        invoices ?
+                            invoices.map(invoice => {
+                                return (
+                                    <React.Fragment>
+                                        <Divider />
+                                        <Appointment bookings={invoice.appointment.bookings} click={() => {
+                                            const { history } = this.props;
+                                            history.push({
+                                                pathname: "/invoice/detail",
+                                                state: {
+                                                    invoice: invoice
+                                                }
+                                            });
+                                        }} />
+                                        <Divider />
+                                    </React.Fragment>
+                                )
+                            }) : null
+                    }
                 </TabPanel>
             </div>
         );
