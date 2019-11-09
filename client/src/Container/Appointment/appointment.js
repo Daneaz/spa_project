@@ -575,7 +575,7 @@ class CalendarView extends React.Component {
                       <BookingOverview key={booking._id} category={booking.category}
                         staff={booking.staff} service={booking.service} start={booking.start}
                         staffList={this.state.staffList} serviceList={booking.availableServiceList}
-                        categoryList={this.state.categoryList}
+                        categoryList={this.state.categoryList} disable={this.state.appointment.checkout}
                         changeTime={(event) => this.handleChangeBooking(event, booking._id, "Time")}
                         changeService={(event, child) => this.handleChangeBooking(event, booking._id, "Service", child)}
                         changeStaff={(event) => this.handleChangeBooking(event, booking._id, "Staff")}
@@ -591,13 +591,17 @@ class CalendarView extends React.Component {
                     options={this.state.clientList}
                     value={this.state.selectedClient}
                     placeholder={"Please Select a Customer..."}
+                    isDisabled={this.state.editFlag ? this.state.appointment.checkout : false}
                   />
                 </FormControl>
 
-                <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">
-                  <AddIcon fontSize="large" />
-                </IconButton>
-
+                {this.state.editFlag ? this.state.appointment.checkout : false ?
+                  <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">
+                    <AddIcon fontSize="large" />
+                  </IconButton>
+                  :
+                  null
+                }
               </Grid>
 
               {
@@ -629,27 +633,31 @@ class CalendarView extends React.Component {
                       justify="center"
                       alignItems="flex-end"
                       spacing={10}>
-                      <Grid item xs={3}>
-                        <Button fullWidth variant="contained" color="secondary"
-                          onClick={this.deleteAppointment}>
-                          Delete
+                      {!this.state.appointment.checkout ?
+                        <React.Fragment>
+                          <Grid item xs={3}>
+                            <Button fullWidth variant="contained" color="secondary"
+                              onClick={this.deleteAppointment}>
+                              Delete
                         </Button>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
-                          Update Appointment
+                          </Grid>
+                          <Grid item xs={3}>
+                            <Button fullWidth variant="contained" color="primary" onClick={this.handleConfirmBookings}>
+                              Update Appointment
                         </Button>
-                      </Grid>
-                      <Grid item xs={3}>
-                        {this.state.appointment.checkout ?
-                          <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleInvoice}>
+                          </Grid>
+                          <Grid item xs={3}>
+                            <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
+                              Checkout
+                          </ColorButton>
+                          </Grid>
+                        </React.Fragment> :
+                        <Grid item xs={3}>
+                          <ColorButton fullWidth variant="contained" onClick={this.handleInvoice}>
                             Invoice
-                      </ColorButton>
-                          : <ColorButton fullWidth variant="contained" color="primary" onClick={this.handleCheckOut}>
-                            Checkout
-                        </ColorButton>
-                        }
-                      </Grid>
+                          </ColorButton>
+                        </Grid>
+                      }
                     </Grid>
                   )
               }

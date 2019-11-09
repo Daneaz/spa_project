@@ -56,6 +56,7 @@ class SelectService extends React.Component {
                                         KeyboardButtonProps={{
                                             'aria-label': 'change time',
                                         }}
+                                        disabled={this.props.disable}
                                     />
                                 </MuiPickersUtilsProvider>
                             </Grid>
@@ -66,6 +67,7 @@ class SelectService extends React.Component {
                                         value={this.props.category}
                                         onChange={this.props.changeCategory}
                                         input={<Input id="age-native-simple" />}
+                                        disabled={this.props.disable}
                                     >
                                         {this.props.categoryList.map((category, i) => (
                                             <MenuItem id={i} value={category.value}>
@@ -88,6 +90,7 @@ class SelectService extends React.Component {
                                         value={this.props.service}
                                         onChange={this.props.changeService}
                                         input={<Input id="age-native-simple" />}
+                                        disabled={this.props.disable}
                                     >
                                         {this.props.serviceList.map((service, i) => (
                                             <MenuItem id={i} value={service._id}>
@@ -104,6 +107,7 @@ class SelectService extends React.Component {
                                         value={this.props.staff}
                                         onChange={this.props.changeStaff}
                                         input={<Input id="age-native-simple" />}
+                                        disabled={this.props.disable}
                                     >
                                         {this.props.staffList.map(staff => (
                                             <MenuItem value={staff._id}>
@@ -115,7 +119,7 @@ class SelectService extends React.Component {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <IconButton color="secondary" onClick={this.props.removeBooking} aria-label="close">
+                    <IconButton color="secondary" onClick={this.props.removeBooking} aria-label="close" disabled={this.props.disable}>
                         <CloseIcon />
                     </IconButton>
                 </ListItem>
