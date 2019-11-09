@@ -4,7 +4,7 @@ import { withStyles } from '@material-ui/styles';
 import {
     Typography, Button, Container, Dialog, DialogContent, Slide, TextField
 } from '@material-ui/core';
-import KioskLayout from './Component/KioskLayout';
+import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
 import { fetchAPI, setClient } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";

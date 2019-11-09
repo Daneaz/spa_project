@@ -2,8 +2,8 @@ import React from 'react';
 import {
     Button, Typography,
 } from '@material-ui/core';
-import KioskLayout from './Component/KioskLayout';
-import SelectService from './Component/SelectService'
+import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
+import SelectService from '../../Component/Kiosk/Checkout/Checkout'
 import { withStyles } from '@material-ui/styles';
 import * as faceapi from 'face-api.js';
 import Webcam from 'react-webcam';

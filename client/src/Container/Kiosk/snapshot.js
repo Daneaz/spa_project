@@ -6,7 +6,7 @@ import Webcam from 'react-webcam';
 import { fetchAPI, getClient, removeClient } from '../../utils';
 import { faceAPIAddPerson } from './faceAPI';
 import Swal from 'sweetalert2';
-import KioskLayout from './Component/KioskLayout';
+import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
 
 const STORAGE_URL = 'https://projectspa.blob.core.windows.net/spacontainer';
 const MODEL_URL = '/models'

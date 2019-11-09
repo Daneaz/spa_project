@@ -3,7 +3,7 @@ import { Animated } from "react-animated-css";
 import { ButtonBase, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { removeToken, removeLocalStorage, removeUser } from '../../utils';
-import KioskLayout from './Component/KioskLayout';
+import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
 
 const LoginImage = '/static/images/login.png';
 const RegisterImage = '/static/images/register.png';

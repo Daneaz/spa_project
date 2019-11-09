@@ -5,8 +5,8 @@ import {
 } from '@material-ui/core';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
-import KioskLayout from './Component/KioskLayout';
-import SelectService from './Component/SelectService'
+import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
+import SelectService from '../../Component/Kiosk/Checkout/Checkout'
 import { fetchAPI, setClient, setToken } from '../../utils';
 
 const mainFontSize = 35;

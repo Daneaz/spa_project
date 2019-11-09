@@ -7,7 +7,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 
 import Swal from 'sweetalert2';
-import Invoice from './Component/invoice'
+import Invoice from '../../Component/Invoice/Invoice'
 import { fetchAPI } from '../../utils';
 
 const styles = theme => ({
