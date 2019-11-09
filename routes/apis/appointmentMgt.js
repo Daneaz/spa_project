@@ -17,9 +17,9 @@ router.get('/appointment/:id', async (reqe, res, next) => {
 
         // return and rename the data as calender needs
         let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false })
-            .populate({ 
-                path: "bookings", 
-                populate :{
+            .populate({
+                path: "bookings",
+                populate: {
                     path: 'service',
                 }
             });
@@ -34,31 +34,34 @@ router.post('/appointment', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.appointmentMgt.create) { next(createError(403)); return; }
         //Create an empty appointment to get the id.
-        (new Appointment).save().then(async (appointment) => {
+        let bookings = reqe.body
+            (new Appointment(bookings[0].client)).save().then(async (appointment) => {
 
-            let bookings = reqe.body
-            for (let i = 0; i < bookings.length; i++) {
-                let client = await Client.findById(bookings[i].client)
-                let service = await Service.findById(bookings[i].service)
-                bookings[i].appointment = appointment._id
-                bookings[i].title = `${service.name} ${client.displayName}`
-            }
+                for (let i = 0; i < bookings.length; i++) {
+                    let client = await Client.findById(bookings[i].client)
+                    let service = await Service.findById(bookings[i].service)
+                    bookings[i].appointment = appointment._id
+                    bookings[i].title = `${service.name} ${client.displayName}`
+                }
 
-            // creating all bookings
-            Booking.insertMany(bookings).then(bookings => {
-                let bookingids = bookings.map(booking => {
-                    return booking._id
+                // creating all bookings
+                Booking.insertMany(bookings).then(bookings => {
+                    let bookingids = bookings.map(booking => {
+                        return booking._id
+                    })
+                    appointment.bookings = bookingids
+
+                    appointment.save()
+                    let rsObj = { ok: "Appointment has been created.", bookings: bookings, appointmentId: appointment._id }
+                    logger.audit("Appointment Mgt", "Create", bookings._id, staff.id, `A new appointment has been created by ${staff.displayName}`)
+                    res.json(rsObj)
+                }).catch(err => {
+                    res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
                 })
-                appointment.bookings = bookingids
-                appointment.save()
-                let rsObj = { ok: "Booking has been created.", bookings: bookings, appointmentId: appointment._id }
-                logger.audit("Booking Mgt", "Create", bookings._id, staff.id, `A new booking has been created by ${staff.displayName}`)
-                res.json(rsObj)
             }).catch(err => {
-                res.status(400).json({ error: `Cannot create booking, ${err.message}` })
+                res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
             })
-        })
-    } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
+    } catch (err) { res.status(400).json({ error: `Cannot create appointment, ${err.message}` }) }
 });
 
 /* PATCH Update appointment. */
@@ -116,16 +119,16 @@ router.patch('/appointment/:id', async (reqe, res, next) => {
                         return booking._id
                     })
                     appointment.bookings = bookingIds
-                    appointment.save();
-                    let rsObj = { ok: "Booking has been created.", bookings: bookings, appointmentId: appointment._id }
-                    logger.audit("Booking Mgt", "Create", bookings._id, staff.id, `A new booking has been created by ${staff.displayName}`)
+                    appointment.save()
+                    let rsObj = { ok: "Appointment has been created.", bookings: bookings, appointmentId: appointment._id }
+                    logger.audit("Appointment Mgt", "Create", bookings._id, staff.id, `A new appointment has been created by ${staff.displayName}`)
                     res.json(rsObj)
                 })
             })
         }).catch(err => {
-            res.status(400).json({ error: `Cannot create booking, ${err.message}` })
+            res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
         })
-    } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
+    } catch (err) { res.status(400).json({ error: `Cannot create appointment, ${err.message}` }) }
 });
 
 /* DELETE disable booking. */
@@ -146,12 +149,12 @@ router.delete('/appointment/:id', async (reqe, res, next) => {
                         ok: "User has been deleted.",
                         id: doc._id
                     };
-                    logger.audit("Booking Mgt", "Delete", doc._id, staff.id, `Booking has been deleted by ${staff.DisplayName}`);
+                    logger.audit("Appointment Mgt", "Delete", doc._id, staff.id, `Appointment has been deleted by ${staff.DisplayName}`);
                     res.json(rsObj);
                 })
             }
         })
-    } catch (err) { res.status(400).json({ error: `Cannot delete booking, ${err.message}` }) }
+    } catch (err) { res.status(400).json({ error: `Cannot delete appointment, ${err.message}` }) }
 
 });
 
@@ -213,12 +216,16 @@ router.post('/availablestaff', async (reqe, res, next) => {
 
 /* Get Category. */
 router.get('/availableservice/:id', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let availableservice = await Service.find({ delFlag: false, category: reqe.params.id })
-    res.send(availableservice);
+        //get raw data from data
+        let availableservice = await Service.find({ delFlag: false, category: reqe.params.id })
+        res.send(availableservice);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 /* POST Create booking. */

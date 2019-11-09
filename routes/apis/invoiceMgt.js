@@ -12,90 +12,106 @@ let logger = require('../../services/logger');
 
 /* GET appointment infomation for invoice . */
 router.get('/appointment/:id', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
-    let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false })
-        .populate({
-            path: "bookings",
-            populate: {
-                path: 'service',
-            }
-        }).populate({
-            path: "bookings",
-            populate: {
-                path: 'staff',
-            }
-        }).populate({
-            path: "bookings",
-            populate: {
-                path: 'client',
-            }
-        })
-    res.send(appointment);
+        let appointment = await Appointment.findOne({ "_id": reqe.params.id, "delFlag": false })
+            .populate({
+                path: "bookings",
+                populate: {
+                    path: 'service',
+                }
+            }).populate({
+                path: "bookings",
+                populate: {
+                    path: 'staff',
+                }
+            }).populate({
+                path: "bookings",
+                populate: {
+                    path: 'client',
+                }
+            })
+        res.send(appointment);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 /* GET appointment infomation for invoice . */
 router.get('/appointmentToInvoice/:id', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
-    let invoice = await Invoice.findOne({ appointment: reqe.params.id, delFlag: false })
-        .populate({
-            path: "appointment",
-            populate: {
-                path: 'bookings',
+        let invoice = await Invoice.findOne({ appointment: reqe.params.id, delFlag: false })
+            .populate({
+                path: "appointment",
                 populate: {
-                    path: 'service',
+                    path: 'bookings',
+                    populate: {
+                        path: 'service',
+                    }
                 }
-            }
-        }).populate({
-            path: "appointment",
-            populate: {
-                path: 'bookings',
+            }).populate({
+                path: "appointment",
                 populate: {
-                    path: 'staff',
+                    path: 'bookings',
+                    populate: {
+                        path: 'staff',
+                    }
                 }
-            }
-        }).populate("client")
-    res.send(invoice);
+            }).populate("client")
+        res.send(invoice);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 
 /* GET invoice list . */
 router.get('/invoicelist', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
-    let invoices = await Invoice.find({ "delFlag": false })
-        .populate("client")
-    res.send(invoices);
+        let invoices = await Invoice.find({ "delFlag": false })
+            .populate("client")
+        res.send(invoices);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 /* GET invoice infomation. */
 router.get('/invoice/:id', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.invoiceMgt.list) { next(createError(403)); return; }
 
-    let invoice = await Invoice.findOne({ "_id": reqe.params.id, "delFlag": false })
-        .populate({
-            path: "appointment",
-            populate: {
-                path: 'bookings',
+        let invoice = await Invoice.findOne({ "_id": reqe.params.id, "delFlag": false })
+            .populate({
+                path: "appointment",
                 populate: {
-                    path: 'service',
+                    path: 'bookings',
+                    populate: {
+                        path: 'service',
+                    }
                 }
-            }
-        }).populate({
-            path: "appointment",
-            populate: {
-                path: 'bookings',
+            }).populate({
+                path: "appointment",
                 populate: {
-                    path: 'staff',
+                    path: 'bookings',
+                    populate: {
+                        path: 'staff',
+                    }
                 }
-            }
-        }).populate("client")
-    res.send(invoice);
+            }).populate("client")
+        res.send(invoice);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 /* POST Create invoice . */

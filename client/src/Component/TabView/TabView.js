@@ -5,6 +5,20 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Tabs, Tab, Typography, Box } from '@material-ui/core';
 
 
+function appointments(props) {
+    const { appointments } = props;
+    return (
+        "appointments"
+    );
+}
+
+function invoices(props) {
+    const { invoices } = props;
+    return (
+        "invoices"
+    );
+}
+
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
 
@@ -40,7 +54,7 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: theme.palette.background.paper,
         width: 500,
     },
-}));
+})); 
 
 export default function FullWidthTabs() {
     const classes = useStyles();
@@ -76,10 +90,10 @@ export default function FullWidthTabs() {
                 onChangeIndex={handleChangeIndex}
             >
                 <TabPanel value={value} index={0} dir={theme.direction}>
-                    Appointments
+                    {appointments}
             </TabPanel>
                 <TabPanel value={value} index={1} dir={theme.direction}>
-                    Invoices
+                    {invoices}
             </TabPanel>
             </SwipeableViews>
         </div>

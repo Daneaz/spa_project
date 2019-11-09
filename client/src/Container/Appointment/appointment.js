@@ -360,7 +360,7 @@ class CalendarView extends React.Component {
     });
   }
 
-  handleEditEvent = async (event) => {
+  handleEditBooking = async (event) => {
     if (event.client && event.service) {
       let appointment = await fetchAPI('GET', `appointmentMgt/appointment/${event.appointment}`)
       let idx = this.state.clientList.findIndex(client => {
@@ -539,7 +539,7 @@ class CalendarView extends React.Component {
             onEventDrop={this.moveBooking}
             onEventResize={this.resizeBooking}
             onSelectSlot={this.newBooking}
-            onSelectEvent={this.handleEditEvent}
+            onSelectEvent={this.handleEditBooking}
             defaultView={Views.DAY}
             views={['day', 'week']}
             defaultDate={new Date()}

@@ -3,6 +3,7 @@ var router = express.Router();
 let createError = require('http-errors');
 
 let Booking = require('../../models/booking');
+let Appointment = require('../../models/appointment')
 let Invoice = require('../../models/invoice');
 let Staff = require('../../models/auth/staff');
 let Client = require('../../models/auth/client');
@@ -13,22 +14,26 @@ const ObjectId = mongoose.Types.ObjectId;
 
 /* GET client list. */
 router.get('/clients', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let rawClients = await Client.find({ "delFlag": false }).lean()
-        .select({
-            "email": 1,
-            "mobile": 1,
-            "displayName": 1,
-            "nric": 1,
-            "gender": 1,
-            "credit": 1,
-            "createdAt": 1,
-        });
+        //get raw data from data
+        let rawClients = await Client.find({ "delFlag": false }).lean()
+            .select({
+                "email": 1,
+                "mobile": 1,
+                "displayName": 1,
+                "nric": 1,
+                "gender": 1,
+                "credit": 1,
+                "createdAt": 1,
+            });
 
-    res.send(rawClients);
+        res.send(rawClients);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
 });
 
 /* POST Create client . */
@@ -171,6 +176,60 @@ router.delete('/clients', async (reqe, res, next) => {
 
 /* GET client total bookings. */
 router.get('/statistics/:id', async (reqe, res, next) => {
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+
+        let bookings = await Booking.find({ delFlag: false, client: reqe.params.id })
+        let invoice = await Invoice.aggregate([
+            {
+                $match: {
+                    client: ObjectId(reqe.params.id)
+                }
+            },
+            {
+                $group:
+                {
+                    _id: null,
+                    totalSales: { $sum: "$total" },
+                    totalCompleted: { $sum: 1 }
+                }
+            }
+        ])
+        if (invoice.length > 0) {
+            let rsObj = {
+                ok: "Client with bookings and sales.",
+                totalBookings: bookings.length,
+                totalCompleted: invoice[0].totalCompleted,
+                totalSales: invoice[0].totalSales
+            };
+            res.json(rsObj);
+        } else {
+            let rsObj = {
+                ok: "Client with bookings.",
+                totalBookings: bookings.length,
+            };
+            res.json(rsObj);
+        }
+
+    } catch (err) { res.status(400).json({ error: `Cannot get statistics, ${err.message}` }) }
+});
+
+/* GET client total bookings. */
+router.get('/appointments/:id', async (reqe, res, next) => {
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+
+        let appointment = await Appointment.find({ delFlag: false, client: reqe.params.id })
+            .populate("bookings");
+        res.json(appointment);
+
+    } catch (err) { res.status(400).json({ error: `Cannot get appointments, ${err.message}` }) }
+});
+
+/* GET client total bookings. */
+router.get('/invoices/:id', async (reqe, res, next) => {
     try {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.staffMgt.list) { next(createError(403)); return; }

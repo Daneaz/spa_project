@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core';
 import { fetchAPI, getAvatarLetter } from '../../utils';
 import AppLayout from '../../Component/Layout/Layout'
-import ClientTabs from './Component/Tabs'
+import TabView from '../../Component/TabView/TabView'
 import Swal from 'sweetalert2';
 
 const styles = theme => ({
@@ -53,7 +53,9 @@ class ClientDetail extends React.Component {
     async componentDidMount() {
         try {
             let respObj = await fetchAPI('GET', `clientMgt/clients/${this.props.location.state.data._id}`)
-            let statistics = await fetchAPI('GET', `clientMgt/statistics/${this.props.location.state.data._id}`)
+            const statistics = await fetchAPI('GET', `clientMgt/statistics/${this.props.location.state.data._id}`)
+            const appointments = await fetchAPI('GET', `clientMgt/appointments/${this.props.location.state.data._id}`)
+            const invoices = await fetchAPI('GET', `clientMgt/invoices/${this.props.location.state.data._id}`)
             if (respObj) {
                 respObj.nric = replaceRange(respObj.nric, 0, 5, "*****")
                 this.setState({
@@ -79,6 +81,7 @@ class ClientDetail extends React.Component {
                     })
                 }
             }
+
         } catch (error) {
             Swal.fire({
                 type: 'error', text: error,
@@ -146,7 +149,7 @@ class ClientDetail extends React.Component {
                             <List className={classes.list}>
                                 <ListItemAvatar className={classes.listAvatar}>
                                     <Grid container direction='column' alignItems="center">
-                                        {/* <Avatar alt="Remy Sharp" className={classes.bigAvatar}>{getAvatarLetter(this.props.location.state.data.displayName)} </Avatar> */}
+                                        <Avatar alt="Remy Sharp" className={classes.bigAvatar}>{getAvatarLetter(this.props.location.state.data.displayName)} </Avatar>
                                         <Typography variant='h4' style={{ marginTop: "10px" }}> {this.state.client.displayName} </Typography>
                                     </Grid>
                                 </ListItemAvatar>
@@ -241,8 +244,7 @@ class ClientDetail extends React.Component {
                             <Grid item
                             >
                                 <Paper style={{ height: 600 }}>
-                                    <ClientTabs></ClientTabs>
-
+                                    <TabView appointments={this.state.appointments} invoices={this.state.invoices}></TabView>
                                 </Paper>
                             </Grid>
                         </Grid>
