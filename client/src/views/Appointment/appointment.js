@@ -13,9 +13,9 @@ import { green } from '@material-ui/core/colors';
 import AddIcon from '@material-ui/icons/Add';
 import CloseIcon from '@material-ui/icons/Close';
 import Swal from 'sweetalert2';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 import { fetchAPI } from '../../utils';
-import SelectService from './Component/SelectService'
+import BookingOverview from '../../Component/BookingOverview/BookingOverview'
 import './sweetalert.scss'
 
 const localizer = momentLocalizer(moment);
@@ -501,12 +501,12 @@ class CalendarView extends React.Component {
 
   navigateToCheckoutDetail = async (id) => {
     if (this.state.checkout) {
-      let invoice = await fetchAPI('GET', `invoiceMgt/invoice/${id}`)
+      let appointment = await fetchAPI('GET', `invoiceMgt/appointment/${id}`)
       const { history } = this.props;
       history.push({
         pathname: "/invoice/detail",
         state: {
-          invoice: invoice
+          appointment: appointment
         }
       });
     }
@@ -559,7 +559,7 @@ class CalendarView extends React.Component {
                 {
                   !this.state.editFlag ?
                     this.state.bookings.map((booking, index) =>
-                      <SelectService key={booking._id} category={booking.category}
+                      <BookingOverview key={booking._id} category={booking.category}
                         staff={booking.staff} service={booking.service} start={booking.start}
                         staffList={this.state.serviceStaffList} serviceList={booking.availableServiceList}
                         categoryList={this.state.categoryList}
@@ -572,7 +572,7 @@ class CalendarView extends React.Component {
                     )
                     :
                     this.state.bookings.map((booking, index) =>
-                      <SelectService key={booking._id} category={booking.category}
+                      <BookingOverview key={booking._id} category={booking.category}
                         staff={booking.staff} service={booking.service} start={booking.start}
                         staffList={this.state.staffList} serviceList={booking.availableServiceList}
                         categoryList={this.state.categoryList}

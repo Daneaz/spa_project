@@ -22,7 +22,7 @@ import {
     Settings as SettingsIcon,
     Payment as InvoiceIcon
 } from '@material-ui/icons';
-import { removeToken, removeUser, getAvatarLetter } from '../utils';
+import { removeToken, removeUser, getAvatarLetter } from '../../utils';
 const logo = '/static/images/logo.png';
 
 const drawerWidth = 240;

@@ -90,18 +90,18 @@ function Routers() {
                     <PrivateRoute exact path="/report" component={Report} />
 
                     <PrivateRoute exact path="/client" component={Client} />
-                    <PrivateRoute exact path="/newclient" component={NewClient} />
-                    <PrivateRoute exact path="/clientdetail" component={ClientDetail} />
-                    <PrivateRoute exact path="/updateclient" component={UpdateClient} />
+                    <PrivateRoute exact path="/client/new" component={NewClient} />
+                    <PrivateRoute exact path="/client/detail" component={ClientDetail} />
+                    <PrivateRoute exact path="/client/update" component={UpdateClient} />
 
                     <PrivateRoute exact path="/staff" component={Staff} />
-                    <PrivateRoute exact path="/newstaff" component={NewStaff} />
-                    <PrivateRoute exact path="/staffdetail" component={StaffDetail} />
+                    <PrivateRoute exact path="/staff/new" component={NewStaff} />
+                    <PrivateRoute exact path="/staff/detail" component={StaffDetail} />
 
                     <PrivateRoute exact path="/service" component={Service} />
-                    <PrivateRoute exact path="/newservice" component={NewService} />
-                    <PrivateRoute exact path="/servicedetail" component={ServiceDetail} />
-                    <PrivateRoute exact path="/newcategory" component={NewCategory} />
+                    <PrivateRoute exact path="/service/new" component={NewService} />
+                    <PrivateRoute exact path="/service/detail" component={ServiceDetail} />
+                    <PrivateRoute exact path="/service/newcategory" component={NewCategory} />
 
                     <PrivateRoute exact path="/invoice" component={Invoice} />
                     <PrivateRoute exact path="/invoice/detail" component={InvoiceDetail} />

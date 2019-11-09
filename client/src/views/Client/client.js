@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/styles';
 import {
   Grid,
 } from '@material-ui/core';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -108,13 +108,13 @@ class Client extends React.Component {
 
   handleAddClient = () => {
     const { history } = this.props;
-    history.push('/newclient');
+    history.push('/client/new');
   }
 
   handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
-      pathname: "/clientdetail",
+      pathname: "/client/detail",
       state: {
         data: this.state.clientList[rowMeta.dataIndex]
       }

@@ -9,7 +9,7 @@ import { Formik, Field, Form } from 'formik';
 import { TextField } from 'formik-material-ui';
 import { fetchAPI } from '../../utils';
 import Swal from 'sweetalert2';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 
 const styles = theme => ({
     container: {
@@ -65,7 +65,7 @@ class UpdateClient extends React.Component {
                                     const { history } = this.props;
 
                                     history.push({
-                                        pathname: "/clientdetail",
+                                        pathname: "/client/detail",
                                         state: {
                                             data: respObj.client
                                         }

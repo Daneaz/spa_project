@@ -5,7 +5,7 @@ import {
     DialogTitle, TextField, ButtonGroup
 } from '@material-ui/core';
 import { fetchAPI, getAvatarLetter } from '../../utils';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 import ClientTabs from './Component/Tabs'
 import Swal from 'sweetalert2';
 
@@ -42,7 +42,7 @@ class ClientDetail extends React.Component {
 
     state = {
         addCreditDialog: false,
-        credit: 0,
+        credit: '',
         client: '',
         totalBookings: 0,
         totalCompleted: 0,
@@ -89,7 +89,7 @@ class ClientDetail extends React.Component {
     handleEditClick = () => {
         const { history } = this.props;
         history.push({
-            pathname: "/updateclient",
+            pathname: "/client/update",
             state: {
                 data: this.state.client,
             }
@@ -102,36 +102,38 @@ class ClientDetail extends React.Component {
         this.setState({ addCreditDialog: true });
     }
     handleAddCreditClose = () => {
-        this.setState({ addCreditDialog: false });
-    };
-
-    handleAddCreditConfirm = () => {
         this.setState({
             addCreditDialog: false,
             credit: '',
-        })
-        let values = {
-            credit: this.state.credit
-        }
-        fetchAPI('PATCH', `clientMgt/addcredit/${this.state.client._id}`, values).then(respObj => {
-            if (respObj && respObj.ok) {
-                this.setState({ client: respObj.client })
+        });
+    };
+
+    handleAddCreditConfirm = () => {
+        this.handleAddCreditClose();
+        if (this.state.credit) {
+            let values = {
+                credit: this.state.credit
+            }
+            fetchAPI('PATCH', `clientMgt/addcredit/${this.state.client._id}`, values).then(respObj => {
+                if (respObj && respObj.ok) {
+                    this.setState({ client: respObj.client })
+                    Swal.fire({
+                        type: 'success', text: respObj.ok,
+                        title: "Success!"
+                    })
+                } else {
+                    Swal.fire({
+                        type: 'error', text: respObj.error,
+                        title: "Fail!"
+                    })
+                }
+            }).catch(error => {
                 Swal.fire({
-                    type: 'success', text: respObj.ok,
-                    title: "Success!"
-                })
-            } else {
-                Swal.fire({
-                    type: 'error', text: respObj.error,
+                    type: 'error', text: error,
                     title: "Fail!"
                 })
-            }
-        }).catch(error => {
-            Swal.fire({
-                type: 'error', text: error,
-                title: "Fail!"
             })
-        })
+        }
     }
     render() {
         const { classes } = this.props;
@@ -183,7 +185,7 @@ class ClientDetail extends React.Component {
                                     <ButtonGroup fullWidth >
                                         <Button onClick={this.handleEditClick}>Edit</Button>
                                         <Button onClick={this.handleAddCreditOpen}>Add Credit</Button>
-                                        <Button onClick={() => this.props.history.push("appointment")}>New Appointment</Button>
+                                        <Button onClick={() => this.props.history.push("/appointment")}>New Appointment</Button>
                                     </ButtonGroup>
                                 </ListItem>
                             </List>

@@ -11,7 +11,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CategoryIcon from "@material-ui/icons/Category";
 import Swal from 'sweetalert2';
 import { fetchAPI } from '../../utils';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 const styles = theme => ({
@@ -113,18 +113,18 @@ class Service extends React.Component {
 
   handleAddService = () => {
     const { history } = this.props;
-    history.push('/newservice');
+    history.push('/service/new');
   }
 
   handleAddCategory = () => {
     const { history } = this.props;
-    history.push('/newcategory');
+    history.push('/service/newcategory');
   }
 
   handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
-      pathname: "/servicedetail",
+      pathname: "/service/detail",
       state: {
         data: this.state.serviceList[rowMeta.dataIndex]
       }

@@ -7,7 +7,7 @@ import {
 import MUIDataTable from "mui-datatables";
 import Swal from 'sweetalert2';
 import { fetchAPI } from '../../utils';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 

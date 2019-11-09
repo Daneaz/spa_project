@@ -6,7 +6,7 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 
 
-import AppLayout from '../layout/app'
+import AppLayout from '../Component/Layout/Layout'
 
 const styles = theme => ({
   fab: {

@@ -4,7 +4,7 @@ import {
   Grid,
 } from '@material-ui/core';
 import Swal from 'sweetalert2';
-import AppLayout from '../../layout/app'
+import AppLayout from '../../Component/Layout/Layout'
 import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -86,7 +86,7 @@ class Staff extends React.Component {
 
   handleAddStaff = () => {
     const { history } = this.props;
-    history.push('/newstaff');
+    history.push('/staff/new');
   }
 
   handleAddRole = () => {
@@ -96,7 +96,7 @@ class Staff extends React.Component {
   handleRowClick = (rowMeta) => {
     const { history } = this.props;
     history.push({
-      pathname: "/staffdetail",
+      pathname: "/staff/detail",
       state: {
         data: this.state.userList[rowMeta.dataIndex]
       }
