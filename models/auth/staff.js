@@ -13,9 +13,6 @@ var StaffSchema = new Schema({
     mobile      : { type: Number },
     displayName : { type: String, required: true },
     role        : { type: Schema.Types.ObjectId, ref: 'StaffRole', required: true },
-    offDays     : [
-        { type: Number }
-    ],
     leaveDays   : [
         { type: Date }
     ],

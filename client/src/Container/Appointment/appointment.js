@@ -291,21 +291,28 @@ class CalendarView extends React.Component {
   }
 
   moveBooking = ({ event, start, end, resourceId }) => {
-    const { events } = this.state
+    if (event.client && event.service) {
+      const { events } = this.state
 
-    const idx = events.indexOf(event)
+      const idx = events.indexOf(event)
 
-    const updatedEvent = { ...event, start, resourceId, end }
+      const updatedEvent = { ...event, start, resourceId, end }
 
-    const nextEvents = [...events]
-    nextEvents.splice(idx, 1, updatedEvent)
+      const nextEvents = [...events]
+      nextEvents.splice(idx, 1, updatedEvent)
 
-    let values = {
-      start: updatedEvent.start,
-      end: updatedEvent.end,
-      staff: updatedEvent.resourceId,
+      let values = {
+        start: updatedEvent.start,
+        end: updatedEvent.end,
+        staff: updatedEvent.resourceId,
+      }
+      this.handleUpdateBackendEvent(values, updatedEvent, nextEvents);
+    } else {
+      Swal.fire({
+        type: 'error',
+        title: "Unable to edit leave from booking. Please edit in staff page!!!"
+      })
     }
-    this.handleUpdateBackendEvent(values, updatedEvent, nextEvents);
   };
 
   async handleUpdateBackendEvent(values, updatedEvent, nextEvents) {
@@ -318,19 +325,26 @@ class CalendarView extends React.Component {
   }
 
   resizeBooking = ({ event, start, end }) => {
-    const { events } = this.state
+    if (event.client && event.service) {
+      const { events } = this.state
 
-    const nextEvents = events.map(existingEvent => {
-      return existingEvent.id === event.id
-        ? { ...existingEvent, start, end }
-        : existingEvent
-    });
+      const nextEvents = events.map(existingEvent => {
+        return existingEvent.id === event.id
+          ? { ...existingEvent, start, end }
+          : existingEvent
+      });
 
-    let values = {
-      start: start,
-      end: end,
+      let values = {
+        start: start,
+        end: end,
+      }
+      this.handleUpdateBackendEvent(values, event, nextEvents)
+    } else {
+      Swal.fire({
+        type: 'error',
+        title: "Unable to edit leave from booking. Please edit in staff page!!!"
+      })
     }
-    this.handleUpdateBackendEvent(values, event, nextEvents)
   }
 
   newBooking = newBooking => {

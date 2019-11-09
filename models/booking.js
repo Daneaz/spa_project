@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var BookingSchema = new Schema({
-    appointment: { type: Schema.Types.ObjectId, ref: 'Appointment', required: true },
+    appointment: { type: Schema.Types.ObjectId, ref: 'Appointment' },
     title: { type: String, required: true },
     start: { type: Date, required: true, index: true },
     end: { type: Date, required: true, index: true },

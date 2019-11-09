@@ -209,35 +209,6 @@ class NewStaff extends React.Component {
                                     </DialogActions>
                                 </Dialog>
 
-                                <Typography>
-                                    <h5>
-                                        Weekly Off Day
-                                    </h5>
-                                </Typography>
-                                <Button variant="outlined" color="primary" onClick={this.handleOffClickOpen}>
-                                    Please Select Off Days...
-                                </Button>
-                                <Dialog open={this.state.offOpen} onClose={this.handleOffClose} aria-labelledby="form-dialog-title">
-                                    <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
-                                    <DialogContent>
-                                        <InfiniteCalendar id="offDayCalendar"
-                                            Component={withMultipleDates(Calendar)}
-                                            selected={this.state.selectedOff}
-                                            interpolateSelection={defaultMultipleDateInterpolation}
-                                            minDate={new Date()}
-                                            disabledDays={this.state.offDays}
-                                            onSelect={(selectedDate) => { this.handleOffSelection(selectedDate) }}
-                                        />
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={this.handleOffReset} color="secondary">
-                                            Reset
-                                        </Button>
-                                        <Button onClick={this.handleOffClose} color="primary">
-                                            Done
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >

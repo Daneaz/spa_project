@@ -29,13 +29,11 @@ const styles = theme => ({
 
 class ClientDetail extends React.Component {
     state = {
-        selectedOption: { value: this.props.location.state.data.role.name, label: this.props.location.state.data.role.name },
+        selectedOption: { value: this.props.location.state.data.role._id, label: this.props.location.state.data.role.name },
         roleList: [],
         selectedLeaves: this.props.location.state.data.leaveDays,
         selectedOff: [],
-        offDays: this.props.location.state.data.offDays,
         leaveOpen: false,
-        offOpen: false,
     };
 
     async componentDidMount() {
@@ -57,16 +55,6 @@ class ClientDetail extends React.Component {
         })
     }
 
-    handleOffSelection(selectedDate) {
-        let selectedOff = defaultMultipleDateInterpolation(selectedDate, this.state.selectedOff)
-        selectedOff.map(day => {
-            return this.state.offDays.push(day.getDay());
-        })
-        this.setState({
-            selectedOff: selectedOff
-        })
-    }
-
     handleLeaveClickOpen = () => {
         this.setState({ leaveOpen: true });
     };
@@ -77,25 +65,6 @@ class ClientDetail extends React.Component {
 
     handleLeaveClose = () => {
         this.setState({ leaveOpen: false });
-    }
-
-    handleOffClickOpen = () => {
-        this.setState({ offOpen: true });
-    };
-
-    handleOffOpen = () => {
-        this.setState({ offOpen: false });
-    }
-
-    handleOffClose = () => {
-        this.setState({ offOpen: false });
-    }
-
-    handleOffReset = () => {
-        this.setState({
-            offDays: [],
-            selectedOff: [],
-        });
     }
 
     render() {
@@ -125,7 +94,6 @@ class ClientDetail extends React.Component {
                                 onSubmit={async (values, { setSubmitting }) => {
                                     try {
                                         values.role = this.state.selectedOption.value;
-                                        values.offDays = this.state.offDays;
                                         values.leaveDays = this.state.selectedLeaves;
 
                                         const respObj = await fetchAPI('PATCH', `staffMgt/staffs/${this.props.location.state.data._id}`, values);
@@ -190,7 +158,7 @@ class ClientDetail extends React.Component {
                                         </Typography>
                                         <Button variant="outlined" color="primary" onClick={this.handleLeaveClickOpen}>
                                             Please Select Leave Days...
-                                </Button>
+                                        </Button>
                                         <Dialog open={this.state.leaveOpen} onClose={this.handleLeaveClose} aria-labelledby="form-dialog-title">
                                             <DialogTitle id="form-dialog-title">Leave</DialogTitle>
                                             <DialogContent>
@@ -198,7 +166,6 @@ class ClientDetail extends React.Component {
                                                     Component={withMultipleDates(Calendar)}
                                                     selected={this.state.selectedLeaves}
                                                     minDate={new Date()}
-                                                    disabledDays={this.state.offDays}
                                                     interpolateSelection={defaultMultipleDateInterpolation}
                                                     onSelect={(selectedDate) => { this.handleLeaveSelection(selectedDate) }}
                                                 />
@@ -210,41 +177,11 @@ class ClientDetail extends React.Component {
                                             </DialogActions>
                                         </Dialog>
 
-                                        <Typography>
-                                            <h5>
-                                                Weekly Off Day
-                                    </h5>
-                                        </Typography>
-                                        <Button variant="outlined" color="primary" onClick={this.handleOffClickOpen}>
-                                            Please Select Off Days...
-                                </Button>
-                                        <Dialog open={this.state.offOpen} onClose={this.handleOffClose} aria-labelledby="form-dialog-title">
-                                            <DialogTitle id="form-dialog-title">Off</DialogTitle>
-                                            <DialogContent>
-                                                <InfiniteCalendar id="offDayCalendar"
-                                                    Component={withMultipleDates(Calendar)}
-                                                    selected={this.state.selectedLeaves}
-                                                    interpolateSelection={defaultMultipleDateInterpolation}
-                                                    minDate={new Date()}
-                                                    disabledDays={this.state.offDays}
-                                                    onSelect={(selectedDate) => { this.handleOffSelection(selectedDate) }}
-                                                />
-                                            </DialogContent>
-                                            <DialogActions>
-                                                <Button onClick={this.handleOffReset} color="secondary">
-                                                    Reset
-                                        </Button>
-                                                <Button onClick={this.handleOffClose} color="primary">
-                                                    Done
-                                        </Button>
-                                            </DialogActions>
-                                        </Dialog>
-
                                         <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                             disabled={isSubmitting} onClick={submitForm}
                                         >
                                             Update
-                                </Button>
+                                        </Button>
                                         <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
                                             onClick={() => { window.history.back(); }}
                                         >

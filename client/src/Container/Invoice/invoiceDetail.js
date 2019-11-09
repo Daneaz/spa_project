@@ -102,11 +102,28 @@ class InvoiceDetail extends React.Component {
                     paymentType: type,
                     appointment: this.state.bookingList[0].appointment,
                 }
-                fetchAPI('POST', `invoiceMgt/invoice`, values).then(invoice => {
-                    const { history } = this.props;
-                    history.push({
-                        pathname: "/invoice",
-                    });
+                fetchAPI('POST', `invoiceMgt/invoice`, values).then(respObj => {
+                    if (respObj && respObj.ok) {
+                        let invoice = respObj.invoice
+                        this.setState({
+                            bookingList: invoice.appointment.bookings,
+                            client: invoice.client.displayName,
+                            subtotal: invoice.subtotal,
+                            total: invoice.total,
+                            addon: invoice.addon,
+                            discount: invoice.discount,
+                            isCheckout: true,
+                        })
+                        Swal.fire({
+                            type: 'success', text: respObj.ok,
+                            title: "Success!"
+                        })
+                    } else {
+                        Swal.fire({
+                            type: 'error', text: 'Please try again.',
+                            title: respObj.error
+                        })
+                    }
                 })
             }
         })

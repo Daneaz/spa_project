@@ -105,15 +105,33 @@ router.post('/invoice', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.invoiceMgt.create) { next(createError(403)); return; }
 
-        let invoice = new Invoice(reqe.body);
-        invoice.createdBy = staff._id;
-        invoice.updatedBy = staff._id;
+        let newInvoice = new Invoice(reqe.body);
+        newInvoice.createdBy = staff._id;
+        newInvoice.updatedBy = staff._id;
 
         Appointment.findByIdAndUpdate(reqe.body.appointment, { checkout: true }, { new: true }).then(async result => {
             if (result.checkout) {
-                let doc = await invoice.save();
-                let rsObj = { ok: "Invoice has been created.", invoice: doc };
-                logger.audit("Invoice Mgt", "Create", doc._id, staff.id, `A new invoice has been created by ${staff.displayName}`);
+                let doc = await newInvoice.save();
+                let invoice = await Invoice.findOne({ "_id": doc._id, "delFlag": false })
+                    .populate({
+                        path: "appointment",
+                        populate: {
+                            path: 'bookings',
+                            populate: {
+                                path: 'service',
+                            }
+                        }
+                    }).populate({
+                        path: "appointment",
+                        populate: {
+                            path: 'bookings',
+                            populate: {
+                                path: 'staff',
+                            }
+                        }
+                    }).populate("client")
+                let rsObj = { ok: "Invoice has been created.", invoice: invoice };
+                logger.audit("Invoice Mgt", "Create", invoice._id, staff.id, `A new invoice has been created by ${staff.displayName}`);
                 res.json(rsObj);
             }
         })
