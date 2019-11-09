@@ -595,12 +595,10 @@ class CalendarView extends React.Component {
                   />
                 </FormControl>
 
-                {this.state.editFlag ? this.state.appointment.checkout : false ?
+                {(this.state.editFlag ? this.state.appointment.checkout : false) ? null :
                   <IconButton color="primary" onClick={this.handleAddBooking} aria-label="close">
                     <AddIcon fontSize="large" />
                   </IconButton>
-                  :
-                  null
                 }
               </Grid>
 
@@ -677,6 +675,7 @@ const ColorButton = withStyles(theme => ({
     '&:hover': {
       backgroundColor: green[700],
     },
+    marginTop: 30
   },
 }))(Button);
 
