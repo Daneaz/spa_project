@@ -12,31 +12,55 @@ const styles = theme => ({
     },
 });
 
-class InvoiceList extends React.Component {
+function getTotal(bookings) {
+    let total = 0
+    for (let i = 0; i < bookings.length; i++) {
+        total += bookings[i].service.price
+    }
+    return total
+}
 
+class InvoiceList extends React.Component {
     render() {
         const { classes } = this.props;
+
         return (
-            // <Paper className={classes.paperMargin}>
             <ListItem button onClick={this.props.click} >
                 <Grid
                     container
                     direction="column">
+                    {
+                        this.props.bookings.map(booking => {
+
+                            return (
+                                <React.Fragment>
+                                    <Grid item>
+                                        <Grid
+                                            container
+                                            justify="space-between"
+                                            direction="row">
+                                            <h3><strong>{booking.service.name}</strong></h3>
+                                            <h3><strong>S${booking.service.price}</strong></h3>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item>
+                                        <light>{new Date(booking.start).toLocaleString()} with {booking.staff.displayName} </light>
+                                    </Grid>
+                                </React.Fragment>
+                            )
+                        })
+                    }
                     <Grid item>
                         <Grid
                             container
-                            justify="space-between"
-                            direction="row">
-                            <h3><strong>{this.props.booking.service.name}</strong></h3>
-                            <h3><strong>S${this.props.booking.service.price}</strong></h3>
+                            direction="row"
+                            justify="flex-end"
+                            alignItems="center">
+                            <h3><strong>Total: ${getTotal(this.props.bookings)} </strong></h3>
                         </Grid>
-                    </Grid>
-                    <Grid item>
-                        <light>{new Date(this.props.booking.start).toTimeString().split(' ')[0]} with {this.props.booking.staff.displayName} </light>
                     </Grid>
                 </Grid>
             </ListItem>
-            // </Paper>
         )
     }
 }

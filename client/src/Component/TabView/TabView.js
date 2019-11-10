@@ -8,9 +8,7 @@ import InvoiceListView from '../Invoice/InvoiceListView'
 
 function Appointment(props) {
     return (
-        props.bookings.map(booking => {
-            return <InvoiceListView booking={booking} click={props.click} />
-        })
+        <InvoiceListView bookings={props.bookings} click={props.click} />
     )
 }
 

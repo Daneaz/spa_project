@@ -88,7 +88,6 @@ class ClientDetail extends React.Component {
                     appointments: appointments.appointments
                 })
             }
-            console.log(invoices.invoices)
             if (invoices && invoices.ok) {
                 this.setState({
                     invoices: invoices.invoices
