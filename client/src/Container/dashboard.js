@@ -87,46 +87,6 @@ class Dashboard extends React.Component {
                 <Bar dataKey="Bookings" fill="#82ca9d" />
               </BarChart>
             </Grid>
-            {/* <Grid
-              container
-              direction="row"
-              justify="space-around"
-              alignItems="center"
-            >
-
-              <LineChart
-                width={750}
-                height={400}
-                data={this.state.bookingList}
-                margin={{
-                  top: 20, right: 20, left: 20, bottom: 20,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="_id" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="totalBookings" stroke="#8884d8" activeDot={{ r: 8 }} />
-                <Line type="monotone" dataKey="totalBookings" stroke="#82ca9d" />
-              </LineChart>
-              <BarChart
-                width={750}
-                height={400}
-                data={this.state.bookingList}
-                margin={{
-                  top: 20, right: 20, left: 20, bottom: 20,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="_id" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="totalBookings" fill="#8884d8" />
-                <Bar dataKey="totalBookings" fill="#82ca9d" />
-              </BarChart>
-            </Grid> */}
           </Grid>
         </Paper>
       </AppLayout>
