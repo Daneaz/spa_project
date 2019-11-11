@@ -101,8 +101,7 @@ class Client extends React.Component {
   async componentDidMount() {
     const clientList = await fetchAPI('GET', 'clientMgt/clients');
     clientList.map(client => {
-      if (client.birthday)
-        client.birthday = new Date(client.birthday).getMonth() + 1;
+      client.birthday = client.birthday ? new Date(client.birthday).getMonth() + 1 : "-"
       return client.nric = replaceRange(client.nric, 0, 5, "*****")
     })
     this.setState({ clientList: clientList });
