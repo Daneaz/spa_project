@@ -79,6 +79,7 @@ class TabView extends React.Component {
                 >
                     <Tab label="Appointments" {...a11yProps(0)} />
                     <Tab label="Invoices" {...a11yProps(1)} />
+                    <Tab label="Credit Record" {...a11yProps(2)} />
                 </Tabs>
                 <TabPanel value={value} index={0} >
                     {
@@ -123,6 +124,28 @@ class TabView extends React.Component {
                                 )
                             }) : null
                     }
+                </TabPanel>
+                <TabPanel value={value} index={2} >
+                    {/* {
+                        invoices ?
+                            invoices.map(invoice => {
+                                return (
+                                    <React.Fragment>
+                                        <Divider />
+                                        <Appointment bookings={invoice.appointment.bookings} click={() => {
+                                            const { history } = this.props;
+                                            history.push({
+                                                pathname: "/invoice/detail",
+                                                state: {
+                                                    invoice: invoice
+                                                }
+                                            });
+                                        }} />
+                                        <Divider />
+                                    </React.Fragment>
+                                )
+                            }) : null
+                    } */}
                 </TabPanel>
             </div>
         );

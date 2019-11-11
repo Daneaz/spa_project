@@ -5,6 +5,8 @@ import {
     Typography, Button, CssBaseline, Container, LinearProgress
 } from '@material-ui/core';
 
+import Datepicker from '@material-ui/core/TextField'
+
 import { Formik, Field, Form } from 'formik';
 import { TextField } from 'formik-material-ui';
 import { fetchAPI } from '../../utils';
@@ -35,6 +37,7 @@ class NewClient extends React.Component {
 
     state = {
         gender: genderOptions[0],
+        birthday: null,
     }
 
     handleCancel() {
@@ -43,6 +46,9 @@ class NewClient extends React.Component {
 
     handleGenderSelection = (gender) => {
         this.setState({ gender });
+    }
+    handleChangeBirthday = (event) => {
+        this.setState({ birthday: event.target.value });
     }
     render() {
         const { classes } = this.props;
@@ -56,7 +62,7 @@ class NewClient extends React.Component {
                     </Typography>
                     <CssBaseline />
                     <Formik
-                        initialValues={{ mobile: '', password: '', confirmPassoword: '', email: '', displayName:'', nric:'' }}
+                        initialValues={{ mobile: '', password: '', confirmPassoword: '', email: '', displayName: '', nric: '' }}
                         validate={values => {
                             const errors = {};
                             if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
@@ -69,6 +75,7 @@ class NewClient extends React.Component {
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
                                 values.gender = this.state.gender.value
+                                values.birthday = this.state.birthday
                                 const respObj = await fetchAPI('POST', 'clientMgt/clients', values);
 
                                 if (respObj && respObj.ok) {
@@ -109,6 +116,18 @@ class NewClient extends React.Component {
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="nric" label="NRIC"
                                 />
+                                <Datepicker
+                                    fullWidth
+                                    margin="normal"
+                                    variant="outlined"
+                                    id="date"
+                                    label="Birthday"
+                                    type="date"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    onChange={this.handleChangeBirthday}
+                                />
                                 <Typography>
                                     <h5>
                                         Gender
@@ -119,7 +138,7 @@ class NewClient extends React.Component {
                                     options={genderOptions}
                                     value={this.state.gender}
                                 />
-                                
+
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >

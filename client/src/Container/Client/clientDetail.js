@@ -170,7 +170,7 @@ class ClientDetail extends React.Component {
                                 <ListItem>
                                     <Grid>
                                         <Typography className={classes.labelColor}> Email </Typography>
-                                        <Typography> {this.state.client.email} </Typography>
+                                        <Typography> {this.state.client.email ? this.state.client.email : "-"} </Typography>
                                     </Grid>
                                 </ListItem>
                                 <ListItem>
@@ -191,12 +191,12 @@ class ClientDetail extends React.Component {
                                         <Typography> {this.state.client.mobile} </Typography>
                                     </Grid>
                                 </ListItem>
-                                {/* <ListItem>
+                                <ListItem>
                                     <Grid>
-                                        <Typography className={classes.labelColor}> Book No </Typography>
-                                        <Typography> {0} </Typography>
+                                        <Typography className={classes.labelColor}> Birthday </Typography>
+                                        <Typography> {this.state.client.birthday ? new Date(this.state.client.birthday).toLocaleDateString() : "-"} </Typography>
                                     </Grid>
-                                </ListItem> */}
+                                </ListItem>
                                 <ListItem >
                                     <ButtonGroup fullWidth >
                                         <Button onClick={this.handleEditClick}>Edit</Button>

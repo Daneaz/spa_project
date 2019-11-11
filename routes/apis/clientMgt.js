@@ -28,6 +28,7 @@ router.get('/clients', async (reqe, res, next) => {
                 "gender": 1,
                 "credit": 1,
                 "createdAt": 1,
+                "birthday": 1,
             });
 
         res.send(rawClients);
@@ -81,6 +82,7 @@ router.get('/clients/:id', async (reqe, res, next) => {
                 "nric": 1,
                 "gender": 1,
                 "credit": 1,
+                "birthday": 1,
             });
         res.send(client);
     } catch (err) {
@@ -106,6 +108,7 @@ router.patch('/clients/:id', async (reqe, res, next) => {
         newClient.mobile = rawNewClient.mobile || newClient.mobile;
         newClient.gender = rawNewClient.gender || newClient.gender;
         newClient.nric = rawNewClient.nric || newClient.nric;
+        newClient.birthday = rawNewClient.birthday || newClient.birthday;
 
         //load fields by biz logic
         if (rawNewClient.password) { newClient.password = auth.hash(rawNewClient.password); }

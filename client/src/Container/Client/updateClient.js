@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/styles';
 import {
     Typography, Button, CssBaseline, Container, LinearProgress
 } from '@material-ui/core';
+import Datepicker from '@material-ui/core/TextField'
 
 import { Formik, Field, Form } from 'formik';
 import { TextField } from 'formik-material-ui';
@@ -30,10 +31,14 @@ class UpdateClient extends React.Component {
 
     state = {
         gender: { value: this.props.location.state.data.gender, label: this.props.location.state.data.gender },
+        birthday: null,
     }
 
     handleGenderSelection = (gender) => {
         this.setState({ gender });
+    }
+    handleChangeBirthday = (event) => {
+        this.setState({ birthday: event.target.value });
     }
 
     render() {
@@ -60,6 +65,7 @@ class UpdateClient extends React.Component {
                         onSubmit={async (values, { setSubmitting }) => {
                             try {
                                 values.gender = this.state.gender.value
+                                values.birthday = this.state.birthday
                                 const respObj = await fetchAPI('PATCH', `clientMgt/clients/${this.props.location.state.data._id}`, values);
                                 if (respObj && respObj.ok) {
                                     const { history } = this.props;
@@ -111,6 +117,18 @@ class UpdateClient extends React.Component {
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="nric" label="NRIC"
+                                />
+                                <Datepicker
+                                    fullWidth
+                                    margin="normal"
+                                    variant="outlined"
+                                    id="date"
+                                    label="Birthday"
+                                    type="date"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    onChange={this.handleChangeBirthday}
                                 />
                                 <Typography>
                                     <h5>

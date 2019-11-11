@@ -34,7 +34,7 @@ const columns = [
     name: "displayName",
     label: "Display Name",
     options: {
-      filter: true,
+      filter: false,
       sort: true,
     }
   },
@@ -66,7 +66,7 @@ const columns = [
     name: "gender",
     label: "Gender",
     options: {
-      filter: false,
+      filter: true,
       sort: true,
     }
   },
@@ -79,10 +79,10 @@ const columns = [
     }
   },
   {
-    name: "createdAt",
-    label: "Regitration Date",
+    name: "birthday",
+    label: "Birthday Month",
     options: {
-      filter: false,
+      filter: true,
       sort: true,
     }
   },
@@ -101,6 +101,8 @@ class Client extends React.Component {
   async componentDidMount() {
     const clientList = await fetchAPI('GET', 'clientMgt/clients');
     clientList.map(client => {
+      if (client.birthday)
+        client.birthday = new Date(client.birthday).getMonth() + 1;
       return client.nric = replaceRange(client.nric, 0, 5, "*****")
     })
     this.setState({ clientList: clientList });
@@ -157,6 +159,22 @@ class Client extends React.Component {
                     </Tooltip>
                   );
                 },
+                // customToolbarSelect: () => {
+                //   return (
+                //     <React.Fragment>
+                //       <Tooltip title={"Add Client"}>
+                //         <IconButton onClick={this.handleAddClient}>
+                //           <AddIcon />
+                //         </IconButton>
+                //       </Tooltip>
+                //       <Tooltip title={"Add Client"}>
+                //         <IconButton onClick={this.handleAddClient}>
+                //           <AddIcon />
+                //         </IconButton>
+                //       </Tooltip>
+                //     </React.Fragment>
+                //   );
+                // },
                 onRowClick: (rowData, rowMeta) => {
                   this.handleRowClick(rowMeta);
                 },
@@ -164,7 +182,6 @@ class Client extends React.Component {
                   this.handleRowDelete(rowsDeleted.data);
                 },
                 filterType: 'checkbox',
-                filter: false
               }}
             />
           </Grid>
