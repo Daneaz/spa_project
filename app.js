@@ -22,6 +22,8 @@ var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
 var apiAppointmentMgtRouter = require('./routes/apis/appointmentMgt');
 var apiInvoiceMgtRouter = require('./routes/apis/invoiceMgt');
 var apiCreditRecordMgtRouter = require('./routes/apis/creditRecordMgt');
+var apiDashboardMgtRouter = require('./routes/apis/dashboardMgt');
+
 
 var app = express();
 
@@ -63,7 +65,7 @@ app.use('/api/serviceMgt', apiServiceMgtRouter);
 app.use('/api/appointmentMgt', apiAppointmentMgtRouter);
 app.use('/api/invoiceMgt', apiInvoiceMgtRouter);
 app.use('/api/creditRecordMgt', apiCreditRecordMgtRouter);
-
+app.use('/api/dashboardMgt', apiDashboardMgtRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
