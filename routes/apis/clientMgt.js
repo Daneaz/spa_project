@@ -7,6 +7,7 @@ let Appointment = require('../../models/appointment')
 let Invoice = require('../../models/invoice');
 let Staff = require('../../models/auth/staff');
 let Client = require('../../models/auth/client');
+let CreditRecord = require('../../models/creditRecord')
 let auth = require('../../services/auth');
 let logger = require('../../services/logger');
 var mongoose = require('mongoose');
@@ -120,37 +121,6 @@ router.patch('/clients/:id', async (reqe, res, next) => {
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot update user, ${err.message}` }); }
-
-});
-
-/* PATCH update add credit. */
-router.patch('/addcredit/:id', async (reqe, res, next) => {
-    try {
-
-        let staff = await Staff.findById(res.locals.user.id).populate('role');
-        if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
-
-        //load data from db
-        let client = await Client.findOne({ "_id": reqe.params.id, "delFlag": false }).select({
-            "email": 1,
-            "mobile": 1,
-            "displayName": 1,
-            "nric": 1,
-            "gender": 1,
-            "credit": 1,
-        });
-
-        client.updatedBy = staff._id;
-
-        client.credit = client.credit + parseFloat(reqe.body.credit);
-
-        //save user 
-        let doc = await client.save();
-        let rsObj = { ok: "Credit has been added.", client: client };
-        logger.audit("Client Mgt", "Add Credit", doc._id, staff.id, `Credit has been added by ${staff.displayName}`);
-        res.json(rsObj);
-
-    } catch (err) { res.status(400).json({ error: `Cannot add credit, ${err.message}` }); }
 
 });
 
@@ -277,6 +247,21 @@ router.get('/invoices/:id', async (reqe, res, next) => {
         res.json(rsObj);
     } catch (err) {
         res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
+});
+
+/* GET client list. */
+router.get('/creditRecordList/:id', async (reqe, res, next) => {
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.creditRecordMgt.list) { next(createError(403)); return; }
+
+        //get raw data from data
+        let creditRecordList = await CreditRecord.find({ "delFlag": false, client: reqe.params.id }).populate('staff')
+        let rsObj = { ok: "Appointment retrieved.", creditRecordList: creditRecordList };
+        res.json(rsObj);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get credit record list, ${err.message}` })
     }
 });
 

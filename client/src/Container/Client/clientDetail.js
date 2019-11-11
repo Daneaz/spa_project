@@ -58,6 +58,7 @@ class ClientDetail extends React.Component {
             const statistics = await fetchAPI('GET', `clientMgt/statistics/${this.props.location.state.data._id}`)
             const appointments = await fetchAPI('GET', `clientMgt/appointments/${this.props.location.state.data._id}`)
             const invoices = await fetchAPI('GET', `clientMgt/invoices/${this.props.location.state.data._id}`)
+            const creditRecords = await fetchAPI('GET', `clientMgt/creditRecordList/${this.props.location.state.data._id}`)
             if (respObj) {
                 respObj.nric = replaceRange(respObj.nric, 0, 5, "*****")
                 this.setState({
@@ -93,6 +94,11 @@ class ClientDetail extends React.Component {
                     invoices: invoices.invoices
                 })
 
+            }
+            if (creditRecords && creditRecords.ok) {
+                this.setState({
+                    creditRecords: creditRecords.creditRecordList
+                })
             }
 
         } catch (error) {
@@ -130,9 +136,12 @@ class ClientDetail extends React.Component {
             let values = {
                 credit: this.state.credit
             }
-            fetchAPI('PATCH', `clientMgt/addcredit/${this.state.client._id}`, values).then(respObj => {
+            fetchAPI('POST', `creditRecordMgt/addcredit/${this.state.client._id}`, values).then(respObj => {
                 if (respObj && respObj.ok) {
-                    this.setState({ client: respObj.client })
+                    this.setState({
+                        client: respObj.client,
+                        creditRecords: this.state.creditRecords.concat([respObj.creditRecord]),
+                    })
                     Swal.fire({
                         type: 'success', text: respObj.ok,
                         title: "Success!"
@@ -151,6 +160,7 @@ class ClientDetail extends React.Component {
             })
         }
     }
+
     render() {
         const { classes } = this.props;
         return (
@@ -256,7 +266,11 @@ class ClientDetail extends React.Component {
                             </Grid>
                             <Grid item>
                                 <Paper>
-                                    <TabView {...this.props} appointments={this.state.appointments ? this.state.appointments : null} invoices={this.state.invoices ? this.state.invoices : null}></TabView>
+                                    <TabView {...this.props}
+                                        appointments={this.state.appointments ? this.state.appointments : null}
+                                        invoices={this.state.invoices ? this.state.invoices : null}
+                                        creditRecords={this.state.creditRecords ? this.state.creditRecords : null}>
+                                    </TabView>
                                 </Paper>
                             </Grid>
                         </Grid>

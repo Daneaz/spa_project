@@ -3,12 +3,27 @@ import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
 import { withStyles } from '@material-ui/styles';
 // import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { Tabs, Tab, Typography, Box, Divider, ListItem, List } from '@material-ui/core';
+import { Tabs, Tab, Typography, Box, Divider, ListItem, Grid } from '@material-ui/core';
 import InvoiceListView from '../Invoice/InvoiceListView'
 
 function Appointment(props) {
     return (
         <InvoiceListView bookings={props.bookings} click={props.click} />
+    )
+}
+
+function Record(props) {
+    return (
+        <ListItem button>
+            <Grid
+                container
+                justify="space-between"
+                alignItems="center"
+                direction="row">
+                <h3><strong>S${props.creditRecord.amount}</strong></h3>
+                Added By {props.creditRecord.staff.displayName}
+            </Grid>
+        </ListItem>
     )
 }
 
@@ -64,7 +79,7 @@ class TabView extends React.Component {
     };
 
     render() {
-        const { appointments, invoices } = this.props
+        const { appointments, invoices, creditRecords } = this.props
         const { value } = this.state
 
         return (
@@ -126,26 +141,19 @@ class TabView extends React.Component {
                     }
                 </TabPanel>
                 <TabPanel value={value} index={2} >
-                    {/* {
-                        invoices ?
-                            invoices.map(invoice => {
+                    {
+
+                        creditRecords ?
+                            creditRecords.map(creditRecord => {
                                 return (
                                     <React.Fragment>
                                         <Divider />
-                                        <Appointment bookings={invoice.appointment.bookings} click={() => {
-                                            const { history } = this.props;
-                                            history.push({
-                                                pathname: "/invoice/detail",
-                                                state: {
-                                                    invoice: invoice
-                                                }
-                                            });
-                                        }} />
+                                        <Record creditRecord={creditRecord} />
                                         <Divider />
                                     </React.Fragment>
                                 )
                             }) : null
-                    } */}
+                    }
                 </TabPanel>
             </div>
         );

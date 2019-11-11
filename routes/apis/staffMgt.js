@@ -38,6 +38,12 @@ const init = async () => {
                 edit: true,
                 delete: true
             },
+            creditRecordMgt: {
+                list: true,
+                create: true,
+                edit: true,
+                delete: true
+            },
         });
         await roleClient.save();
 
