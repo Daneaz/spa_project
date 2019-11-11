@@ -48,47 +48,98 @@ class Dashboard extends React.Component {
     const { classes } = this.props;
     return (
       <AppLayout title="Dashboard" {...this.props} >
-        {/* <BarChart
-          width={500}
-          height={300}
-          data={data}
-          margin={{
-            top: 5, right: 30, left: 20, bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="pv" fill="#8884d8" />
-          <Bar dataKey="uv" fill="#82ca9d" />
-        </BarChart> */}
-
         <Grid
           container
-          direction="row"
+          direction="column"
           justify="center"
           alignItems="center"
         >
-          <Paper>
-            <LineChart
-              width={500}
-              height={400}
-              data={data}
-              margin={{
-                top: 10, right: 10, left: 10, bottom: 10,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-              <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-            </LineChart>
-          </Paper>
+          <Grid
+            container
+            direction="row"
+            justify="space-around"
+            alignItems="center"
+          >
+            <Paper>
+              <LineChart
+                width={750}
+                height={400}
+                data={data}
+                margin={{
+                  top: 10, right: 10, left: 10, bottom: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+              </LineChart>
+            </Paper>
+            <Paper>
+              <BarChart
+                width={750}
+                height={400}
+                data={data}
+                margin={{
+                  top: 10, right: 10, left: 10, bottom: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="pv" fill="#8884d8" />
+                <Bar dataKey="uv" fill="#82ca9d" />
+              </BarChart>
+            </Paper>
+          </Grid>
+          <Grid
+            container
+            direction="row"
+            justify="space-around"
+            alignItems="center"
+          >
+            <Paper>
+              <LineChart
+                width={750}
+                height={400}
+                data={data}
+                margin={{
+                  top: 10, right: 10, left: 10, bottom: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+              </LineChart>
+            </Paper>
+            <Paper>
+              <BarChart
+                width={750}
+                height={400}
+                data={data}
+                margin={{
+                  top: 10, right: 10, left: 10, bottom: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="pv" fill="#8884d8" />
+                <Bar dataKey="uv" fill="#82ca9d" />
+              </BarChart>
+            </Paper>
+          </Grid>
         </Grid>
       </AppLayout>
     );
