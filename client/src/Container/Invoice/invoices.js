@@ -90,6 +90,9 @@ class Invoice extends React.Component {
 
     async componentDidMount() {
         let invoiceList = await fetchAPI('GET', 'invoiceMgt/invoicelist');
+        invoiceList.map(invoice =>{
+            invoice.createdAt = new Date(invoice.createdAt).toLocaleDateString()
+        })
         this.setState({
             invoiceList: invoiceList
         });

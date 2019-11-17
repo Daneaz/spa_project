@@ -42,6 +42,7 @@ class InvoiceDetail extends React.Component {
         discount: null,
         remark: "",
         isCheckout: false,
+        createdAt:  null,
     }
 
     async componentDidMount() {
@@ -68,6 +69,7 @@ class InvoiceDetail extends React.Component {
                 addon: invoice.addon,
                 discount: invoice.discount,
                 isCheckout: true,
+                createdAt: invoice.createdAt
             })
         }
     }
@@ -146,6 +148,7 @@ class InvoiceDetail extends React.Component {
                     addon: invoice.addon,
                     discount: invoice.discount,
                     isCheckout: true,
+                    createdAt: invoice.createdAt
                 })
                 Swal.fire({
                     type: 'success', text: respObj.ok,
@@ -261,6 +264,17 @@ class InvoiceDetail extends React.Component {
                                                     <div>${this.state.total}</div>
                                                 </Grid>
                                             </ListItem>
+                                            {this.state.isCheckout ?
+                                                <ListItem>
+                                                    <Grid
+                                                        container
+                                                        justify="space-between"
+                                                        direction="row">
+                                                        <div>Date</div>
+                                                        <div>{new Date(this.state.createdAt).toLocaleString()}</div>
+                                                    </Grid>
+                                                </ListItem> : null
+                                            }
                                         </List>
                                     </Grid>
                                 </Grid>
