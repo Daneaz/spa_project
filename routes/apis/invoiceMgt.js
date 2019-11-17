@@ -3,12 +3,50 @@ var express = require('express');
 var router = express.Router();
 let createError = require('http-errors');
 
+let Client = require('../../models/auth/client');
 let Staff = require('../../models/auth/staff');
 let Invoice = require('../../models/invoice');
 let Appointment = require('../../models/appointment');
 let logger = require('../../services/logger');
 
+// SMS Config
+const messagingApi = require("@cmdotcom/text-sdk");
+const yourProductToken = "91888406-8B79-4800-9DB9-02390203CDA7";
+const myMessageApi = new messagingApi.MessageApiClient(yourProductToken);
 
+/* Buy Service using credit . */
+router.post('/useCredit/:id', async (reqe, res, next) => {
+    try {
+
+        let data = reqe.body;
+
+        Client.findOne({ "_id": reqe.params.id, "delFlag": false }).then(client => {
+            if (client.credit < data.total) {
+                res.json({ error: "Not enought credit, Please top up!" });
+            } else {
+                client.credit = client.credit - data.total;
+                client.save();
+                let mobile = client.mobile;
+                let firstDigit = mobile.toString()[0];
+                if (mobile.toString().length === 8 && (firstDigit === '8' || firstDigit === '9')) {
+                    mobile = `+65${mobile}`;
+                }
+                let message = `You have purchase a service recently. Total: $${data.total}. Your remaining credit is ${client.credit}`
+                const result = myMessageApi.sendTextMessage([mobile], "Sante", message);
+                result.then((result) => {
+                    console.log(result);
+                }).catch((error) => {
+                    console.log(error);
+                });
+                res.json({ ok: "Please process to the waiting area!" });
+            }
+        })
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ error: `Cannot use credit, ${err.message}` })
+    }
+
+});
 
 /* GET appointment infomation for invoice . */
 router.get('/appointment/:id', async (reqe, res, next) => {
@@ -153,6 +191,29 @@ router.post('/invoice', async (reqe, res, next) => {
         })
 
     } catch (err) { res.status(400).json({ error: `Cannot create invoice, ${err.message}` }) }
+
+});
+
+/* DELETE disable invoice. */
+router.delete('/invoice', async (reqe, res, next) => {
+    try {
+
+        let user = await Staff.findById(res.locals.user.id).populate('role');
+        if (!user.role.invoiceMgt.delete) { next(createError(403)); return; }
+
+        //save user 
+        let deleteId = [];
+        let delObj = { updatedBy: user._id, delFlag: true };
+        reqe.body.forEach(async function (deleteObj) {
+            let doc = await Invoice.findOneAndUpdate({ "_id": deleteObj._id, "delFlag": false }, delObj);
+            deleteId.push(doc._id);
+            logger.audit("Invoice Mgt", "Delete", doc._id, user.id, `Invoice has been deleted by ${user.displayName}`);
+        });
+
+        let rsObj = { ok: "Invoices are deleted.", id: deleteId };
+        res.json(rsObj);
+
+    } catch (err) { res.status(400).json({ error: `Cannot delete Invoice, ${err.message}` }) }
 
 });
 

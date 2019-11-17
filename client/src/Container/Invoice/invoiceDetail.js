@@ -107,39 +107,64 @@ class InvoiceDetail extends React.Component {
                     paymentType: type,
                     appointment: this.state.bookingList[0].appointment,
                 }
-                fetchAPI('POST', `invoiceMgt/invoice`, values).then(respObj => {
-                    if (respObj && respObj.ok) {
-                        let invoice = respObj.invoice
-                        this.setState({
-                            bookingList: invoice.appointment.bookings,
-                            client: invoice.client.displayName,
-                            subtotal: invoice.subtotal,
-                            total: invoice.total,
-                            addon: invoice.addon,
-                            discount: invoice.discount,
-                            isCheckout: true,
-                        })
-                        Swal.fire({
-                            type: 'success', text: respObj.ok,
-                            title: "Success!"
-                        })
-                    } else {
+                if (type === "Credit") {
+                    fetchAPI('POST', `invoiceMgt/useCredit/${this.state.client._id}`, { total: this.state.total }).then(respObj => {
+                        if (respObj && respObj.ok) {
+                            this.checkout(values)
+                        } else {
+                            Swal.fire({
+                                type: 'error',
+                                title: "Opps... Something Wrong...",
+                                text: respObj.error
+                            })
+                        }
+                    }).catch(error => {
                         Swal.fire({
                             type: 'error',
                             title: "Opps... Something Wrong...",
-                            text: respObj.error
+                            text: error
                         })
-                    }
-                }).catch(error=>{
-                    Swal.fire({
-                        type: 'error',
-                        title: "Opps... Something Wrong...",
-                        text: error
                     })
+                } else {
+                    this.checkout(values)
+                }
+
+            }
+
+        })
+    }
+
+    checkout = (values) => {
+        fetchAPI('POST', `invoiceMgt/invoice`, values).then(respObj => {
+            if (respObj && respObj.ok) {
+                let invoice = respObj.invoice
+                this.setState({
+                    bookingList: invoice.appointment.bookings,
+                    client: invoice.client.displayName,
+                    subtotal: invoice.subtotal,
+                    total: invoice.total,
+                    addon: invoice.addon,
+                    discount: invoice.discount,
+                    isCheckout: true,
+                })
+                Swal.fire({
+                    type: 'success', text: respObj.ok,
+                    title: "Success!"
+                })
+            } else {
+                Swal.fire({
+                    type: 'error',
+                    title: "Opps... Something Wrong...",
+                    text: respObj.error
                 })
             }
+        }).catch(error => {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
         })
-
     }
 
     handleClose = () => {
@@ -153,8 +178,8 @@ class InvoiceDetail extends React.Component {
                 <AppBar className={classes.titleBar}>
                     <Toolbar>
                         <Typography variant="h6" className={classes.title}>
-                            New Appointment
-                    </Typography>
+                            {this.state.isCheckout ? "Invoice" : "Checkout"}
+                        </Typography>
                         <IconButton edge="start" color="inherit" onClick={this.handleClose} aria-label="close">
                             <CloseIcon />
                         </IconButton>
@@ -246,11 +271,14 @@ class InvoiceDetail extends React.Component {
                                             container
                                             justify="space-evenly"
                                             direction="row">
+                                            <Button className={classes.checkoutBtn} variant="contained" color="primary" onClick={() => this.handleConfirmCheckout("Credit")}>
+                                                Credit
+                                            </Button>
                                             <Button className={classes.checkoutBtn} variant="contained" color="primary" onClick={() => this.handleConfirmCheckout("Cash")}>
                                                 Cash
                                             </Button>
                                             <Button className={classes.checkoutBtn} variant="contained" color="primary" onClick={() => this.handleConfirmCheckout("Card")}>
-                                                Credit Card
+                                                Card
                                             </Button>
                                             <Button className={classes.checkoutBtn} variant="contained" color="primary" onClick={() => this.handleConfirmCheckout("Others")}>
                                                 Others

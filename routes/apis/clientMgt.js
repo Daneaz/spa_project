@@ -140,7 +140,7 @@ router.delete('/clients', async (reqe, res, next) => {
             logger.audit("Client Mgt", "Delete", doc._id, staff.id, `Client has been deleted by ${staff.displayName}`);
         });
 
-        let rsObj = { ok: "Client has been deleted.", id: deleteId };
+        let rsObj = { ok: "Clients are deleted.", id: deleteId };
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot delete Client, ${err.message}` }) }

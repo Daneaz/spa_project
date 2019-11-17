@@ -304,7 +304,7 @@ router.delete('/staffs', async (reqe, res, next) => {
             logger.audit("Staff Mgt", "Delete", doc._id, user.id, `Staff has been deleted by ${user.displayName}`);
         });
 
-        let rsObj = { ok: "Staff has been deleted.", id: deleteId };
+        let rsObj = { ok: "Staffs are deleted.", id: deleteId };
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot delete Staff, ${err.message}` }) }

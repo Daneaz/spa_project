@@ -110,7 +110,10 @@ class Staff extends React.Component {
       });
       const response = await fetchAPI('DELETE', 'staffMgt/staffs', deleteObjList);
       if (response && response.ok) {
-        alert("Clients are deleted");
+        Swal.fire({
+          type: 'success', text: response.ok,
+          title: "Success!"
+        })
       } else {
         Swal.fire({
           type: 'error',

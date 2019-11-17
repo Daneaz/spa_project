@@ -109,11 +109,14 @@ class Invoice extends React.Component {
     async handleRowDelete(rowsDeleted) {
         try {
             const deleteObjList = rowsDeleted.map((row) => {
-                return this.state.serviceList[row.dataIndex]
+                return this.state.invoiceList[row.dataIndex]
             });
-            const response = await fetchAPI('DELETE', 'serviceMgt/services', deleteObjList);
+            const response = await fetchAPI('DELETE', 'invoiceMgt/invoice', deleteObjList);
             if (response && response.ok) {
-                alert("Clients are deleted");
+                Swal.fire({
+                    type: 'success', text: response.ok,
+                    title: "Success!"
+                })
             } else { 
                 Swal.fire({
                     type: 'error',

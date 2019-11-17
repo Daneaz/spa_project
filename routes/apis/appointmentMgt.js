@@ -146,7 +146,7 @@ router.delete('/appointment/:id', async (reqe, res, next) => {
             if (result.ok) {
                 appointment.save().then(doc => {
                     let rsObj = {
-                        ok: "User has been deleted.",
+                        ok: "Appointment has been deleted.",
                         id: doc._id
                     };
                     logger.audit("Appointment Mgt", "Delete", doc._id, staff.id, `Appointment has been deleted by ${staff.DisplayName}`);

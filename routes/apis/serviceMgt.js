@@ -100,7 +100,7 @@ router.delete('/services', async (reqe, res, next) => {
             logger.audit("Service Mgt", "Delete", doc._id, user.id, `Service has been deleted by ${user.displayName}`);
         });
 
-        let rsObj = { ok: "Service has been deleted.", id: deleteId };
+        let rsObj = { ok: "Services are deleted.", id: deleteId };
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot delete service, ${err.message}` }) }
