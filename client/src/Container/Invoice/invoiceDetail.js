@@ -125,10 +125,17 @@ class InvoiceDetail extends React.Component {
                         })
                     } else {
                         Swal.fire({
-                            type: 'error', text: 'Please try again.',
-                            title: respObj.error
+                            type: 'error',
+                            title: "Opps... Something Wrong...",
+                            text: respObj.error
                         })
                     }
+                }).catch(error=>{
+                    Swal.fire({
+                        type: 'error',
+                        title: "Opps... Something Wrong...",
+                        text: error
+                    })
                 })
             }
         })

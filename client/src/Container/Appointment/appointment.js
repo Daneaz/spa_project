@@ -114,6 +114,7 @@ class CalendarView extends React.Component {
         type: 'error',
         title: "Please Select Service !!!"
       })
+      return
     } else {
       for (let i = 0; i < bookings.length; i++) {
         if (!bookings[i].service) {
@@ -225,16 +226,22 @@ class CalendarView extends React.Component {
         } else {
           Swal.fire({
             type: 'error',
-            title: 'Fail to create booking'
+            title: "Opps... Something Wrong...",
+            text: respObj.error
           })
         }
-      }).catch(err => {
-        throw new Error(err)
+      }).catch(error => {
+        Swal.fire({
+          type: 'error',
+          title: "Opps... Something Wrong...",
+          text: error
+        })
       })
     } else {
       Swal.fire({
         type: 'error',
-        title: 'No Booking found'
+        title: "Opps... Something Wrong...",
+        text: 'No Booking found'
       })
     }
   }
@@ -262,13 +269,15 @@ class CalendarView extends React.Component {
       } else {
         Swal.fire({
           type: 'error',
-          title: 'Fail to create booking'
+          title: "Opps... Something Wrong...",
+          text: respObj.error
         })
       }
-    }).catch(err => {
+    }).catch(error => {
       Swal.fire({
         type: 'error',
-        title: err
+        title: "Opps... Something Wrong...",
+        text: error
       })
     })
   }
@@ -321,7 +330,13 @@ class CalendarView extends React.Component {
       this.setState({
         events: nextEvents,
       })
-    } else { throw new Error('Fail to update booking') }
+    } else {
+      Swal.fire({
+        type: 'error',
+        title: "Opps... Something Wrong...",
+        text: respObj.error
+      })
+    }
   }
 
   resizeBooking = ({ event, start, end }) => {

@@ -66,8 +66,9 @@ class ClientDetail extends React.Component {
                 })
             } else {
                 Swal.fire({
-                    type: 'error', text: "Client cannot be found",
-                    title: "Fail!"
+                    type: 'error',
+                    title: "Opps... Something Wrong...",
+                    text: respObj.error
                 })
             }
             if (statistics && statistics.ok) {
@@ -103,8 +104,9 @@ class ClientDetail extends React.Component {
 
         } catch (error) {
             Swal.fire({
-                type: 'error', text: error,
-                title: "Fail!"
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
             })
         }
     }
@@ -148,14 +150,16 @@ class ClientDetail extends React.Component {
                     })
                 } else {
                     Swal.fire({
-                        type: 'error', text: respObj.error,
-                        title: "Fail!"
+                        type: 'error',
+                        title: "Opps... Something Wrong...",
+                        text: respObj.error
                     })
                 }
             }).catch(error => {
                 Swal.fire({
-                    type: 'error', text: error,
-                    title: "Fail!"
+                    type: 'error',
+                    title: "Opps... Something Wrong...",
+                    text: error
                 })
             })
         }

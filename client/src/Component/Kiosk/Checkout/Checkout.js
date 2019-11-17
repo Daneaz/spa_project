@@ -112,7 +112,8 @@ class SelectService extends React.Component {
                     } else {
                         Swal.fire({
                             type: 'error',
-                            title: respObj.error,
+                            title: "Opps... Something Wrong...",
+                            text: respObj.error,
                             animation: false,
                             customClass: {
                                 popup: 'animated tada'
@@ -126,7 +127,8 @@ class SelectService extends React.Component {
             } else if (service.error) {
                 Swal.fire({
                     type: 'error',
-                    title: service.error,
+                    title: "Opps... Something Wrong...",
+                    text: service.error,
                     animation: false,
                     customClass: {
                         popup: 'animated tada'

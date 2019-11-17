@@ -3,7 +3,7 @@ import Select from 'react-select';
 import Picky from 'react-picky';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress, Paper, Box, 
+    Typography, Button, CssBaseline, Container, LinearProgress, Paper, Box,
 } from '@material-ui/core';
 
 import { Formik, Field, Form } from 'formik';
@@ -35,7 +35,7 @@ class ClientDetail extends React.Component {
             staffList: [],
             arrayValue: [],
             categoryList: [],
-            selectedCategory: { value: this.props.location.state.data.category.name, label: this.props.location.state.data.category.name },
+            selectedCategory: { value: this.props.location.state.data.category.value, label: this.props.location.state.data.category.name },
         };
         this.selectMultipleOption = this.selectMultipleOption.bind(this);
     }
@@ -93,9 +93,14 @@ class ClientDetail extends React.Component {
                                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                                     try {
                                         let rawStaffList = this.state.arrayValue;
-                                        if (!rawStaffList)
-                                            throw new Error('Please select a staff')
-                                        else {
+                                        if (rawStaffList.length <= 0) {
+                                            Swal.fire({
+                                                type: 'error',
+                                                title: "Please select a staff...",
+                                            })
+                                            setSubmitting(false);
+                                            return
+                                        } else {
                                             let staffList = [];
                                             for (let i = 0; i < rawStaffList.length; i++) {
                                                 staffList.push(rawStaffList[i]._id)
@@ -108,11 +113,16 @@ class ClientDetail extends React.Component {
                                         if (respObj && respObj.ok) {
 
                                             window.history.back();
-                                        } else { throw new Error('Fail to add service') }
-                                    } catch (err) {
+                                        } else {
+                                            Swal.fire({
+                                                type: 'error', text: respObj.error,
+                                                title: "Opps... Something Wrong..."
+                                            })
+                                        }
+                                    } catch (error) {
                                         Swal.fire({
-                                            type: 'error', text: 'Please try again.',
-                                            title: err.message
+                                            type: 'error', text: error,
+                                            title: "Opps... Something Wrong..."
                                         })
                                     }
                                     setSubmitting(false);

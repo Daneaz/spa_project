@@ -129,12 +129,19 @@ class Client extends React.Component {
       const response = await fetchAPI('DELETE', 'clientMgt/clients', deleteObjList);
       if (response && response.ok) {
         alert("Clients are deleted");
-      } else { throw new Error('Delete failed') }
+      } else {
+        Swal.fire({
+          type: 'error',
+          title: "Opps... Something Wrong...",
+          text: response.error
+        })
+       }
     }
-    catch (err) {
+    catch (error) {
       Swal.fire({
         type: 'error',
-        title: err.message
+        title: "Opps... Something Wrong...",
+        text: error
       })
     }
   }

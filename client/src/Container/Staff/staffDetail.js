@@ -102,14 +102,16 @@ class ClientDetail extends React.Component {
                                             window.history.back();
                                         } else {
                                             Swal.fire({
-                                                type: 'error', text: 'Please try again.',
-                                                title: respObj.err.message
+                                                type: 'error',
+                                                title: "Opps... Something Wrong...",
+                                                text: respObj.error
                                             })
                                         }
-                                    } catch (err) {
+                                    } catch (error) {
                                         Swal.fire({
-                                            type: 'error', text: 'Please try again.',
-                                            title: err.message
+                                            type: 'error',
+                                            title: "Opps... Something Wrong...",
+                                            text: error
                                         })
                                     }
                                     setSubmitting(false);

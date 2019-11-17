@@ -78,14 +78,16 @@ class UpdateClient extends React.Component {
                                     });
                                 } else {
                                     Swal.fire({
-                                        type: 'error', text: respObj.error,
-                                        title: "Fail!"
+                                        type: 'error',
+                                        title: "Opps... Something Wrong...",
+                                        text: respObj.error
                                     })
                                 }
-                            } catch (err) {
+                            } catch (error) {
                                 Swal.fire({
-                                    type: 'error', text: err.message,
-                                    title: "Fail!"
+                                    type: 'error',
+                                    title: "Opps... Something Wrong...",
+                                    text: error
                                 })
                             }
                             setSubmitting(false);

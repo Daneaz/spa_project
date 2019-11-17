@@ -84,11 +84,12 @@ class NewStaff extends React.Component {
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
                                 let rawStaffList = this.state.arrayValue;
-                                if (!rawStaffList) {
+                                if (rawStaffList.length <= 0) {
                                     Swal.fire({
                                         type: 'error', text: 'Please try again.',
                                         title: "Please select a staff"
                                     })
+                                    setSubmitting(false);
                                     return
                                 } else {
                                     let staffList = [];
@@ -106,14 +107,16 @@ class NewStaff extends React.Component {
                                     window.history.back();
                                 } else {
                                     Swal.fire({
-                                        type: 'error', text: 'Please try again.',
-                                        title: "Fail to add service"
+                                        type: 'error',
+                                        title: "Opps... Something Wrong...",
+                                        text: respObj.error
                                     })
                                 }
-                            } catch (err) {
+                            } catch (error) {
                                 Swal.fire({
-                                    type: 'error', text: 'Please try again.',
-                                    title: err.message
+                                    type: 'error',
+                                    title: "Opps... Something Wrong...",
+                                    text: error
                                 })
                             }
                             setSubmitting(false);

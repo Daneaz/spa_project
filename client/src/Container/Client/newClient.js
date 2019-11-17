@@ -81,11 +81,18 @@ class NewClient extends React.Component {
                                 if (respObj && respObj.ok) {
 
                                     window.history.back();
-                                } else { throw new Error('Register failed') }
-                            } catch (err) {
+                                } else { 
+                                    Swal.fire({
+                                        type: 'error',
+                                        title: "Opps... Something Wrong...",
+                                        text: respObj.error
+                                    })
+                                 }
+                            } catch (error) {
                                 Swal.fire({
-                                    type: 'error', text: 'Please try again.',
-                                    title: err.message
+                                    type: 'error',
+                                    title: "Opps... Something Wrong...",
+                                    text: error
                                 })
                             }
                             setSubmitting(false);

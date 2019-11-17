@@ -46,7 +46,7 @@ class Login extends React.Component {
         <div className={classes.paper}>
           <Box m={3}><img src={logo} alt="Logo" style={{ width: 320 }} /></Box>
           <Typography component="h1" variant="h5">
-            Spa Management System 
+            Spa Management System
         </Typography>
           <Formik
             initialValues={{ username: '', password: '' }}
@@ -64,7 +64,12 @@ class Login extends React.Component {
                   setToken(respObj.token);
                   setUser(respObj.user);
                   this.setState({ redirectToReferrer: true });
-                } else { throw new Error('Login failed') }
+                } else {
+                  Swal.fire({
+                    type: 'error', text: 'Please try again.',
+                    title: 'Invalid email or password!'
+                  })
+                }
               } catch (err) {
                 removeToken(); removeUser();
                 setErrors({ username: "Invalid username", password: "Invalid password" });
@@ -93,7 +98,7 @@ class Login extends React.Component {
                 {isSubmitting && <LinearProgress />}
               </Form>
             )} />
-            <small>{process.env.REACT_APP_VERSION}</small>
+          <small>{process.env.REACT_APP_VERSION}</small>
         </div>
       </Container>
     )

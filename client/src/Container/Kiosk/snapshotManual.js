@@ -64,14 +64,16 @@ class FacialLogin extends React.Component {
                 this.props.history.push('/start')
             } else {
                 Swal.fire({
-                    type: 'error', text: 'Please try again.',
-                    title: respObj.error
+                    type: 'error',
+                    title: "Opps... Something Wrong...",
+                    text: respObj.error
                 })
             }
         }).catch(error => {
             Swal.fire({
-                type: 'error', text: 'Please try again.',
-                title: error
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
             })
         });
     }

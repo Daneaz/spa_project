@@ -63,17 +63,17 @@ router.patch('/services/:id', async (reqe, res, next) => {
         let staff = await Staff.findById(res.locals.user.id).populate('role');
         if (!staff.role.serviceMgt.edit) { next(createError(403)); return; }
 
-        let rawNewStaff = reqe.body;
+        let rawService = reqe.body;
 
         //load data from db
         let newService = await Service.findOne({ "_id": reqe.params.id, "delFlag": false });
 
         newService.updatedBy = staff._id;
-        newService.name = rawNewStaff.name || newService.name;
-        newService.price = rawNewStaff.price || newService.price;
-        newService.duration = rawNewStaff.duration || newService.duration;
-        newService.staff = rawNewStaff.staff || newService.staff;
-        newService.category = rawNewStaff.category || newService.category;
+        newService.name = rawService.name || newService.name;
+        newService.price = rawService.price || newService.price;
+        newService.duration = rawService.duration || newService.duration;
+        newService.staff = rawService.staff || newService.staff;
+        newService.category = rawService.category || newService.category;
         //save service 
         let doc = await newService.save();
         let rsObj = { ok: "Service has been updated.", id: doc._id };
