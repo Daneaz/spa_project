@@ -6,6 +6,7 @@ let Category = require('../../models/category')
 let Client = require('../../models/auth/client');
 let Service = require('../../models/service');
 let Booking = require('../../models/booking');
+let Invoice = require('../../models/invoice')
 let logger = require('../../services/logger');
 const path = require('path');
 var fs = require('fs');
@@ -179,40 +180,40 @@ router.post('/availablestaff', async (reqe, res, next) => {
     } catch (err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
 });
 
-/* Register client over Kiosk POST Create client . */
-router.post('/buyservice', async (reqe, res, next) => {
+/* Buy Service using credit . */
+router.post('/useCredit/:id', async (reqe, res, next) => {
     try {
 
         let data = reqe.body;
 
-        Client.findOne({ "_id": data.id, "delFlag": false })
-            .then(client => {
-                if (client.credit < data.price) {
-                    res.json({ error: "Not enought credit, Please top up!" });
-                } else {
-                    client.credit = client.credit - data.price;
-                    client.save();
-                    let mobile = client.mobile;
-                    let firstDigit = mobile.toString()[0];
-                    if (mobile.toString().length === 8 && (firstDigit === '8' || firstDigit === '9')) {
-                        mobile = `+65${mobile}`;
-                    }
-                    let message = `You have purchase a service recently. Your remaining credit is ${client.credit}`
-                    const result = myMessageApi.sendTextMessage([mobile], "Sante", message);
-                    result.then((result) => {
-                        console.log(result);
-                    }).catch((error) => {
-                        console.log(error);
-                    });
-                    res.json({ ok: "Please process to the waiting area!" });
+        Client.findOne({ "_id": reqe.params.id, "delFlag": false }).then(client => {
+            if (client.credit < data.total) {
+                res.json({ error: "Not enought credit, Please top up!" });
+            } else {
+                client.credit = client.credit - data.total;
+                client.save();
+                let mobile = client.mobile;
+                let firstDigit = mobile.toString()[0];
+                if (mobile.toString().length === 8 && (firstDigit === '8' || firstDigit === '9')) {
+                    mobile = `+65${mobile}`;
                 }
-            })
+                let message = `You have purchase a service recently. Total: $${data.total}. Your remaining credit is ${client.credit}`
+                const result = myMessageApi.sendTextMessage([mobile], "Sante", message);
+                result.then((result) => {
+                    console.log(result);
+                }).catch((error) => {
+                    console.log(error);
+                });
+                res.json({ ok: "Please process to the waiting area!" });
+            }
+        })
     } catch (err) {
         console.log(err);
-        res.status(400).json({ error: `Cannot create client, ${err.message}` })
+        res.status(400).json({ error: `Cannot use credit, ${err.message}` })
     }
 
 });
+
 /* POST Create appointment. */
 router.post('/appointment', async (reqe, res, next) => {
     try {
@@ -237,6 +238,7 @@ router.post('/appointment', async (reqe, res, next) => {
 
                 appointment.save()
                 let rsObj = { ok: "Appointment has been created.", bookings: bookings, appointmentId: appointment._id }
+                logger.audit("KioskMgt", "Create appointment", appointment._id, "Kiosk", `A new appointment has been created by Kiosk`);
                 res.json(rsObj)
             }).catch(err => {
                 res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
@@ -275,6 +277,44 @@ router.post('/savephoto', async (req, res, next) => {
         console.log(err);
         res.status(400).json({ error: `Cannot save photo, ${err.message}` })
     }
+
+});
+
+router.post('/invoice', async (reqe, res, next) => {
+    try {
+
+        let newInvoice = new Invoice(reqe.body);
+        newInvoice.createdBy = "Kiosk"
+        newInvoice.updatedBy = "Kiosk"
+
+        Appointment.findByIdAndUpdate(reqe.body.appointment, { checkout: true }, { new: true }).then(async result => {
+            if (result.checkout) {
+                let doc = await newInvoice.save();
+                let invoice = await Invoice.findOne({ "_id": doc._id, "delFlag": false })
+                    .populate({
+                        path: "appointment",
+                        populate: {
+                            path: 'bookings',
+                            populate: {
+                                path: 'service',
+                            }
+                        }
+                    }).populate({
+                        path: "appointment",
+                        populate: {
+                            path: 'bookings',
+                            populate: {
+                                path: 'staff',
+                            }
+                        }
+                    }).populate("client")
+                let rsObj = { ok: "Invoice has been created.", invoice: invoice };
+                logger.audit("Invoice Mgt", "Create", invoice._id, "Kiosk", `A new invoice has been created by Kiosk`);
+                res.json(rsObj);
+            }
+        })
+
+    } catch (err) { res.status(400).json({ error: `Cannot create invoice, ${err.message}` }) }
 
 });
 

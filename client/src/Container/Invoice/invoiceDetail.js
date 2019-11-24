@@ -42,7 +42,8 @@ class InvoiceDetail extends React.Component {
         discount: null,
         remark: "",
         isCheckout: false,
-        createdAt:  null,
+        createdAt: null,
+        paymentType: null,
     }
 
     async componentDidMount() {
@@ -68,6 +69,7 @@ class InvoiceDetail extends React.Component {
                 total: invoice.total,
                 addon: invoice.addon,
                 discount: invoice.discount,
+                paymentType :invoice.paymentType,
                 isCheckout: true,
                 createdAt: invoice.createdAt
             })
@@ -265,15 +267,26 @@ class InvoiceDetail extends React.Component {
                                                 </Grid>
                                             </ListItem>
                                             {this.state.isCheckout ?
-                                                <ListItem>
-                                                    <Grid
-                                                        container
-                                                        justify="space-between"
-                                                        direction="row">
-                                                        <div>Date</div>
-                                                        <div>{new Date(this.state.createdAt).toLocaleString()}</div>
-                                                    </Grid>
-                                                </ListItem> : null
+                                                <React.Fragment>
+                                                    <ListItem>
+                                                        <Grid
+                                                            container
+                                                            justify="space-between"
+                                                            direction="row">
+                                                            <div>Payment Method</div>
+                                                            <div>{this.state.paymentType}</div>
+                                                        </Grid>
+                                                    </ListItem>
+                                                    <ListItem>
+                                                        <Grid
+                                                            container
+                                                            justify="space-between"
+                                                            direction="row">
+                                                            <div>Date</div>
+                                                            <div>{new Date(this.state.createdAt).toLocaleString()}</div>
+                                                        </Grid>
+                                                    </ListItem>
+                                                </React.Fragment> : null
                                             }
                                         </List>
                                     </Grid>

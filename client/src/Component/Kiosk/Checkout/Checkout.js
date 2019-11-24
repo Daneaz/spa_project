@@ -101,9 +101,9 @@ class SelectService extends React.Component {
     submit() {
         let client = getClient()
         let data = {}
-        data.id = client._id;
-        data.price = this.state.selectedServiceData.price;
-        fetchAPI('POST', 'kioskMgt/buyservice', data).then(service => {
+        data.total = this.state.selectedServiceData.price;
+
+        fetchAPI('POST', `kioskMgt/useCredit/${client._id}`, data).then(service => {
             if (service.ok) {
                 let start = new Date();
                 let end = new Date(start.getTime() + parseInt(this.state.selectedServiceData.duration) * 60000)
@@ -117,17 +117,17 @@ class SelectService extends React.Component {
                 }]
                 fetchAPI('POST', 'kioskMgt/appointment', values).then(respObj => {
                     if (respObj && respObj.ok) {
-                        Swal.fire({
-                            type: 'success',
-                            title: service.ok,
-                            animation: false,
-                            customClass: {
-                                popup: 'animated tada'
-                            },
-                            preConfirm: () => {
-                                return this.props.history.push('/start')
-                            }
-                        })
+                        let values = {
+                            subtotal: data.total,
+                            client: client._id,
+                            discount: 0,
+                            addon: 0,
+                            total: data.total,
+                            remark: '',
+                            paymentType: "Credit",
+                            appointment: respObj.appointmentId
+                        }
+                        this.checkout(values);
                     } else {
                         Swal.fire({
                             type: 'error',
@@ -158,8 +158,42 @@ class SelectService extends React.Component {
                 })
             }
         }).catch(error => {
-            console.log(error)
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
         });
+    }
+
+    checkout = (values) => {
+        fetchAPI('POST', `kioskMgt/invoice`, values).then(respObj => {
+            if (respObj && respObj.ok) {
+                Swal.fire({
+                    type: 'success',
+                    title: "Please process to the waiting area!",
+                    animation: false,
+                    customClass: {
+                        popup: 'animated tada'
+                    },
+                    preConfirm: () => {
+                        return this.props.history.push('/start')
+                    }
+                })
+            } else {
+                Swal.fire({
+                    type: 'error',
+                    title: "Opps... Something Wrong...",
+                    text: respObj.error
+                })
+            }
+        }).catch(error => {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        })
     }
 
     render() {
