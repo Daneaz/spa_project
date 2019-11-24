@@ -181,7 +181,7 @@ class Snapshot extends React.Component {
             imagebase64: this.state.imageUrl,
             id: userid
         };
-        fetchAPI('POST', 'kiosk/savephoto', data).then(respObj => {
+        fetchAPI('POST', 'kioskMgt/savephoto', data).then(respObj => {
             if (respObj && respObj.ok) {
                 faceAPIAddPerson(`${STORAGE_URL}/${data.id}.jpg`, data.id);
                 removeClient();

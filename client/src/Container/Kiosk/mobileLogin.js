@@ -1,7 +1,7 @@
 import React from 'react';
 import { withStyles } from '@material-ui/styles';
 import {
-    Button, Typography,Dialog, DialogContent, Slide, TextField,
+    Button, Typography, Dialog, DialogContent, Slide, TextField,
 } from '@material-ui/core';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
@@ -107,30 +107,27 @@ class MobileLogin extends React.Component {
             })
             return;
         }
-        try {
-            fetchAPI('GET', `kiosk/mobilelogin/${input.mobile}`).then(respObj => {
-                if (respObj && respObj.ok) {
-                    setToken(respObj.token);
-                    setClient(respObj.user);
-                    this.setState({
-                        displayName: respObj.user.displayName,
-                        login: true
-                    })
-
-                } else {
-                    Swal.fire({
-                        type: 'error', text: 'Please try again.',
-                        title: respObj.error
-                    })
-                }
-            })
-        } catch (err) {
+        fetchAPI('GET', `kioskMgt/mobilelogin/${input.mobile}`).then(respObj => {
+            if (respObj && respObj.ok) {
+                setToken(respObj.token);
+                setClient(respObj.user);
+                this.setState({
+                    displayName: respObj.user.displayName,
+                    login: true
+                })
+            } else {
+                Swal.fire({
+                    type: 'error', text: 'Please try again.',
+                    title: respObj.error
+                })
+            }
+        }).catch(error => {
             Swal.fire({
                 type: 'error', text: 'Please try again.',
-                title: err.message
+                title: error
             })
-        }
-    };
+        })
+    }
 
     render() {
         const { classes } = this.props;
@@ -165,7 +162,7 @@ class MobileLogin extends React.Component {
                         null
                     }
                     {this.state.login ?
-                            <SelectService {...this.props}/>
+                        <SelectService {...this.props} />
                         : null
                     }
                 </div>

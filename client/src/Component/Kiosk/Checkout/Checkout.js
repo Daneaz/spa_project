@@ -39,18 +39,22 @@ class SelectService extends React.Component {
     state = {
         selectedServiceData: '',
         selectedService: '',
+        selectedServiceCategory: '',
         selectedStaff: '',
         serviceList: [],
         staffList: [],
         displayName: '',
+        categoryList: [],
     };
 
     async componentWillMount() {
         try {
-            let serviceList = await fetchAPI('GET', 'kiosk/services')
+            const serviceList = await fetchAPI('GET', 'kioskMgt/services')
+            const categoryList = await fetchAPI('GET', 'kioskMgt/category')
             this.setState({
                 serviceList: serviceList,
-                staffList: serviceList[0].staff
+                staffList: serviceList[0].staff,
+                categoryList: categoryList
             });
         } catch (error) {
             console.log(error);
@@ -61,11 +65,24 @@ class SelectService extends React.Component {
         this.setState({ selectedStaff: event.target.value });
     };
 
+    handleSelectServiceCategoryChange = (event) => {
+        this.setState({
+            selectedServiceCategory: event.target.value,
+            selectedService: ''
+        });
+    };
+
     handleSelectServiceChange = (event, child) => {
         this.setState({ selectedStaff: '' });
         let index = child.props.id;
-
-        fetchAPI('POST', 'kiosk/availablestaff', this.state.serviceList[index]).then(staffAvailable => {
+        let start = new Date();
+        let end = new Date(start.getTime() + parseInt(this.state.selectedServiceData.duration) * 60000)
+        let values = {
+            ...this.state.serviceList[index],
+            start: start,
+            end: end,
+        }
+        fetchAPI('POST', 'kioskMgt/availablestaff', values).then(staffAvailable => {
             if (staffAvailable.length === 0) {
                 staffAvailable = [
                     {
@@ -86,17 +103,19 @@ class SelectService extends React.Component {
         let data = {}
         data.id = client._id;
         data.price = this.state.selectedServiceData.price;
-        fetchAPI('POST', 'kiosk/buyservice', data).then(service => {
+        fetchAPI('POST', 'kioskMgt/buyservice', data).then(service => {
             if (service.ok) {
                 let start = new Date();
                 let end = new Date(start.getTime() + parseInt(this.state.selectedServiceData.duration) * 60000)
-                let values = {
-                    title: `${this.state.selectedServiceData.name} ${client.displayName}`,
+                let values = [{
+                    category: this.state.selectedServiceCategory,
+                    client: client._id,
+                    service: this.state.selectedService,
                     start: start,
                     end: end,
                     staff: this.state.selectedStaff,
-                }
-                fetchAPI('POST', 'kiosk/bookings', values).then(respObj => {
+                }]
+                fetchAPI('POST', 'kioskMgt/appointment', values).then(respObj => {
                     if (respObj && respObj.ok) {
                         Swal.fire({
                             type: 'success',
@@ -145,46 +164,58 @@ class SelectService extends React.Component {
 
     render() {
         const { classes } = this.props;
-        let serviceInfoDiv;
-        if (this.state.selectedServiceData) {
-            let service = this.state.selectedServiceData;
-            serviceInfoDiv =
-                <Animated key="serviceInfoDiv" animationIn="fadeIn" animationOut="fadeOut" >
-                    <FormControl className={classes.formControl} fullWidth>
-                        <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }} >Staff Name</InputLabel>
-                        <Select
-                            style={{ fontSize: 40, height: 100 }}
-                            value={this.state.selectedStaff}
-                            onChange={this.handleSelectStaffChange}
-                            input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
-                        >
-                            {this.state.staffList.map(staff => (
-                                <MenuItem value={staff._id} style={{ fontSize: 40 }}>
-                                    {staff.displayName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <Typography variant="h3" className={classes.bold}> Price: ${service.price}</Typography>
-                    <Typography variant="h3" className={classes.bold}> Duration: {service.duration} mins</Typography>
-                </Animated>
+        let serviceDiv =
+            <FormControl className={classes.formControl} fullWidth >
+                <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }}>Service Type</InputLabel>
+                <Select
+                    style={{ fontSize: 40, height: 100 }}
+                    value={this.state.selectedService}
+                    onChange={this.handleSelectServiceChange}
+                    input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
+                >
+                    {this.state.serviceList.map((service, i) => (
+                        <MenuItem id={i} value={service._id} style={{ fontSize: 40 }}>
+                            {service.name}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
-        }
-        let confirmDiv;
-        if (this.state.selectedStaff && this.state.selectedService) {
-            confirmDiv = <Animated animationIn="fadeIn" animationOut="fadeOut" key="confirmDiv" >
-                <Button variant="contained" color="primary" fullWidth className={classes.submit}
-                    style={{ fontSize: 40 }} onClick={() => this.submit()}
-                >
-                    Confirm
-                </Button>
-                <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
-                    onClick={() => { this.props.history.push('/start'); }} style={{ fontSize: 40 }}
-                >
-                    Cancel
-                </Button>
+        let serviceInfoDiv =
+            <Animated key="serviceInfoDiv" animationIn="fadeIn" animationOut="fadeOut" >
+                <FormControl className={classes.formControl} fullWidth>
+                    <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }} >Staff Name</InputLabel>
+                    <Select
+                        style={{ fontSize: 40, height: 100 }}
+                        value={this.state.selectedStaff}
+                        onChange={this.handleSelectStaffChange}
+                        input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
+                    >
+                        {this.state.staffList.map(staff => (
+                            <MenuItem value={staff._id} style={{ fontSize: 40 }}>
+                                {staff.displayName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <Typography variant="h3" className={classes.bold}> Price: ${this.state.selectedServiceData.price}</Typography>
+                <Typography variant="h3" className={classes.bold}> Duration: {this.state.selectedServiceData.duration} mins</Typography>
             </Animated>
-        }
+
+
+        let confirmDiv = <Animated animationIn="fadeIn" animationOut="fadeOut" key="confirmDiv" >
+            <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                style={{ fontSize: 40 }} onClick={() => this.submit()}
+            >
+                Confirm
+                </Button>
+            <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
+                onClick={() => { this.props.history.push('/start'); }} style={{ fontSize: 40 }}
+            >
+                Cancel
+                </Button>
+        </Animated>
+
         return (
             <div style={{ display: "block" }} >
                 <Animated animationIn="fadeIn" animationOut="fadeOut" animationInDelay={500} >
@@ -197,26 +228,29 @@ class SelectService extends React.Component {
                         >
                             <Grid item xs={12}>
                                 <FormControl className={classes.formControl} fullWidth >
-                                    <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }}>Service Type</InputLabel>
+                                    <InputLabel htmlFor="age-native-simple" style={{ fontSize: 40 }}>Service Category</InputLabel>
                                     <Select
                                         style={{ fontSize: 40, height: 100 }}
-                                        value={this.state.selectedService}
-                                        onChange={this.handleSelectServiceChange}
+                                        value={this.state.selectedServiceCategory}
+                                        onChange={this.handleSelectServiceCategoryChange}
                                         input={<Input id="age-native-simple" style={{ fontSize: 40 }} />}
                                     >
-                                        {this.state.serviceList.map((service, i) => (
-                                            <MenuItem id={i} value={service._id} style={{ fontSize: 40 }}>
-                                                {service.name}
+                                        {this.state.categoryList.map((category, i) => (
+                                            <MenuItem id={i} value={category._id} style={{ fontSize: 40 }}>
+                                                {category.label}
                                             </MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12}>
-                                {serviceInfoDiv}
+                                {this.state.selectedServiceCategory ? serviceDiv : null}
                             </Grid>
                             <Grid item xs={12}>
-                                {confirmDiv}
+                                {this.state.selectedService ? serviceInfoDiv : null}
+                            </Grid>
+                            <Grid item xs={12}>
+                                {(this.state.selectedStaff && this.state.selectedService) ? confirmDiv : null}
                             </Grid>
                         </Grid>
                     </form>

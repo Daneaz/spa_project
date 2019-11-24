@@ -15,7 +15,7 @@ let logger = require('./services/logger');
 
 var indexRouter = require('./routes/index');
 var apiAuthRouter = require('./routes/apis/auth');
-var apiKioskRouter = require('./routes/apis/kiosk');
+var apiKioskRouter = require('./routes/apis/kioskMgt');
 var apiUserMgtRouter = require('./routes/apis/staffMgt');
 var apiClientMgtRouter = require('./routes/apis/clientMgt');
 var apiServiceMgtRouter = require('./routes/apis/serviceMgt');
@@ -53,7 +53,7 @@ app.locals.ver = pjson.version;
 
 //routing
 app.use('/api', indexRouter);
-app.use('/api/kiosk', apiKioskRouter);
+app.use('/api/kioskMgt', apiKioskRouter);
 app.use(`/api/auth`, apiAuthRouter);
 
 

@@ -2,11 +2,11 @@ import React from 'react';
 import { withStyles } from '@material-ui/styles';
 
 import {
-  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line,
+  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ResponsiveContainer
 } from 'recharts';
 
 import {
-  Paper, Grid
+  Paper
 } from '@material-ui/core';
 
 import AppLayout from '../Component/Layout/Layout'
@@ -42,52 +42,40 @@ class Dashboard extends React.Component {
     return (
       <AppLayout title="Dashboard" {...this.props} >
         <Paper>
-          <Grid
-            container
-            direction="column"
-            justify="center"
-            alignItems="center"
-          >
-            <Grid
-              container
-              direction="row"
-              justify="space-around"
-              alignItems="center"
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart
+              data={this.state.totalBookings}
+              margin={{
+                top: 20, right: 40, left: 20, bottom: 20,
+              }}
             >
-              <LineChart
-                width={1500}
-                height={400}
-                data={this.state.totalBookings}
-                margin={{
-                  top: 20, right: 20, left: 20, bottom: 20,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="_id" />
-                <YAxis dataKey="TotalBooking" />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="TotalBooking" stroke="#8884d8" activeDot={{ r: 8 }} />
-                {/* <Line type="monotone" dataKey="Bookings" stroke="#82ca9d" /> */}
-              </LineChart>
-              <BarChart
-                width={1500}
-                height={400}
-                data={this.state.bookingList}
-                margin={{
-                  top: 20, right: 20, left: 20, bottom: 20,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="staff" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {/* <Bar dataKey="totalBookings" fill="#8884d8" /> */}
-                <Bar dataKey="Bookings" fill="#82ca9d" />
-              </BarChart>
-            </Grid>
-          </Grid>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="_id" />
+              <YAxis dataKey="TotalBooking" />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="TotalBooking" stroke="#8884d8" activeDot={{ r: 8 }} />
+              {/* <Line type="monotone" dataKey="Bookings" stroke="#82ca9d" /> */}
+            </LineChart>
+          </ResponsiveContainer>
+        </Paper>
+        <Paper style={{ marginTop: 20 }}>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart
+              data={this.state.bookingList}
+              margin={{
+                top: 20, right: 40, left: 20, bottom: 20,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="staff" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {/* <Bar dataKey="totalBookings" fill="#8884d8" /> */}
+              <Bar dataKey="Bookings" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
         </Paper>
       </AppLayout>
     );

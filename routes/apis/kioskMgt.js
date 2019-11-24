@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var auth = require('../../services/auth');
+let Appointment = require('../../models/appointment')
+let Category = require('../../models/category')
 let Client = require('../../models/auth/client');
 let Service = require('../../models/service');
 let Booking = require('../../models/booking');
@@ -147,32 +149,34 @@ router.get('/services', async (reqe, res, next) => {
     res.send(services);
 });
 
-/* GET service list. */
+/* GET available staff list. */
 router.post('/availablestaff', async (reqe, res, next) => {
-    //get raw data from data
-    let service = reqe.body;
-    let startTime = new Date();
-    let endTime = new Date(startTime.getTime() + service.duration * 60000);
-    let staffs = service.staff;
-    let staffList = []
-    let todayDate = new Date(startTime.toDateString());
-    for (let i = 0; i < staffs.length; i++) {
-        let bookings = await Booking.find({ staff: staffs[i]._id, start: { $gte: todayDate }, delFlag: false });
-        if (bookings.length <= 0) {
-            staffList.push(staffs[i])
-            continue;
-        }
-        let conflit = false;
-        for (let j = 0; j < bookings.length; j++) {
-            if ((bookings[j].end > startTime && startTime > bookings[j].start) || (bookings[j].end > endTime && endTime > bookings[j].start)) {
-                conflit = true
+    try {
+        //get raw data from data
+        let service = reqe.body;
+        let startTime = new Date(service.start)
+        let endTime = new Date(service.end)
+        let staffs = service.staff;
+        let staffList = []
+        let todayDate = new Date(startTime.toDateString());
+        for (let i = 0; i < staffs.length; i++) {
+            let bookings = await Booking.find({ staff: staffs[i]._id, start: { $gte: todayDate }, delFlag: false });
+            if (bookings.length <= 0) {
+                staffList.push(staffs[i])
+                continue;
+            }
+            let conflit = false;
+            for (let j = 0; j < bookings.length; j++) {
+                if ((bookings[j].end > startTime && startTime > bookings[j].start) || (bookings[j].end > endTime && endTime > bookings[j].start)) {
+                    conflit = true
+                }
+            }
+            if (!conflit) {
+                staffList.push(staffs[i])
             }
         }
-        if (!conflit) {
-            staffList.push(staffs[i])
-        }
-    }
-    res.send(staffList);
+        res.send(staffList);
+    } catch (err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
 });
 
 /* Register client over Kiosk POST Create client . */
@@ -209,23 +213,40 @@ router.post('/buyservice', async (reqe, res, next) => {
     }
 
 });
-
-/* POST Create booking. */
-router.post('/bookings', async (reqe, res, next) => {
+/* POST Create appointment. */
+router.post('/appointment', async (reqe, res, next) => {
     try {
+        //Create an empty appointment to get the id.
 
-        //load main fields
-        let booking = new Booking(reqe.body);
-        booking.createdBy = "Kiosk";
+        (new Appointment({ client: reqe.body[0].client })).save().then(async (appointment) => {
+            let bookings = reqe.body
+            for (let i = 0; i < bookings.length; i++) {
+                let client = await Client.findById(bookings[i].client)
+                let service = await Service.findById(bookings[i].service)
+                bookings[i].appointment = appointment._id
+                bookings[i].title = `${service.name} ${client.displayName}`
+                bookings[i].createdBy = "Kiosk";
+            }
 
-        //save client 
-        let doc = await booking.save();
-        let rsObj = { ok: "Booking has been created.", id: doc._id };
-        logger.audit("Kiosk", "Create", doc._id, `A new booking has been created by Kiosk`);
-        res.json(rsObj);
+            // creating all bookings
+            Booking.insertMany(bookings).then(bookings => {
+                let bookingids = bookings.map(booking => {
+                    return booking._id
+                })
+                appointment.bookings = bookingids
 
-    } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
-
+                appointment.save()
+                let rsObj = { ok: "Appointment has been created.", bookings: bookings, appointmentId: appointment._id }
+                res.json(rsObj)
+            }).catch(err => {
+                res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+            })
+        }).catch(err => {
+            res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+        })
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+    }
 });
 
 /* Save photo over Kiosk POST Create client . */
@@ -255,6 +276,26 @@ router.post('/savephoto', async (req, res, next) => {
         res.status(400).json({ error: `Cannot save photo, ${err.message}` })
     }
 
+});
+
+/* Get Category. */
+router.get('/category', async (reqe, res, next) => {
+    try {
+        let category = await Category.aggregate([
+            { $match: { delFlag: false } },
+            {
+                $project: {
+                    "value": "$_id",
+                    "label": "$name",
+                }
+            }
+        ])
+        res.send(category);
+    }
+    catch (err) {
+        console.log(err);
+        res.status(400).json({ error: `Cannot get category, ${err.message}` })
+    }
 });
 
 const uploadLocalFile = async (containerName, filePath) => {

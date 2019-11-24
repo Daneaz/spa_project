@@ -82,7 +82,7 @@ class CalendarView extends React.Component {
     const clientList = await fetchAPI('GET', 'clientMgt/clients');
     const categoryList = await fetchAPI('GET', 'serviceMgt/category')
     let options = clientList.map(client => {
-      return { value: client._id, label: client.displayName };
+      return { value: client._id, label: `${client.mobile} (${client.displayName})` };
     })
     events.map(event => {
       event.start = new Date(event.start);
@@ -559,7 +559,7 @@ class CalendarView extends React.Component {
             views={['day', 'week']}
             defaultDate={new Date()}
             step={10}
-            timeslots={4}
+            timeslots={3}
             resources={this.state.staffList}
             resourceIdAccessor="_id"
             resourceTitleAccessor="displayName"

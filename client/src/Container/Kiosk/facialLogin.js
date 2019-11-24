@@ -188,7 +188,7 @@ class FacialLogin extends React.Component {
             }
         };
         axios(options).then(response => {
-            fetchAPI('GET', `kiosk/faciallogin/${response.data.name}`).then(respObj => {
+            fetchAPI('GET', `kioskMgt/faciallogin/${response.data.name}`).then(respObj => {
                 if (respObj && respObj.ok) {
                     console.log("Client: ")
                     console.log(respObj)
@@ -353,7 +353,7 @@ class FacialLogin extends React.Component {
             let data = {};
             data.imagebase64 = imageUrl;
             data.id = "auth";
-            const respObj = await fetchAPI('POST', 'kiosk/savephoto', data);
+            const respObj = await fetchAPI('POST', 'kioskMgt/savephoto', data);
             if (respObj && respObj.ok) {
                 this.faceAPIDetect(`${STORAGE_URL}/${data.id}.jpg`);
             } else {

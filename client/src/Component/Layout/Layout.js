@@ -274,7 +274,7 @@ function AccountMenu(props) {
                 transformOrigin={{ vertical: 'top', horizontal: 'right', }}
                 open={open} onClose={handleClose}
             >
-                <MenuItem onClick={handleClose} button component={Link} to="/profile">Profile</MenuItem>
+                {/* <MenuItem onClick={handleClose} button component={Link} to="/profile">Profile</MenuItem> */}
                 <MenuItem onClick={() => {
                     removeToken(); removeUser();
                     props.history.push("/login")

@@ -182,7 +182,7 @@ class Register extends React.Component {
             return;
         }
         try {
-            fetchAPI('POST', 'kiosk/clients', this.state.input).then(respObj => {
+            fetchAPI('POST', 'kioskMgt/clients', this.state.input).then(respObj => {
                 if (respObj && respObj.ok) {
                     setClient(respObj.user._id);
                     this.props.history.push('/snapshot');
