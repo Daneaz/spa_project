@@ -478,7 +478,7 @@ class CalendarView extends React.Component {
       booking.availableServiceList = availableServiceList
     } else if (type === "Service") {
       let index = child.props.id;
-      let service = this.state.serviceList[index]
+      let service = this.state.bookings[bookingIndex].availableServiceList[index]
       if (this.state.editFlag) {
         service.start = new Date(booking.start)
       } else {

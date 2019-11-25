@@ -221,7 +221,7 @@ router.get('/availableservice/:id', async (reqe, res, next) => {
         if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
 
         //get raw data from data
-        let availableservice = await Service.find({ delFlag: false, category: reqe.params.id })
+        let availableservice = await Service.find({ delFlag: false, category: reqe.params.id }).populate('staff')
         res.send(availableservice);
     } catch (err) {
         res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
