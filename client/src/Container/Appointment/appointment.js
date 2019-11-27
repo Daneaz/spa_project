@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
 import AppLayout from '../../Component/Layout/Layout'
 import { fetchAPI } from '../../utils';
 import BookingOverview from '../../Component/BookingOverview/BookingOverview'
-import './sweetalert.scss'
+import './sweetalert.css'
 
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar)

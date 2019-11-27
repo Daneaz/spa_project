@@ -41,7 +41,7 @@ router.post('/appointment', async (reqe, res, next) => {
                 let client = await Client.findById(bookings[i].client)
                 let service = await Service.findById(bookings[i].service)
                 bookings[i].appointment = appointment._id
-                bookings[i].title = `${service.name} ${client.displayName}`
+                bookings[i].title = `${service.name} ${client.mobile} (${client.displayName})`
             }
 
             // creating all bookings

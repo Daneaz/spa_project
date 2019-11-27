@@ -308,7 +308,7 @@ class Register extends React.Component {
                 >
                     <DialogContent>
                         <div>
-                            <TextField InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            <TextField InputProps={{ style: { fontSize: 30}} } fullWidth
                                 ref="displayValue" value={input[this.state.inputName]} placeholder={"Tap to start"} onChange={e => this.onChangeAll(e)} />
                             <Keyboard
                                 keyboardRef={r => (this.keyboard = r)}

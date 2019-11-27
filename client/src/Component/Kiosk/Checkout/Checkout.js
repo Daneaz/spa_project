@@ -49,11 +49,8 @@ class SelectService extends React.Component {
 
     async componentWillMount() {
         try {
-            const serviceList = await fetchAPI('GET', 'kioskMgt/services')
             const categoryList = await fetchAPI('GET', 'kioskMgt/category')
             this.setState({
-                serviceList: serviceList,
-                staffList: serviceList[0].staff,
                 categoryList: categoryList
             });
         } catch (error) {
@@ -65,8 +62,10 @@ class SelectService extends React.Component {
         this.setState({ selectedStaff: event.target.value });
     };
 
-    handleSelectServiceCategoryChange = (event) => {
+    handleSelectServiceCategoryChange = async(event) => {
+        const serviceList = await fetchAPI('GET', `kioskMgt/availableservice/${event.target.value}`)
         this.setState({
+            serviceList: serviceList,
             selectedServiceCategory: event.target.value,
             selectedService: ''
         });

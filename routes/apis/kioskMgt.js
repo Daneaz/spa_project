@@ -180,6 +180,17 @@ router.post('/availablestaff', async (reqe, res, next) => {
     } catch (err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
 });
 
+/* Get Category. */
+router.get('/availableservice/:id', async (reqe, res, next) => {
+    try {
+        //get raw data from data
+        let availableservice = await Service.find({ delFlag: false, category: reqe.params.id }).populate('staff')
+        res.send(availableservice);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+    }
+});
+
 /* Buy Service using credit . */
 router.post('/useCredit/:id', async (reqe, res, next) => {
     try {
@@ -225,7 +236,7 @@ router.post('/appointment', async (reqe, res, next) => {
                 let client = await Client.findById(bookings[i].client)
                 let service = await Service.findById(bookings[i].service)
                 bookings[i].appointment = appointment._id
-                bookings[i].title = `${service.name} ${client.displayName}`
+                bookings[i].title = `${service.name} ${client.mobile} (${client.displayName})`
                 bookings[i].createdBy = "Kiosk";
             }
 
