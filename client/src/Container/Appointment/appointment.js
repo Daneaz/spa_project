@@ -16,7 +16,6 @@ import Swal from 'sweetalert2';
 import AppLayout from '../../Component/Layout/Layout'
 import { fetchAPI } from '../../utils';
 import BookingOverview from '../../Component/BookingOverview/BookingOverview'
-import './sweetalert.css'
 
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar)
@@ -41,6 +40,9 @@ const styles = theme => ({
     marginLeft: theme.spacing(2),
     flex: 1,
   },
+  alert:{
+    zIndex: 2000,
+  }
 });
 
 const minTime = new Date();
@@ -109,7 +111,7 @@ class CalendarView extends React.Component {
     if (bookings.length <= 0) {
       Swal.fire({
         customClass: {
-          container: 'my-swal'
+          container: this.props.classes.alert
         },
         type: 'error',
         title: "Please Select Service !!!"
@@ -120,7 +122,7 @@ class CalendarView extends React.Component {
         if (!bookings[i].service) {
           Swal.fire({
             customClass: {
-              container: 'my-swal'
+              container: this.props.classes.alert
             },
             type: 'error',
             title: "Please Select Service!!!"
@@ -129,7 +131,7 @@ class CalendarView extends React.Component {
         } else if (!bookings[i].staff) {
           Swal.fire({
             customClass: {
-              container: 'my-swal'
+              container: this.props.classes.alert
             },
             type: 'error',
             title: "Please Select Staff!!!"
@@ -140,7 +142,7 @@ class CalendarView extends React.Component {
       if (!selectedClient) {
         Swal.fire({
           customClass: {
-            container: 'my-swal'
+            container: this.props.classes.alert
           },
           type: 'error',
           title: "Please Select Customer!!!"
@@ -227,21 +229,30 @@ class CalendarView extends React.Component {
           Swal.fire({
             type: 'error',
             title: "Opps... Something Wrong...",
-            text: respObj.error
+            text: respObj.error,
+            customClass: {
+              container: this.props.classes.alert
+            },
           })
         }
       }).catch(error => {
         Swal.fire({
           type: 'error',
           title: "Opps... Something Wrong...",
-          text: error
+          text: error,
+          customClass: {
+            container: this.props.classes.alert
+          },
         })
       })
     } else {
       Swal.fire({
         type: 'error',
         title: "Opps... Something Wrong...",
-        text: 'No Booking found'
+        text: 'No Booking found',
+        customClass: {
+          container: this.props.classes.alert
+        },
       })
     }
   }
@@ -270,14 +281,20 @@ class CalendarView extends React.Component {
         Swal.fire({
           type: 'error',
           title: "Opps... Something Wrong...",
-          text: respObj.error
+          text: respObj.error,
+          customClass: {
+            container: this.props.classes.alert
+          },
         })
       }
     }).catch(error => {
       Swal.fire({
         type: 'error',
         title: "Opps... Something Wrong...",
-        text: error
+        text: error,
+        customClass: {
+          container: this.props.classes.alert
+        },
       })
     })
   }
@@ -411,7 +428,7 @@ class CalendarView extends React.Component {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!',
       customClass: {
-        container: 'my-swal'
+        container: this.props.classes.alert
       },
     }).then((result) => {
       const { appointment, events } = this.state
