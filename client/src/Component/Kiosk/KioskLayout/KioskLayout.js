@@ -2,7 +2,7 @@ import React from 'react';
 import { Animated } from "react-animated-css";
 import { Paper, IconButton, Button, Typography } from '@material-ui/core';
 import { Home as HomeIcon } from '@material-ui/icons';
-
+import Swal from 'sweetalert2';
 const BackGroundImage = '/static/images/kiosk_bg.png';
 
 const HomeButton = (props) => {
@@ -20,7 +20,13 @@ const HomeButton = (props) => {
 const SkipButton = (props) => {
     if (props.skip) {
         return (
-            <Button onClick={() => { props.history.push('/start'); }} color="primary" style={{ position: 'fixed', fontSize: 30, right: 50, top: 50 }}>
+            <Button onClick={() => {
+                props.history.push('/start');
+                Swal.fire({
+                    type: 'success', text: "Register Success",
+                    title: "Success!"
+                })
+            }} color="primary" style={{ position: 'fixed', fontSize: 30, right: 50, top: 50 }}>
                 Skip
             </Button>
         )

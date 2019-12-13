@@ -12,17 +12,30 @@ let logger = require('../../services/logger');
 /* PATCH update add credit. */
 router.get('/dashboard', async (reqe, res, next) => {
     try {
-
-        let bookingsByStaff = await Booking.aggregate([
+        let date = new Date();
+        date.setDate(1);
+        date.setHours(0);
+        date.setMinutes(0);
+        let bookingsByStaff = await Appointment.aggregate([
             {
                 $match: {
-                    delFlag: false
+                    delFlag: false,
+                    createdAt: { $gte: date }
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "bookings",
+                    localField: "bookings",
+                    foreignField: "_id",
+                    as: "bookings"
                 }
             },
             {
                 $group:
                 {
-                    _id: "$staff",
+                    _id: { $arrayElemAt: ["$bookings.staff", 0] },
                     Bookings: { $sum: 1 },
                 }
             },
@@ -34,12 +47,20 @@ router.get('/dashboard', async (reqe, res, next) => {
                     foreignField: "_id",
                     as: "staffName"
                 }
+            },
+            {
+                $project: 
+                {
+                    staffName: "$staffName.displayName",
+                    Bookings: 1
+                }
             }
         ])
 
         let totalBookings = await Booking.aggregate([
             {
-                $match: {
+                $match:
+                {
                     delFlag: false
                 }
             },
@@ -55,14 +76,20 @@ router.get('/dashboard', async (reqe, res, next) => {
                     _id: "$date",
                     TotalBooking: { $sum: 1 },
                 }
+            },
+            {
+                $sort:
+                {
+                    _id: 1
+                }
             }
         ])
 
         for (let i = 0; i < bookingsByStaff.length; i++) {
-            bookingsByStaff[i].staff = bookingsByStaff[i].staffName[0].displayName
+            bookingsByStaff[i].staff = bookingsByStaff[i].staffName[0]
         }
 
-        let rsObj = { ok: "Credit has been added.", bookingsByStaff: bookingsByStaff, totalBookings, totalBookings };
+        let rsObj = { ok: "Credit has been added.", bookingsByStaff: bookingsByStaff, totalBookings: totalBookings };
         res.json(rsObj);
 
     } catch (err) { res.status(400).json({ error: `Cannot add credit, ${err.message}` }); }

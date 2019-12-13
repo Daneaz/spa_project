@@ -9,7 +9,14 @@ import { fetchAPI, setClient } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-
+// import DatePicker from '@material-ui/core/TextField'
+import DateFnsUtils from '@date-io/date-fns';
+import {
+    DatePicker,
+    TimePicker,
+    DateTimePicker,
+    MuiPickersUtilsProvider,
+} from '@material-ui/pickers';
 const mainFontSize = 35;
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -44,6 +51,7 @@ class Register extends React.Component {
         submittedData: "",
         gender: genderOptions[0],
         keyboardOpen: false,
+        selectedDate: null,
     };
 
     handleGenderSelection = (gender) => {
@@ -167,13 +175,6 @@ class Register extends React.Component {
             })
             return;
         }
-        else if (!input.email) {
-            Swal.fire({
-                type: 'error', text: 'Please enter email',
-                title: "Error"
-            })
-            return;
-        }
         else if (!input.nric) {
             Swal.fire({
                 type: 'error', text: 'Please enter NRIC',
@@ -200,6 +201,10 @@ class Register extends React.Component {
             })
         }
     };
+
+    handleDateChange = (value) => {
+        this.setState({ selectedDate: value })
+    }
 
     render() {
         const { classes } = this.props;
@@ -259,6 +264,23 @@ class Register extends React.Component {
                             value={input["nric"] || ""}
                             onChange={e => this.onChangeInput(e)}
                         />
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <DatePicker 
+                                autoOk
+                                disableFuture
+                                disableToolbar
+                                openTo="year"
+                                format="dd/MM/yyyy"
+                                label="Date of birth"
+                                views={["year", "month", "date"]}
+                                style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
+                                InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ shrink: true, style: { fontSize: mainFontSize } }}
+                                fullWidth
+                                margin="normal"
+                                inputVariant="outlined"
+                                variant="outlined"
+                                value={this.state.selectedDate} onChange={this.handleDateChange} />
+                        </MuiPickersUtilsProvider>
                         <Typography variant='h3' color='primary' gutterBottom>
                             Gender
                                 </Typography>
@@ -308,7 +330,7 @@ class Register extends React.Component {
                 >
                     <DialogContent>
                         <div>
-                            <TextField InputProps={{ style: { fontSize: 30}} } fullWidth
+                            <TextField InputProps={{ style: { fontSize: 30 } }} fullWidth
                                 ref="displayValue" value={input[this.state.inputName]} placeholder={"Tap to start"} onChange={e => this.onChangeAll(e)} />
                             <Keyboard
                                 keyboardRef={r => (this.keyboard = r)}

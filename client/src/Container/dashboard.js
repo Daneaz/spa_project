@@ -2,7 +2,7 @@ import React from 'react';
 import { withStyles } from '@material-ui/styles';
 
 import {
-  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ResponsiveContainer
 } from 'recharts';
 
 import {

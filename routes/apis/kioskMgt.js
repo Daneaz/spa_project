@@ -6,6 +6,7 @@ let Category = require('../../models/category')
 let Client = require('../../models/auth/client');
 let Service = require('../../models/service');
 let Booking = require('../../models/booking');
+let CreditRecord = require('../../models/creditRecord');
 let Invoice = require('../../models/invoice')
 let logger = require('../../services/logger');
 const path = require('path');
@@ -203,6 +204,8 @@ router.post('/useCredit/:id', async (reqe, res, next) => {
             } else {
                 client.credit = client.credit - data.total;
                 client.save();
+                let record = new CreditRecord({ client: client._id, services: data.service, amount: data.total })
+                record.save();
                 let mobile = client.mobile;
                 let firstDigit = mobile.toString()[0];
                 if (mobile.toString().length === 8 && (firstDigit === '8' || firstDigit === '9')) {

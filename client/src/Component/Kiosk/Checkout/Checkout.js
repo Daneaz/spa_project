@@ -101,7 +101,7 @@ class SelectService extends React.Component {
         let client = getClient()
         let data = {}
         data.total = this.state.selectedServiceData.price;
-
+        data.service = this.state.selectedServiceData.name
         fetchAPI('POST', `kioskMgt/useCredit/${client._id}`, data).then(service => {
             if (service.ok) {
                 let start = new Date();

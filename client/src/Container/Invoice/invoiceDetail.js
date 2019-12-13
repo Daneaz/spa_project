@@ -14,7 +14,7 @@ const styles = theme => ({
     checkoutBtn: {
         marginTop: 5,
         marginBottom: 5,
-        width: "25%",
+        width: "22%",
         minHeight: 100,
     },
     titleBar: {
@@ -69,7 +69,7 @@ class InvoiceDetail extends React.Component {
                 total: invoice.total,
                 addon: invoice.addon,
                 discount: invoice.discount,
-                paymentType :invoice.paymentType,
+                paymentType: invoice.paymentType,
                 isCheckout: true,
                 createdAt: invoice.createdAt
             })
@@ -112,7 +112,7 @@ class InvoiceDetail extends React.Component {
                     appointment: this.state.bookingList[0].appointment,
                 }
                 if (type === "Credit") {
-                    fetchAPI('POST', `invoiceMgt/useCredit/${this.state.client._id}`, { total: this.state.total }).then(respObj => {
+                    fetchAPI('POST', `invoiceMgt/useCredit/${this.state.client._id}`, { total: this.state.total, bookings: this.state.bookingList }).then(respObj => {
                         if (respObj && respObj.ok) {
                             this.checkout(values)
                         } else {

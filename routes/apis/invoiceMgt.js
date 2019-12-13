@@ -7,6 +7,7 @@ let Client = require('../../models/auth/client');
 let Staff = require('../../models/auth/staff');
 let Invoice = require('../../models/invoice');
 let Appointment = require('../../models/appointment');
+let CreditRecord = require('../../models/creditRecord');
 let logger = require('../../services/logger');
 
 // SMS Config
@@ -26,6 +27,13 @@ router.post('/useCredit/:id', async (reqe, res, next) => {
             } else {
                 client.credit = client.credit - data.total;
                 client.save();
+                let servcies = [];
+                for (let i = 0; i < data.bookings.length; i++) {
+                    servcies.push(data.bookings[i].service.name)
+                }
+                let record = new CreditRecord({ client: client._id, services: servcies, amount: data.total })
+                record.save();
+
                 let mobile = client.mobile;
                 let firstDigit = mobile.toString()[0];
                 if (mobile.toString().length === 8 && (firstDigit === '8' || firstDigit === '9')) {

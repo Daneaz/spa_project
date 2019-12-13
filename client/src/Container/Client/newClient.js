@@ -2,10 +2,10 @@ import React from 'react';
 import Select from 'react-select';
 import { withStyles } from '@material-ui/styles';
 import {
-    Typography, Button, CssBaseline, Container, LinearProgress
+    Typography, Button, CssBaseline, Container, LinearProgress,
 } from '@material-ui/core';
 
-import Datepicker from '@material-ui/core/TextField'
+import DatePicker from '@material-ui/core/TextField'
 
 import { Formik, Field, Form } from 'formik';
 import { TextField } from 'formik-material-ui';
@@ -123,7 +123,7 @@ class NewClient extends React.Component {
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="nric" label="NRIC"
                                 />
-                                <Datepicker
+                                <DatePicker
                                     fullWidth
                                     margin="normal"
                                     variant="outlined"
