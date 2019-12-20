@@ -43,11 +43,19 @@ class NewStaff extends React.Component {
     };
 
     async componentDidMount() {
-        const roleList = await fetchAPI('GET', 'staffMgt/roles');
-        this.setState({
-            roleList: roleList,
-            selectedOption: roleList[0]
-        });
+        try {
+            const roleList = await fetchAPI('GET', 'staffMgt/roles');
+            this.setState({
+                roleList: roleList,
+                selectedOption: roleList[0]
+            });
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
     }
 
     handleChange = selectedOption => {
@@ -137,13 +145,13 @@ class NewStaff extends React.Component {
 
                                 if (respObj && respObj.ok) {
                                     window.history.back();
-                                } else { 
+                                } else {
                                     Swal.fire({
                                         type: 'error',
                                         title: "Opps... Something Wrong...",
                                         text: respObj.error
                                     })
-                                 }
+                                }
                             } catch (error) {
                                 Swal.fire({
                                     type: 'error',

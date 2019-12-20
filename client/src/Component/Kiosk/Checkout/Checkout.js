@@ -54,7 +54,11 @@ class SelectService extends React.Component {
                 categoryList: categoryList
             });
         } catch (error) {
-            console.log(error);
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
         }
     }
 

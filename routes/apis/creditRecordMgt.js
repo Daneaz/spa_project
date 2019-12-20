@@ -26,7 +26,9 @@ router.post('/addcredit/:id', async (reqe, res, next) => {
             res.json(rsObj);
         })
 
-    } catch (err) { res.status(400).json({ error: `Cannot add credit, ${err.message}` }); }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot add credit, ${err.message}` });
+    }
 
 });
 

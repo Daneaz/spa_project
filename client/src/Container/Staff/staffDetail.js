@@ -37,11 +37,19 @@ class ClientDetail extends React.Component {
     };
 
     async componentDidMount() {
-        const roleList = await fetchAPI('GET', 'staffMgt/roles');
+        try {
+            const roleList = await fetchAPI('GET', 'staffMgt/roles');
 
-        this.setState({
-            roleList: roleList,
-        });
+            this.setState({
+                roleList: roleList,
+            });
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
     }
 
     handleChange = selectedOption => {

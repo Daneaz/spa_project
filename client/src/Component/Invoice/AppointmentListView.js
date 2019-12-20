@@ -12,16 +12,25 @@ const styles = theme => ({
     },
 });
 
+function getTotal(bookings) {
+    let total = 0
+    for (let i = 0; i < bookings.length; i++) {
+        total += bookings[i].service.price
+    }
+    return total
+}
+
 class InvoiceList extends React.Component {
     render() {
         const { classes } = this.props;
+
         return (
             <ListItem button onClick={this.props.click} >
                 <Grid
                     container
                     direction="column">
                     {
-                        this.props.invoice.appointment.bookings.map(booking => {
+                        this.props.bookings.map(booking => {
 
                             return (
                                 <React.Fragment>
@@ -45,11 +54,9 @@ class InvoiceList extends React.Component {
                         <Grid
                             container
                             direction="row"
-                            justify="space-between"
+                            justify="flex-end"
                             alignItems="center">
-                                    <h3><strong>Addon: ${this.props.invoice.addon} </strong></h3>
-                                    <h3><strong>Discount: ${this.props.invoice.discount} </strong></h3>
-                                    <h3><strong>Total: ${this.props.invoice.total} </strong></h3>
+                            <h3><strong>Total: ${getTotal(this.props.bookings)} </strong></h3>
                         </Grid>
                     </Grid>
                 </Grid>

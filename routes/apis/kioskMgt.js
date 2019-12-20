@@ -133,22 +133,28 @@ router.post('/clients', async (reqe, res, next) => {
         logger.audit("Client Mgt", "Create", user._id, `A new client has self registor`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create client, ${err.message}` })
+    }
 
 });
 
 /* GET service list. */
 router.get('/services', async (reqe, res, next) => {
     //get raw data from data
-    let services = await Service.find({ "delFlag": false }).lean()
-        .populate("staff")
-        .select({
-            "name": 1,
-            "duration": 1,
-            "price": 1,
-            "staff": 1,
-        });
-    res.send(services);
+    try {
+        let services = await Service.find({ "delFlag": false }).lean()
+            .populate("staff")
+            .select({
+                "name": 1,
+                "duration": 1,
+                "price": 1,
+                "staff": 1,
+            });
+        res.send(services);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get service list, ${err.message}` })
+    }
 });
 
 /* GET available staff list. */
@@ -178,7 +184,9 @@ router.post('/availablestaff', async (reqe, res, next) => {
             }
         }
         res.send(staffList);
-    } catch (err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get available staff list, ${err.message}` })
+    }
 });
 
 /* Get Category. */
@@ -188,7 +196,7 @@ router.get('/availableservice/:id', async (reqe, res, next) => {
         let availableservice = await Service.find({ delFlag: false, category: reqe.params.id }).populate('staff')
         res.send(availableservice);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({ error: `Cannot get available staff, ${err.message}` })
     }
 });
 
@@ -222,7 +230,6 @@ router.post('/useCredit/:id', async (reqe, res, next) => {
             }
         })
     } catch (err) {
-        console.log(err);
         res.status(400).json({ error: `Cannot use credit, ${err.message}` })
     }
 
@@ -288,7 +295,6 @@ router.post('/savephoto', async (req, res, next) => {
         });
 
     } catch (err) {
-        console.log(err);
         res.status(400).json({ error: `Cannot save photo, ${err.message}` })
     }
 
@@ -328,7 +334,9 @@ router.post('/invoice', async (reqe, res, next) => {
             }
         })
 
-    } catch (err) { res.status(400).json({ error: `Cannot create invoice, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create invoice, ${err.message}` })
+    }
 
 });
 

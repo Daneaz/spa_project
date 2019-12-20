@@ -9,7 +9,6 @@ import { fetchAPI, setClient } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-// import DatePicker from '@material-ui/core/TextField'
 import DateFnsUtils from '@date-io/date-fns';
 import {
     DatePicker,

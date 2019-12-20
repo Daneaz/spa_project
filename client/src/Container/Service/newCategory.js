@@ -40,8 +40,16 @@ class NewStaff extends React.Component {
     }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/workingStaff');
-        this.setState({ staffList: response });
+        try {
+            const response = await fetchAPI('GET', 'staffMgt/workingStaff');
+            this.setState({ staffList: response });
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
     }
 
     render() {
@@ -57,7 +65,7 @@ class NewStaff extends React.Component {
                     </Typography>
                     <CssBaseline />
                     <Formik
-                        initialValues={{ name: ''}}
+                        initialValues={{ name: '' }}
                         validate={values => {
                             const errors = {};
                             if (!values.name) { errors.name = 'Please enter category name' }
@@ -65,18 +73,18 @@ class NewStaff extends React.Component {
                         }}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                
+
                                 const respObj = await fetchAPI('POST', 'serviceMgt/category', values);
 
                                 if (respObj && respObj.ok) {
                                     window.history.back();
-                                } else { 
+                                } else {
                                     Swal.fire({
                                         type: 'error',
                                         title: "Opps... Something Wrong...",
                                         text: respObj.error
                                     })
-                                 }
+                                }
                             } catch (error) {
                                 Swal.fire({
                                     type: 'error',
@@ -92,7 +100,7 @@ class NewStaff extends React.Component {
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="name" label="Category Name"
                                 />
-                                
+
                                 <Button variant="contained" color="primary" fullWidth className={classes.submit}
                                     disabled={isSubmitting} onClick={submitForm}
                                 >

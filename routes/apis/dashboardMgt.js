@@ -2,12 +2,7 @@ var express = require('express');
 var router = express.Router();
 let createError = require('http-errors');
 
-let Staff = require('../../models/auth/staff');
-let Client = require('../../models/auth/client');
-let Booking = require('../../models/booking');
 let Appointment = require('../../models/appointment');
-let CreditRecord = require('../../models/creditRecord');
-let logger = require('../../services/logger');
 
 /* PATCH update add credit. */
 router.get('/dashboard', async (reqe, res, next) => {
@@ -49,32 +44,52 @@ router.get('/dashboard', async (reqe, res, next) => {
                 }
             },
             {
-                $project: 
+                $project:
                 {
                     staffName: "$staffName.displayName",
                     Bookings: 1
                 }
             }
         ])
-
-        let totalBookings = await Booking.aggregate([
+        date.setMonth(0);
+        let missedAppointment = await Appointment.aggregate([
             {
                 $match:
                 {
-                    delFlag: false
-                }
-            },
-            {
-                $project:
-                {
-                    date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    delFlag: false,
+                    checkout: false,
+                    createdAt: { $gte: date }
                 }
             },
             {
                 $group:
                 {
-                    _id: "$date",
-                    TotalBooking: { $sum: 1 },
+                    _id: { $month: "$createdAt" },
+                    Missed: { $sum: 1 },
+                }
+            },
+            {
+                $sort:
+                {
+                    _id: 1
+                }
+            }
+        ])
+
+        let completedAppointment = await Appointment.aggregate([
+            {
+                $match:
+                {
+                    delFlag: false,
+                    checkout: true,
+                    createdAt: { $gte: date }
+                }
+            },
+            {
+                $group:
+                {
+                    _id: { $month: "$createdAt" },
+                    Completed: { $sum: 1 },
                 }
             },
             {
@@ -88,12 +103,26 @@ router.get('/dashboard', async (reqe, res, next) => {
         for (let i = 0; i < bookingsByStaff.length; i++) {
             bookingsByStaff[i].staff = bookingsByStaff[i].staffName[0]
         }
-
-        let rsObj = { ok: "Credit has been added.", bookingsByStaff: bookingsByStaff, totalBookings: totalBookings };
+        let appointments = mergeAppoinmentObj(completedAppointment, missedAppointment);
+        appointments.map(appointment => {
+            appointment.Total = appointment.Missed + appointment.Completed
+        })
+        let rsObj = { ok: "Success.", bookingsByStaff: bookingsByStaff, appointments: appointments };
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot add credit, ${err.message}` }); }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get dashboard, ${err.message}` });
+    }
 
 });
+
+function mergeAppoinmentObj(arr1, arr2) {
+    return arr1.map((item, i) => {
+        if (item.id === arr2[i].id) {
+            //merging two objects
+            return Object.assign({}, item, arr2[i])
+        }
+    })
+}
 
 module.exports = router;

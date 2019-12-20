@@ -40,7 +40,7 @@ const styles = theme => ({
     marginLeft: theme.spacing(2),
     flex: 1,
   },
-  alert:{
+  alert: {
     zIndex: 2000,
   }
 });
@@ -78,26 +78,34 @@ class CalendarView extends React.Component {
 
 
   async componentDidMount() {
-    const staffList = await fetchAPI('GET', 'staffMgt/workingStaff');
-    const serviceList = await fetchAPI('GET', 'serviceMgt/services');
-    const events = await fetchAPI('GET', 'appointmentMgt/bookings');
-    const clientList = await fetchAPI('GET', 'clientMgt/clients');
-    const categoryList = await fetchAPI('GET', 'serviceMgt/category')
-    let options = clientList.map(client => {
-      return { value: client._id, label: `${client.mobile} (${client.displayName})` };
-    })
-    events.map(event => {
-      event.start = new Date(event.start);
-      event.end = new Date(event.end);
-    })
-    this.setState({
-      staffList: staffList,
-      serviceList: serviceList,
-      clientList: options,
-      events: events,
-      appointment: null,
-      categoryList: categoryList,
-    });
+    try {
+      const staffList = await fetchAPI('GET', 'staffMgt/workingStaff');
+      const serviceList = await fetchAPI('GET', 'serviceMgt/services');
+      const events = await fetchAPI('GET', 'appointmentMgt/bookings');
+      const clientList = await fetchAPI('GET', 'clientMgt/clients');
+      const categoryList = await fetchAPI('GET', 'serviceMgt/category')
+      let options = clientList.map(client => {
+        return { value: client._id, label: `${client.mobile} (${client.displayName})` };
+      })
+      events.map(event => {
+        event.start = new Date(event.start);
+        event.end = new Date(event.end);
+      })
+      this.setState({
+        staffList: staffList,
+        serviceList: serviceList,
+        clientList: options,
+        events: events,
+        appointment: null,
+        categoryList: categoryList,
+      });
+    } catch (error) {
+      Swal.fire({
+        type: 'error',
+        title: "Opps... Something Wrong...",
+        text: error
+      })
+    }
   }
 
   handleSelectClientChange = (selectedOption) => {

@@ -47,13 +47,21 @@ class NewStaff extends React.Component {
     }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/workingStaff');
-        const categoryList = await fetchAPI('GET', 'serviceMgt/category');
-        this.setState({
-            staffList: response,
-            categoryList: categoryList,
-            selectedCategory: categoryList[0]
-        });
+        try {
+            const response = await fetchAPI('GET', 'staffMgt/workingStaff');
+            const categoryList = await fetchAPI('GET', 'serviceMgt/category');
+            this.setState({
+                staffList: response,
+                categoryList: categoryList,
+                selectedCategory: categoryList[0]
+            });
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
     }
 
     handleChangeCategory = (event) => {

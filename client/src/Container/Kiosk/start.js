@@ -4,7 +4,7 @@ import { ButtonBase, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
 import { removeToken, removeLocalStorage, removeUser } from '../../utils';
 import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
-
+import Swal from 'sweetalert2'
 const LoginImage = '/static/images/login.png';
 const RegisterImage = '/static/images/register.png';
 
@@ -71,9 +71,17 @@ class FacialLogin extends React.Component {
     }
 
     componentDidMount() {
-        removeLocalStorage("userid");
-        removeToken();
-        removeUser();
+        try {
+            removeLocalStorage("userid");
+            removeToken();
+            removeUser();
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
     }
 
     handleRegisterClick = () => {

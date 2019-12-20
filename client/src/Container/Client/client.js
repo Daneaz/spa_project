@@ -99,12 +99,20 @@ class Client extends React.Component {
   };
 
   async componentDidMount() {
-    const clientList = await fetchAPI('GET', 'clientMgt/clients');
-    clientList.map(client => {
-      client.birthday = client.birthday ? new Date(client.birthday).getMonth() + 1 : "-"
-      return client.nric = replaceRange(client.nric, 0, 5, "*****")
-    })
-    this.setState({ clientList: clientList });
+    try {
+      const clientList = await fetchAPI('GET', 'clientMgt/clients');
+      clientList.map(client => {
+        client.birthday = client.birthday ? new Date(client.birthday).getMonth() + 1 : "-"
+        return client.nric = replaceRange(client.nric, 0, 5, "*****")
+      })
+      this.setState({ clientList: clientList });
+    } catch (error) {
+      Swal.fire({
+        type: 'error',
+        title: "Opps... Something Wrong...",
+        text: error
+      })
+    }
   }
 
   handleAddClient = () => {

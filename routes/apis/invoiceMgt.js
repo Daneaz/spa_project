@@ -50,7 +50,6 @@ router.post('/useCredit/:id', async (reqe, res, next) => {
             }
         })
     } catch (err) {
-        console.log(err);
         res.status(400).json({ error: `Cannot use credit, ${err.message}` })
     }
 
@@ -81,7 +80,9 @@ router.get('/appointment/:id', async (reqe, res, next) => {
             })
         res.send(appointment);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({
+            error: `Cannot get appointment, ${err.message}`
+        })
     }
 });
 
@@ -111,7 +112,9 @@ router.get('/appointmentToInvoice/:id', async (reqe, res, next) => {
             }).populate("client")
         res.send(invoice);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({
+            error: `Cannot convert appointment to invoice, ${err.message}`
+        })
     }
 });
 
@@ -126,7 +129,9 @@ router.get('/invoicelist', async (reqe, res, next) => {
             .populate("client")
         res.send(invoices);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({
+            error: `Cannot get invoice list, ${err.message}`
+        })
     }
 });
 
@@ -156,7 +161,9 @@ router.get('/invoice/:id', async (reqe, res, next) => {
             }).populate("client")
         res.send(invoice);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({
+            error: `Cannot get invoice, ${err.message}`
+        })
     }
 });
 
@@ -198,7 +205,9 @@ router.post('/invoice', async (reqe, res, next) => {
             }
         })
 
-    } catch (err) { res.status(400).json({ error: `Cannot create invoice, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create invoice, ${err.message}` })
+    }
 
 });
 
@@ -221,7 +230,9 @@ router.delete('/invoice', async (reqe, res, next) => {
         let rsObj = { ok: "Invoices are deleted.", id: deleteId };
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot delete Invoice, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot delete Invoice, ${err.message}` })
+    }
 
 });
 

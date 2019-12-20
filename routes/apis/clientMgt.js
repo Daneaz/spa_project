@@ -34,7 +34,7 @@ router.get('/clients', async (reqe, res, next) => {
 
         res.send(rawClients);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({ error: `Cannot get client list, ${err.message}` })
     }
 });
 
@@ -64,7 +64,9 @@ router.post('/clients', async (reqe, res, next) => {
         logger.audit("Client Mgt", "Create", doc._id, staff.id, `A new client has been created by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create client, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create client, ${err.message}` })
+    }
 
 });
 
@@ -87,7 +89,7 @@ router.get('/clients/:id', async (reqe, res, next) => {
             });
         res.send(client);
     } catch (err) {
-        res.status(400).json({ error: `Cannot find client, ${err.message}` });
+        res.status(400).json({ error: `Cannot get client, ${err.message}` });
     }
 });
 
@@ -120,7 +122,9 @@ router.patch('/clients/:id', async (reqe, res, next) => {
         logger.audit("Client Mgt", "Update", doc._id, staff.id, `Client has been updated by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot update user, ${err.message}` }); }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update user, ${err.message}` });
+    }
 
 });
 
@@ -143,9 +147,11 @@ router.delete('/clients', async (reqe, res, next) => {
         let rsObj = { ok: "Clients are deleted.", id: deleteId };
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot delete Client, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot delete Client, ${err.message}` })
+    }
 
-}); ``
+});
 
 /* GET client total bookings. */
 router.get('/statistics/:id', async (reqe, res, next) => {
@@ -185,7 +191,9 @@ router.get('/statistics/:id', async (reqe, res, next) => {
             res.json(rsObj);
         }
 
-    } catch (err) { res.status(400).json({ error: `Cannot get statistics, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get statistics, ${err.message}` })
+    }
 });
 
 /* GET client total bookings. */
@@ -215,7 +223,9 @@ router.get('/appointments/:id', async (reqe, res, next) => {
         let rsObj = { ok: "Appointment retrieved.", appointments: appointments };
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot get appointments, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get appointment, ${err.message}` })
+    }
 });
 
 /* GET client total bookings. */
@@ -246,7 +256,7 @@ router.get('/invoices/:id', async (reqe, res, next) => {
         let rsObj = { ok: "Appointment retrieved.", invoices: invoices };
         res.json(rsObj);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({ error: `Cannot get invoice, ${err.message}` })
     }
 });
 

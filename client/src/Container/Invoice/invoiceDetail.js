@@ -47,31 +47,39 @@ class InvoiceDetail extends React.Component {
     }
 
     async componentDidMount() {
-        if (this.props.location.state.appointment) {
-            let appointment = this.props.location.state.appointment
-            let subtotal = 0
-            appointment.bookings.map(booking => {
-                subtotal += parseFloat(booking.service.price)
-            })
-            this.setState({
-                bookingList: appointment.bookings,
-                client: appointment.bookings[0].client,
-                subtotal: subtotal,
-                total: subtotal,
-                isCheckout: appointment.checkout,
-            })
-        } else {
-            let invoice = this.props.location.state.invoice
-            this.setState({
-                bookingList: invoice.appointment.bookings,
-                client: invoice.client.displayName,
-                subtotal: invoice.subtotal,
-                total: invoice.total,
-                addon: invoice.addon,
-                discount: invoice.discount,
-                paymentType: invoice.paymentType,
-                isCheckout: true,
-                createdAt: invoice.createdAt
+        try {
+            if (this.props.location.state.appointment) {
+                let appointment = this.props.location.state.appointment
+                let subtotal = 0
+                appointment.bookings.map(booking => {
+                    subtotal += parseFloat(booking.service.price)
+                })
+                this.setState({
+                    bookingList: appointment.bookings,
+                    client: appointment.bookings[0].client,
+                    subtotal: subtotal,
+                    total: subtotal,
+                    isCheckout: appointment.checkout,
+                })
+            } else {
+                let invoice = this.props.location.state.invoice
+                this.setState({
+                    bookingList: invoice.appointment.bookings,
+                    client: invoice.client.displayName,
+                    subtotal: invoice.subtotal,
+                    total: invoice.total,
+                    addon: invoice.addon,
+                    discount: invoice.discount,
+                    paymentType: invoice.paymentType,
+                    isCheckout: true,
+                    createdAt: invoice.createdAt
+                })
+            }
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
             })
         }
     }

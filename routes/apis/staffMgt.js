@@ -87,86 +87,93 @@ init();
 
 /* GET all role all staff list. */
 router.get('/staffs', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let rawStaffs = await Staff.find({ "delFlag": false }).lean()
-        .populate("role")
-        .select({
-            "username": 1,
-            "email": 1,
-            "mobile": 1,
-            "displayName": 1,
-            "role.name": 1,
-            "offDays": 1,
-            "leaveDays": 1,
-        });
-    //fillter & process data for api
-    // let staffs = rawUsers.map((i) => {
-    //     delete i.role.createdAt;
-    //     delete i.role.updatedAt;
-    //     delete i.role.delFlag;
-    //     delete i.role.__v;
-    //     return i;
-    // });
+        //get raw data from data
+        let rawStaffs = await Staff.find({ "delFlag": false }).lean()
+            .populate("role")
+            .select({
+                "username": 1,
+                "email": 1,
+                "mobile": 1,
+                "displayName": 1,
+                "role.name": 1,
+                "offDays": 1,
+                "leaveDays": 1,
+            });
 
-    res.send(rawStaffs);
+        res.send(rawStaffs);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get staff list, ${err.message}` });
+    }
 });
 /* GET working staff list. */
 router.get('/workingStaff', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-    let role = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
+        let role = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
 
-    //get raw data from data
-    let rawStaffs = await Staff.find({ "delFlag": false, role: role.id }).lean()
-        .populate("role")
-        .select({
-            "username": 1,
-            "email": 1,
-            "mobile": 1,
-            "displayName": 1,
-            "role.name": 1,
-            "offDays": 1,
-            "leaveDays": 1,
-        });
+        //get raw data from data
+        let rawStaffs = await Staff.find({ "delFlag": false, role: role.id }).lean()
+            .populate("role")
+            .select({
+                "username": 1,
+                "email": 1,
+                "mobile": 1,
+                "displayName": 1,
+                "role.name": 1,
+                "offDays": 1,
+                "leaveDays": 1,
+            });
 
-    res.send(rawStaffs);
+        res.send(rawStaffs);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get working staff list, ${err.message}` });
+    }
 });
 
 /* GET total staff number. */
 router.get('/totalstaffs', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.staffMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.list) { next(createError(403)); return; }
 
-    let role = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
-    let totalstaffs = await Staff.count({ "delFlag": false, role: role.id });
+        let role = await StaffRole.findOne({ "delFlag": false, name: "Staff" });
+        let totalstaffs = await Staff.count({ "delFlag": false, role: role.id });
 
-
-    res.send({ total: totalstaffs });
+        res.send({ total: totalstaffs });
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get total number of staff, ${err.message}` });
+    }
 });
 
 /* GET staff details by id. */
 router.get('/staffs/:id', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.staffMgt.edit) { next(createError(403)); return; }
 
-    //get raw data from data
-    let rawStaff = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
-        .populate("role", "name")
-        .select({
-            "username": 1,
-            "email": 1,
-            "mobile": 1,
-            "displayName": 1,
-            "role.name": 1,
-            "offDays": 1,
-            "leaveDays": 1,
-        });
+        //get raw data from data
+        let rawStaff = await Staff.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
+            .populate("role", "name")
+            .select({
+                "username": 1,
+                "email": 1,
+                "mobile": 1,
+                "displayName": 1,
+                "role.name": 1,
+                "offDays": 1,
+                "leaveDays": 1,
+            });
 
-    res.send(rawStaff);
+        res.send(rawStaff);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get staff, ${err.message}` });
+    }
 });
 
 /* GET check staff name exist. */
@@ -218,7 +225,9 @@ router.post('/staffs', async (reqe, res, next) => {
         logger.audit("Staff Mgt", "Create", doc._id, staff.id, `A new staff has been created by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create staff, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create staff, ${err.message}` })
+    }
 
 });
 
@@ -284,7 +293,9 @@ router.patch('/staffs/:id', async (reqe, res, next) => {
         logger.audit("Staff Mgt", "Update", doc._id, staff.id, `Staff has been updated by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot update staff, ${err.message}` }); }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update staff, ${err.message}` });
+    }
 
 });
 
@@ -307,41 +318,50 @@ router.delete('/staffs', async (reqe, res, next) => {
         let rsObj = { ok: "Staffs are deleted.", id: deleteId };
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot delete Staff, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot delete Staff, ${err.message}` })
+    }
 
 });
 
 /* GET role list. */
 router.get('/roles', async (reqe, res, next) => {
+    try {
+        let user = await Staff.findById(res.locals.user.id).populate('role');
+        if (!user.role.staffMgt.list) { next(createError(403)); return; }
 
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.list) { next(createError(403)); return; }
-
-    //get raw data from data
-    let rawRoles = await StaffRole.aggregate([
-        { $match: { delFlag: false } },
-        {
-            $project: {
-                "value": "$_id",
-                "label": "$name",
+        //get raw data from data
+        let rawRoles = await StaffRole.aggregate([
+            { $match: { delFlag: false } },
+            {
+                $project: {
+                    "value": "$_id",
+                    "label": "$name",
+                }
             }
-        }
-    ])
-    res.send(rawRoles);
+        ])
+        res.send(rawRoles);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get role list, ${err.message}` })
+    }
 });
 
 
 
 /* GET role details by id. */
 router.get('/roles/:id', async (reqe, res, next) => {
-    let user = await Staff.findById(res.locals.user.id).populate('role');
-    if (!user.role.staffMgt.edit) { next(createError(403)); return; }
+    try {
+        let user = await Staff.findById(res.locals.user.id).populate('role');
+        if (!user.role.staffMgt.edit) { next(createError(403)); return; }
 
-    //get raw data from data
-    let sUserRole = await StaffRole.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
-        .select({ "delFlag": 0, "__v": 0 });
+        //get raw data from data
+        let sUserRole = await StaffRole.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
+            .select({ "delFlag": 0, "__v": 0 });
 
-    res.send(sUserRole);
+        res.send(sUserRole);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get role, ${err.message}` })
+    }
 });
 
 /* POST Create Role. */
@@ -368,7 +388,9 @@ router.post('/roles', async (reqe, res, next) => {
         logger.audit("Staff Mgt", "Create", doc._id, user.id, `A new user role has been created by ${user.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create user role, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create staff role, ${err.message}` })
+    }
 
 });
 
@@ -398,7 +420,9 @@ router.patch('/roles/:id', async (reqe, res, next) => {
         logger.audit("Staff Mgt", "Update", doc._id, user.id, `Staff Role has been updated by ${user.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot update Staff Role\r\n ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update Staff Role\r\n ${err.message}` })
+    }
 
 });
 
@@ -416,7 +440,9 @@ router.delete('/roles/:id', async (reqe, res, next) => {
         logger.audit("Staff Mgt", "Deleted", doc._id, user.id, `Staff Role has been deleted by ${user.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.json({ error: `Cannot delete Staff Role\r\n ${err.message}` }); }
+    } catch (err) {
+        res.json({ error: `Cannot delete Staff Role\r\n ${err.message}` });
+    }
 
 });
 

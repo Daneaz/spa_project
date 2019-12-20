@@ -11,24 +11,32 @@ let logger = require('../../services/logger');
 
 /* GET service list. */
 router.get('/services', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let services = await Service.find({ "delFlag": false }).lean()
-        .populate("staff").populate("category")
-    res.send(services);
+        //get raw data from data
+        let services = await Service.find({ "delFlag": false }).lean()
+            .populate("staff").populate("category")
+        res.send(services);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get service list, ${err.message}` })
+    }
 });
 
 /* GET service list. */
 router.get('/services/:id', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let services = await Service.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
-        .populate("staff").populate("category")
-    res.send(services);
+        //get raw data from data
+        let services = await Service.findOne({ "_id": reqe.params.id, "delFlag": false }).lean()
+            .populate("staff").populate("category")
+        res.send(services);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get service, ${err.message}` })
+    }
 });
 
 /* Create service. */
@@ -52,7 +60,9 @@ router.post('/services', async (reqe, res, next) => {
         logger.audit("Service Mgt", "Create", doc._id, staff.id, `A new service has been created by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create service, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create service, ${err.message}` })
+    }
 
 });
 
@@ -80,7 +90,9 @@ router.patch('/services/:id', async (reqe, res, next) => {
         logger.audit("Service Mgt", "Update", doc._id, staff.id, `Service has been updated by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot update service, ${err.message}` }); }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update service, ${err.message}` });
+    }
 
 });
 
@@ -103,26 +115,32 @@ router.delete('/services', async (reqe, res, next) => {
         let rsObj = { ok: "Services are deleted.", id: deleteId };
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot delete service, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot delete service, ${err.message}` })
+    }
 
 });
 
 /* Get Category. */
 router.get('/category', async (reqe, res, next) => {
-    let staff = await Staff.findById(res.locals.user.id).populate('role');
-    if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
+    try {
+        let staff = await Staff.findById(res.locals.user.id).populate('role');
+        if (!staff.role.serviceMgt.list) { next(createError(403)); return; }
 
-    //get raw data from data
-    let category = await Category.aggregate([
-        { $match: { delFlag: false } },
-        {
-            $project: {
-                "value": "$_id",
-                "label": "$name",
+        //get raw data from data
+        let category = await Category.aggregate([
+            { $match: { delFlag: false } },
+            {
+                $project: {
+                    "value": "$_id",
+                    "label": "$name",
+                }
             }
-        }
-    ])
-    res.send(category);
+        ])
+        res.send(category);
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get category, ${err.message}` })
+    }
 });
 
 /* Create Category. */
@@ -146,6 +164,8 @@ router.post('/category', async (reqe, res, next) => {
         logger.audit("Service Mgt", "Create", doc._id, staff.id, `A new category has been created by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create category, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create category, ${err.message}` })
+    }
 });
 module.exports = router;

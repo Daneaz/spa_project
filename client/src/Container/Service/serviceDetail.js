@@ -41,18 +41,26 @@ class ClientDetail extends React.Component {
     }
 
     async componentDidMount() {
-        const response = await fetchAPI('GET', 'staffMgt/workingStaff');
-        const categoryList = await fetchAPI('GET', 'serviceMgt/category');
-        if (this.props.location.state.data.staff === "All Staff") {
-            this.setState({ arrayValue: response });
-        } else {
-            const service = await fetchAPI('GET', `serviceMgt/services/${this.props.location.state.data._id}`);
-            this.setState({ arrayValue: service.staff });
+        try {
+            const response = await fetchAPI('GET', 'staffMgt/workingStaff');
+            const categoryList = await fetchAPI('GET', 'serviceMgt/category');
+            if (this.props.location.state.data.staff === "All Staff") {
+                this.setState({ arrayValue: response });
+            } else {
+                const service = await fetchAPI('GET', `serviceMgt/services/${this.props.location.state.data._id}`);
+                this.setState({ arrayValue: service.staff });
+            }
+            this.setState({
+                staffList: response,
+                categoryList: categoryList
+            });
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
         }
-        this.setState({
-            staffList: response,
-            categoryList: categoryList
-        });
     }
 
     selectMultipleOption(value) {

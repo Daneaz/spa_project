@@ -24,7 +24,9 @@ router.get('/appointment/:id', async (reqe, res, next) => {
                 }
             });
         res.send(appointment);
-    } catch (err) { res.status(400).json({ error: `Cannot get appointment, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get appointment, ${err.message}` })
+    }
 });
 
 /* POST Create appointment. */
@@ -61,7 +63,9 @@ router.post('/appointment', async (reqe, res, next) => {
         }).catch(err => {
             res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
         })
-    } catch (err) { res.status(400).json({ error: `Cannot create appointment, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+    }
 });
 
 /* PATCH Update appointment. */
@@ -126,9 +130,11 @@ router.patch('/appointment/:id', async (reqe, res, next) => {
                 })
             })
         }).catch(err => {
-            res.status(400).json({ error: `Cannot create appointment, ${err.message}` })
+            res.status(400).json({ error: `Cannot update appointment, ${err.message}` })
         })
-    } catch (err) { res.status(400).json({ error: `Cannot create appointment, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update appointment, ${err.message}` })
+    }
 });
 
 /* DELETE disable booking. */
@@ -154,7 +160,9 @@ router.delete('/appointment/:id', async (reqe, res, next) => {
                 })
             }
         })
-    } catch (err) { res.status(400).json({ error: `Cannot delete appointment, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot delete appointment, ${err.message}` })
+    }
 
 });
 
@@ -181,7 +189,9 @@ router.get('/bookings', async (reqe, res, next) => {
             }
         ])
         res.send(bookings);
-    } catch (err) { res.status(400).json({ error: `Cannot get bookings, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get booking list, ${err.message}` })
+    }
 });
 
 /* GET available staff list. */
@@ -211,7 +221,9 @@ router.post('/availablestaff', async (reqe, res, next) => {
             }
         }
         res.send(staffList);
-    } catch (err) { res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot get availablestaff list, ${err.message}` })
+    }
 });
 
 /* Get Category. */
@@ -224,7 +236,7 @@ router.get('/availableservice/:id', async (reqe, res, next) => {
         let availableservice = await Service.find({ delFlag: false, category: reqe.params.id }).populate('staff')
         res.send(availableservice);
     } catch (err) {
-        res.status(400).json({ error: `Cannot get availablestaff, ${err.message}` })
+        res.status(400).json({ error: `Cannot get available staff, ${err.message}` })
     }
 });
 
@@ -246,7 +258,9 @@ router.post('/bookings', async (reqe, res, next) => {
         logger.audit("Booking Mgt", "Create", doc._id, staff.id, `A new booking has been created by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot create booking, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot create booking, ${err.message}` })
+    }
 });
 
 /* PATCH update booking. */
@@ -275,7 +289,9 @@ router.patch('/bookings/:id', async (reqe, res, next) => {
         logger.audit("Booking Mgt", "Update", doc._id, staff.id, `Booking has been updated by ${staff.displayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot update booking, ${err.message}` }); }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update booking, ${err.message}` });
+    }
 
 });
 
@@ -299,7 +315,9 @@ router.delete('/bookings/:id', async (reqe, res, next) => {
         logger.audit("Booking Mgt", "Delete", doc._id, staff.id, `Booking has been deleted by ${staff.DisplayName}`);
         res.json(rsObj);
 
-    } catch (err) { res.status(400).json({ error: `Cannot delete booking, ${err.message}` }) }
+    } catch (err) {
+        res.status(400).json({ error: `Cannot delete booking, ${err.message}` })
+    }
 
 });
 

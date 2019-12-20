@@ -71,7 +71,11 @@ class FacialLogin extends React.Component {
                 .then(() => {
                     setTimeout(() => this.startDetection(), 1000);
                 })).catch(error => {
-                    console.log(error);
+                    Swal.fire({
+                        type: 'error',
+                        title: "Opps... Something Wrong...",
+                        text: error
+                    })
                 })
     }
 

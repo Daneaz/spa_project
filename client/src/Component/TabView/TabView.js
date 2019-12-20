@@ -4,11 +4,18 @@ import SwipeableViews from 'react-swipeable-views';
 import { withStyles } from '@material-ui/styles';
 // import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { Tabs, Tab, Typography, Box, Divider, ListItem, Grid } from '@material-ui/core';
+import AppointmentListView from '../Invoice/AppointmentListView'
 import InvoiceListView from '../Invoice/InvoiceListView'
 
 function Appointment(props) {
     return (
-        <InvoiceListView bookings={props.bookings} click={props.click} />
+        <AppointmentListView bookings={props.bookings} click={props.click} />
+    )
+}
+
+function Invoice(props) {
+    return (
+        <InvoiceListView invoice={props.invoice} click={props.click} />
     )
 }
 
@@ -21,7 +28,10 @@ function Record(props) {
                     justify="space-between"
                     alignItems="center"
                     direction="row">
-                    <h3><strong>S${props.creditRecord.amount}</strong></h3>
+                    <div>
+                        <h3><strong>S${props.creditRecord.amount}</strong></h3>
+                        <light>{new Date(props.creditRecord.createdAt).toLocaleString()}</light>
+                    </div>
                     Added By {props.creditRecord.staff.displayName}
                 </Grid>
                 :
@@ -30,75 +40,77 @@ function Record(props) {
                     justify="space-between"
                     alignItems="center"
                     direction="row">
-                    <h3><strong>S${props.creditRecord.amount}</strong></h3>
+                    <div>
+                        <h3><strong>S${props.creditRecord.amount}</strong></h3>
+                        <light>{new Date(props.creditRecord.createdAt).toLocaleString()}</light>
+                    </div>
                     <div>
                         {props.creditRecord.services.map(service => {
                             return <div>{service}</div>
                         })}
                     </div>
                 </Grid>
-                    }
-        
+            }
+
         </ListItem>
     )
-        }
-        
+}
+
 function TabPanel(props) {
-    const {children, value, index, ...other } = props;
-        
-            return (
+    const { children, value, index, ...other } = props;
+
+    return (
         <Typography
-                component="div"
-                role="tabpanel"
-                hidden={value !== index}
-                id={`full-width-tabpanel-${index}`}
-                aria-labelledby={`full-width-tab-${index}`}
-                {...other}
-            >
-                <Box p={3}>{children}</Box>
-            </Typography>
-            );
-        }
-        
+            component="div"
+            role="tabpanel"
+            hidden={value !== index}
+            id={`full-width-tabpanel-${index}`}
+            aria-labelledby={`full-width-tab-${index}`}
+            {...other}
+        >
+            <Box p={3}>{children}</Box>
+        </Typography>
+    );
+}
+
 TabPanel.propTypes = {
-                children: PropTypes.node,
-            index: PropTypes.any.isRequired,
-            value: PropTypes.any.isRequired,
-        };
-        
+    children: PropTypes.node,
+    index: PropTypes.any.isRequired,
+    value: PropTypes.any.isRequired,
+};
+
 function a11yProps(index) {
     return {
-                id: `full-width-tab-${index}`,
+        id: `full-width-tab-${index}`,
         'aria-controls': `full-width-tabpanel-${index}`,
-        };
-    }
-    
+    };
+}
+
 const styles = theme => ({
-                root: {
-                backgroundColor: theme.palette.background.paper,
-            width: 500,
-        },
-    });
-    
+    root: {
+        backgroundColor: theme.palette.background.paper,
+        width: 500,
+    },
+});
+
 class TabView extends React.Component {
-                state = {
-                    value: 0,
-                    index: null,
-                }
+    state = {
+        value: 0,
+        index: null,
+    }
 
     handleChange = (event, newValue) => {
-                this.setState({ value: newValue })
-            };
-        
+        this.setState({ value: newValue })
+    };
+
     handleChangeIndex = index => {
-                this.setState({ index: index })
-            };
-        
+        this.setState({ index: index })
+    };
+
     render() {
-        const {appointments, invoices, creditRecords} = this.props
-        const {value} = this.state
-    
-            return (
+        const { appointments, invoices, creditRecords } = this.props
+        const { value } = this.state
+        return (
             <div>
                 <Tabs
                     value={value}
@@ -141,7 +153,7 @@ class TabView extends React.Component {
                                 return (
                                     <React.Fragment>
                                         <Divider />
-                                        <Appointment bookings={invoice.appointment.bookings} click={() => {
+                                        <Invoice invoice={invoice} click={() => {
                                             const { history } = this.props;
                                             history.push({
                                                 pathname: "/invoice/detail",
@@ -172,8 +184,8 @@ class TabView extends React.Component {
                     }
                 </TabPanel>
             </div>
-            );
-        }
+        );
     }
-    
+}
+
 export default withStyles(styles)(TabView);

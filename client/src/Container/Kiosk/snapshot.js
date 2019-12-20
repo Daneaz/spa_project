@@ -74,7 +74,13 @@ class Snapshot extends React.Component {
             .then(() => faceapi.loadTinyFaceDetectorModel(MODEL_URL)
                 .then(() => {
                     setTimeout(() => this.startDetection(), 1000);
-                }));
+                })).catch(error => {
+                    Swal.fire({
+                        type: 'error',
+                        title: "Opps... Something Wrong...",
+                        text: error
+                    })
+                });
     }
 
     componentWillUnmount() {

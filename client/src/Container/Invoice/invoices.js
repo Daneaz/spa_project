@@ -89,13 +89,21 @@ class Invoice extends React.Component {
     })
 
     async componentDidMount() {
-        let invoiceList = await fetchAPI('GET', 'invoiceMgt/invoicelist');
-        invoiceList.map(invoice =>{
-            invoice.createdAt = new Date(invoice.createdAt).toLocaleDateString()
-        })
-        this.setState({
-            invoiceList: invoiceList
-        });
+        try {
+            let invoiceList = await fetchAPI('GET', 'invoiceMgt/invoicelist');
+            invoiceList.map(invoice => {
+                invoice.createdAt = new Date(invoice.createdAt).toLocaleDateString()
+            })
+            this.setState({
+                invoiceList: invoiceList
+            });
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
     }
 
     handleRowClick = async (rowMeta) => {
@@ -120,13 +128,13 @@ class Invoice extends React.Component {
                     type: 'success', text: response.ok,
                     title: "Success!"
                 })
-            } else { 
+            } else {
                 Swal.fire({
                     type: 'error',
                     title: "Opps... Something Wrong...",
                     text: response.error
                 })
-             }
+            }
         }
         catch (error) {
             Swal.fire({

@@ -89,26 +89,34 @@ class Service extends React.Component {
   })
 
   async componentDidMount() {
-    let displayService = await fetchAPI('GET', 'serviceMgt/services');
-    let staffs = await fetchAPI('GET', 'staffMgt/totalstaffs');
-    let services = displayService;
+    try {
+      let displayService = await fetchAPI('GET', 'serviceMgt/services');
+      let staffs = await fetchAPI('GET', 'staffMgt/totalstaffs');
+      let services = displayService;
 
-    displayService.map(service => {
-      let tempStaffs = "";
-      if (service.staff.length === staffs.total) {
-        tempStaffs = "All Staff";
-      } else {
-        service.staff.map(staff => {
-          tempStaffs += staff.displayName + ', ';
-        });
-        tempStaffs = tempStaffs.slice(0, -2);
-      }
-      service.staff = tempStaffs;
-    });
-    this.setState({
-      serviceList: services,
-      displayServiceList: displayService
-    });
+      displayService.map(service => {
+        let tempStaffs = "";
+        if (service.staff.length === staffs.total) {
+          tempStaffs = "All Staff";
+        } else {
+          service.staff.map(staff => {
+            tempStaffs += staff.displayName + ', ';
+          });
+          tempStaffs = tempStaffs.slice(0, -2);
+        }
+        service.staff = tempStaffs;
+      });
+      this.setState({
+        serviceList: services,
+        displayServiceList: displayService
+      });
+    } catch (error) {
+      Swal.fire({
+        type: 'error',
+        title: "Opps... Something Wrong...",
+        text: error
+      })
+    }
   }
 
   handleAddService = () => {
@@ -141,7 +149,7 @@ class Service extends React.Component {
         Swal.fire({
           type: 'success', text: response.ok,
           title: "Success!"
-      })
+        })
       } else {
         Swal.fire({
           type: 'error',

@@ -80,8 +80,16 @@ class Staff extends React.Component {
   }
 
   async componentDidMount() {
-    const response = await fetchAPI('GET', 'staffMgt/staffs');
-    this.setState({ userList: response });
+    try {
+      const response = await fetchAPI('GET', 'staffMgt/staffs');
+      this.setState({ userList: response });
+    } catch (error) {
+      Swal.fire({
+        type: 'error',
+        title: "Opps... Something Wrong...",
+        text: error
+      })
+    }
   }
 
   handleAddStaff = () => {
