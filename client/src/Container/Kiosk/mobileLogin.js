@@ -99,6 +99,12 @@ class MobileLogin extends React.Component {
 
         if (!input.mobile) {
             Swal.fire({
+                type: 'error', text: 'Please enter mobile number',
+                title: "Error"
+            })
+            return;
+        } else if (input.mobile.length < 8) {
+            Swal.fire({
                 type: 'error', text: 'Mobile must be 8 digit',
                 title: "Error"
             })
