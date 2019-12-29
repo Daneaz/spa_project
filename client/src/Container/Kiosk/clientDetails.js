@@ -161,6 +161,12 @@ class ClientDetails extends React.Component {
 
         if (!input.mobile) {
             Swal.fire({
+                type: 'error', text: 'Please enter mobile number',
+                title: "Error"
+            })
+            return;
+        } else if (input.mobile.length < 8) {
+            Swal.fire({
                 type: 'error', text: 'Mobile must be 8 digit',
                 title: "Error"
             })
@@ -233,6 +239,15 @@ class ClientDetails extends React.Component {
 
     handleDateChange = (value) => {
         this.setState({ selectedDate: value })
+    }
+
+    handleCancelClick = () => {
+        let client = getClient();
+
+        this.setState({
+            edit: true,
+            input: client
+        })
     }
 
     render() {
@@ -336,7 +351,7 @@ class ClientDetails extends React.Component {
                             }}
                             isDisabled={edit}
                         />
-                        <div style={{textAlign: "center"}}>
+                        <div style={{ textAlign: "center" }}>
                             <Typography style={{ fontSize: 50, marginTop: 20 }} color="primary">
                                 Credit: {this.state.input.credit}
                             </Typography>
@@ -362,14 +377,12 @@ class ClientDetails extends React.Component {
                                     Update
                             </Button>
                                 <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
-                                    style={{ fontSize: mainFontSize }} onClick={() => this.setState({ edit: true })}
+                                    style={{ fontSize: mainFontSize }} onClick={this.handleCancelClick}
                                 >
                                     Cancel
                             </Button>
                             </React.Fragment>
                         }
-
-
                     </form>
                 </Container>
                 <Dialog
@@ -377,11 +390,11 @@ class ClientDetails extends React.Component {
                     maxWidth="xl"
                     style={{ fontSize: mainFontSize }}
                     open={this.state.keyboardOpen}
-                    // onEnter={() => {
-                    //     //clear the display value when open
-                    //     var value = this.refs.displayValue;
-                    //     value.children[0].children[0].value = '';
-                    // }}
+                    onEnter={() => {
+                        //clear the display value when open
+                        var value = this.refs.displayValue;
+                        value.children[0].children[0].value = input[this.state.inputName];
+                    }}
                     onClose={this.handleKeyboardClose}
                     TransitionComponent={Transition}
                     keepMounted
