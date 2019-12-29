@@ -184,6 +184,7 @@ class SelectService extends React.Component {
                     customClass: {
                         popup: 'animated tada'
                     },
+                    allowOutsideClick: false,
                     preConfirm: () => {
                         return this.props.history.push('/start')
                     }
