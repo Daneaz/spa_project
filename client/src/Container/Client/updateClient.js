@@ -58,7 +58,7 @@ class UpdateClient extends React.Component {
                         validate={values => {
                             const errors = {};
                             if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
+                            if (!values.displayName) { errors.displayName = 'Please enter display name' }
                             if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
                             return errors;
                         }}

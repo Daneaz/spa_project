@@ -66,9 +66,9 @@ class NewClient extends React.Component {
                         validate={values => {
                             const errors = {};
                             if (!values.mobile) { errors.mobile = 'Please enter mobile number' }
-                            if (!values.password) { errors.password = 'Please enter password' }
-                            if (!values.confirmPassoword) { errors.confirmPassoword = 'Please enter password' }
-                            if (!values.displayName) { errors.displayName = 'Please enter password' }
+                            if (!values.displayName) { errors.displayName = 'Please enter display name' }
+                            // if (!values.password) { errors.password = 'Please enter password' }
+                            // if (!values.confirmPassoword) { errors.confirmPassoword = 'Please enter password' }
                             if (values.password !== values.confirmPassoword) { errors.confirmPassoword = 'Password does not match' }
                             return errors;
                         }}
@@ -110,7 +110,7 @@ class NewClient extends React.Component {
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="confirmPassoword" label="Confirm Password" type="password"
-                                />
+                                /> */}
                                 <Field
                                     component={TextField} variant="outlined" margin="normal" fullWidth
                                     name="displayName" label="Display Name"

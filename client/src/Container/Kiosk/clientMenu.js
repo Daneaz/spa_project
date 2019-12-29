@@ -2,11 +2,11 @@ import React from 'react';
 import { Animated } from "react-animated-css";
 import { ButtonBase, Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/styles';
-import { removeToken, removeLocalStorage, removeClient } from '../../utils';
+import { getClient } from '../../utils';
 import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
 import Swal from 'sweetalert2'
-const LoginImage = '/static/images/login.png';
-const RegisterImage = '/static/images/register.png';
+const ProfileImage = '/static/images/editprofile.png';
+const AppointmentImage = '/static/images/appointment.png';
 
 
 const styles = theme => ({
@@ -63,13 +63,15 @@ const styles = theme => ({
     },
 });
 
-class FacialLogin extends React.Component {
+class ClientMenu extends React.Component {
 
+    state = {
+        displayName: null
+    }
     componentDidMount() {
         try {
-            removeLocalStorage("userid");
-            removeToken();
-            removeClient();
+            let user = getClient();
+            this.setState({ displayName: user.displayName })
         } catch (error) {
             Swal.fire({
                 type: 'error',
@@ -79,24 +81,24 @@ class FacialLogin extends React.Component {
         }
     }
 
-    handleRegisterClick = () => {
+    handleEditClick = () => {
         const { history } = this.props;
         setTimeout(function () {
-            history.push('/register');
+            history.push('/clientdetails');
         }, 500);
     }
 
-    handleFacialLoginClick = () => {
+    handleSelectServiceClick = () => {
         const { history } = this.props;
         setTimeout(function () {
-            history.push('/mobilelogin');
+            history.push('/selectservice');
         }, 500);
     }
 
     render() {
         const { classes } = this.props;
         return (
-            <KioskLayout {...this.props} imageWidth={320} imagePadding={50} homePage={true} >
+            <KioskLayout {...this.props} imageWidth={200} imagePadding={10} displayName={this.state.displayName} >
                 <Grid
                     container
                     spacing={5}
@@ -105,21 +107,21 @@ class FacialLogin extends React.Component {
                     alignItems="center"
                 >
                     <Grid item>
-                        <Animated animationInDelay={500} animationIn="bounceInLeft" animationOut="fadeOut" >
+                        <Animated animationInDelay={500} animationIn="bounceInLeft" animationOut="fadeOut">
                             <ButtonBase
                                 focusRipple
                                 className={classes.image}
                                 focusVisibleClassName={classes.focusVisible}
                                 style={{
                                     width: 300,
-                                    height: 360,
+                                    height: 310,
                                 }}
-                                onClick={this.handleRegisterClick}
+                                onClick={this.handleEditClick}
                             >
                                 <span
                                     className={classes.imageSrc}
                                     style={{
-                                        backgroundImage: `url(${RegisterImage})`,
+                                        backgroundImage: `url(${ProfileImage})`,
                                     }}
                                 />
                             </ButtonBase>
@@ -133,14 +135,14 @@ class FacialLogin extends React.Component {
                                 focusVisibleClassName={classes.focusVisible}
                                 style={{
                                     width: 300,
-                                    height: 360,
+                                    height: 310,
                                 }}
-                                onClick={this.handleFacialLoginClick}
+                                onClick={this.handleSelectServiceClick}
                             >
                                 <span
                                     className={classes.imageSrc}
                                     style={{
-                                        backgroundImage: `url(${LoginImage})`,
+                                        backgroundImage: `url(${AppointmentImage})`,
                                     }}
                                 />
                             </ButtonBase>
@@ -152,4 +154,4 @@ class FacialLogin extends React.Component {
     }
 }
 
-export default withStyles(styles)(FacialLogin);
+export default withStyles(styles)(ClientMenu);

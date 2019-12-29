@@ -36,6 +36,7 @@ router.get('/faciallogin/:id', async (reqe, res, next) => {
                 "nric": 1,
                 "gender": 1,
                 "credit": 1,
+                "birthday": 1,
             });
 
         if (userObj != null) {
@@ -80,6 +81,7 @@ router.get('/mobilelogin/:mobile', async (reqe, res, next) => {
                 "nric": 1,
                 "gender": 1,
                 "credit": 1,
+                "birthday": 1,
             });
 
         if (userObj != null) {
@@ -119,13 +121,13 @@ router.post('/clients', async (reqe, res, next) => {
         let rawNewClient = reqe.body;
 
         let sClient = await Client.findOne({ "mobile": rawNewClient.mobile }).lean().select({ "mobile": 1 });
-        if (sClient != null) { throw new Error('login name is already taken.') }
+        if (sClient != null) { throw new Error('mobile number is already exist.') }
 
         //load main fields
         let newClient = new Client(rawNewClient);
 
-        //load fields by biz logic
-        newClient.password = auth.hash(rawNewClient.password);
+        // Disable password for register
+        // newClient.password = auth.hash(rawNewClient.password);
 
         //save client 
         let user = await newClient.save();
@@ -135,6 +137,33 @@ router.post('/clients', async (reqe, res, next) => {
 
     } catch (err) {
         res.status(400).json({ error: `Cannot create client, ${err.message}` })
+    }
+
+});
+
+router.patch('/clients/:id', async (reqe, res, next) => {
+    try {
+        let rawNewClient = reqe.body;
+
+        //load data from db
+        let newClient = await Client.findOne({ "_id": reqe.params.id, "delFlag": false });
+
+        newClient.updatedBy = newClient._id;
+        newClient.email = rawNewClient.email || newClient.email;
+        newClient.displayName = rawNewClient.displayName || newClient.displayName;
+        newClient.mobile = rawNewClient.mobile || newClient.mobile;
+        newClient.gender = rawNewClient.gender || newClient.gender;
+        newClient.nric = rawNewClient.nric || newClient.nric;
+        newClient.birthday = rawNewClient.birthday || newClient.birthday;
+
+        //save user 
+        let doc = await newClient.save();
+        let rsObj = { ok: "Client has been updated.", client: newClient };
+        logger.audit("Client Mgt", "Update", doc._id, newClient._id, `Client has been updated by ${newClient.displayName}`);
+        res.json(rsObj);
+
+    } catch (err) {
+        res.status(400).json({ error: `Cannot update user, ${err.message}` });
     }
 
 });

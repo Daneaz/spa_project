@@ -6,7 +6,6 @@ import {
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
-import SelectService from '../../Component/Kiosk/Checkout/Checkout'
 import { fetchAPI, setClient, setToken } from '../../utils';
 
 const mainFontSize = 35;
@@ -47,8 +46,6 @@ class MobileLogin extends React.Component {
         input: {},
         inputName: "mobile",
         keyboardOpen: false,
-        displayName: '',
-        login: false,
     };
 
     onChangeAll = inputObj => {
@@ -111,10 +108,7 @@ class MobileLogin extends React.Component {
             if (respObj && respObj.ok) {
                 setToken(respObj.token);
                 setClient(respObj.user);
-                this.setState({
-                    displayName: respObj.user.displayName,
-                    login: true
-                })
+                this.props.history.push('/clientdetails');
             } else {
                 Swal.fire({
                     type: 'error', text: 'Please try again.',
@@ -138,33 +132,26 @@ class MobileLogin extends React.Component {
             <KioskLayout {...this.props} imageWidth={200} imagePadding={10} displayName={this.state.displayName}>
 
                 <div style={{ flexDirection: 'column', alignItems: 'center', display: 'flex' }} >
-                    {!this.state.login ?
-                        <div style={{ display: "block" }} >
-                            <Typography style={{ fontSize: 50, }} color="primary">
-                                Login
+                    <div style={{ display: "block" }} >
+                        <Typography style={{ fontSize: 50, }} color="primary">
+                            Login
                             </Typography>
-                            <form style={{ flexDirection: 'column', alignItems: 'center', display: 'flex', minWidth: 600 }}>
-                                <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
-                                    InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
-                                    variant="outlined" margin="normal" fullWidth
-                                    name="mobile" label="Mobile" type="number"
-                                    onClick={this.setActiveInput}
-                                    value={input["mobile"] || ""}
-                                    onChange={e => this.onChangeInput(e)}
-                                />
-                                <Button variant="contained" color="primary" fullWidth className={classes.login}
-                                    style={{ fontSize: mainFontSize }} onClick={this.login}
-                                >
-                                    Login
+                        <form style={{ flexDirection: 'column', alignItems: 'center', display: 'flex', minWidth: 600 }}>
+                            <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
+                                InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                                variant="outlined" margin="normal" fullWidth
+                                name="mobile" label="Mobile" type="number"
+                                onClick={this.setActiveInput}
+                                value={input["mobile"] || ""}
+                                onChange={e => this.onChangeInput(e)}
+                            />
+                            <Button variant="contained" color="primary" fullWidth className={classes.login}
+                                style={{ fontSize: mainFontSize }} onClick={this.login}
+                            >
+                                Login
                         </Button>
-                            </form>
-                        </div> :
-                        null
-                    }
-                    {this.state.login ?
-                        <SelectService {...this.props} />
-                        : null
-                    }
+                        </form>
+                    </div>
                 </div>
                 <Dialog
                     fullWidth
@@ -184,7 +171,7 @@ class MobileLogin extends React.Component {
                 >
                     <DialogContent>
                         <div>
-                            <TextField InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
+                            <TextField fullWidth InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                                 ref="displayValue" value={input[this.state.inputName]} placeholder={"Tap to start"} onChange={e => this.onChangeAll(e)} />
                             <Keyboard
                                 keyboardRef={r => (this.keyboard = r)}

@@ -5,11 +5,12 @@ import {
     Typography, Button, Container, Dialog, DialogContent, Slide, TextField
 } from '@material-ui/core';
 import KioskLayout from '../../Component/Kiosk/KioskLayout/KioskLayout';
-import { fetchAPI, setClient } from '../../utils';
+import { fetchAPI, getClient } from '../../utils';
 import Swal from 'sweetalert2';
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import DateFnsUtils from '@date-io/date-fns';
+import { green } from '@material-ui/core/colors';
 import {
     DatePicker,
     MuiPickersUtilsProvider,
@@ -40,24 +41,62 @@ const genderOptions = [
     { value: "F", label: 'F' },
 ];
 
-class Register extends React.Component {
+class ClientDetails extends React.Component {
     state = {
         layoutName: "default",
-        inputName: "mobile",
+        inputName: null,
         input: {},
         submittedData: "",
         gender: genderOptions[0],
         keyboardOpen: false,
         selectedDate: null,
+        edit: true
     };
+
+    componentDidMount() {
+        try {
+            let client = getClient();
+            this.setState({
+                input: client,
+                displayName: client.displayName,
+                gender: { value: client.gender, label: client.gender },
+                selectedDate: client.birthday
+            })
+        } catch (error) {
+            Swal.fire({
+                type: 'error',
+                title: "Opps... Something Wrong...",
+                text: error
+            })
+        }
+    }
 
     handleGenderSelection = (gender) => {
         this.setState({ gender });
     }
 
+    onChangeInput = event => {
+        let inputVal = event.target.value;
+
+        let updatedInputObj = {
+            ...this.state.input,
+            [this.state.inputName]: inputVal
+        }
+
+        this.setState(
+            {
+                input: updatedInputObj
+            },
+            () => {
+                this.keyboard.setInput(inputVal);
+            }
+        );
+    };
+
     onChangeAll = inputObj => {
+        let input = { ...this.state.input, ...inputObj }
         this.setState({
-            input: inputObj
+            input: input
         });
     };
 
@@ -91,24 +130,6 @@ class Register extends React.Component {
         });
     };
 
-    onChangeInput = event => {
-        let inputVal = event.target.value;
-
-        let updatedInputObj = {
-            ...this.state.input,
-            [this.state.inputName]: inputVal
-        };
-
-        this.setState(
-            {
-                input: updatedInputObj
-            },
-            () => {
-                this.keyboard.setInput(inputVal);
-            }
-        );
-    };
-
     setActiveInput = inputName => {
         if (inputName === 'mobile') {
             this.setState({ layoutName: "mobile" })
@@ -134,7 +155,7 @@ class Register extends React.Component {
         this.setState({ keyboardOpen: false });
     }
 
-    submit = async () => {
+    update = async () => {
         const { input, gender } = this.state;
         input.gender = gender.value;
 
@@ -182,14 +203,11 @@ class Register extends React.Component {
             return;
         }
         try {
-            fetchAPI('POST', 'kioskMgt/clients', this.state.input).then(respObj => {
+            fetchAPI('PATCH', `kioskMgt/clients/${this.state.input._id}`, this.state.input).then(respObj => {
                 if (respObj && respObj.ok) {
-                    // disable for camera
-                    // setClient(respObj.user._id);
-                    // this.props.history.push('/snapshot');
                     Swal.fire({
                         type: 'success',
-                        title: "Register Success!",
+                        title: "Update Success!",
                         animation: false,
                         customClass: {
                             popup: 'animated tada'
@@ -219,21 +237,20 @@ class Register extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { input } = this.state;
+        const { input, edit } = this.state;
         return (
-            <KioskLayout {...this.props} imageWidth={160} imagePadding={10}>
+            <KioskLayout {...this.props} imageWidth={130} imagePadding={10} displayName={this.state.displayName}>
                 <Container component="main" maxWidth="md" className={classes.container} >
-                    <Typography style={{ fontSize: 50, }} color="primary">
-                        New Client Onboard
-                            </Typography>
+
                     <form>
                         <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
                             InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                             variant="outlined" margin="normal" fullWidth
                             name="mobile" label="Mobile" type="number"
-                            onClick={() => this.setActiveInput("mobile")}
+                            onClick={edit ? null : () => this.setActiveInput("mobile")}
                             value={input["mobile"] || ""}
                             onChange={e => this.onChangeInput(e)}
+                            disabled={edit}
                         />
 
                         {// Disable password for register
@@ -241,41 +258,46 @@ class Register extends React.Component {
                             InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                             variant="outlined" margin="normal" fullWidth
                             name="password" label="Password" type="password"
-                            onClick={() => this.setActiveInput("password")}
+                            onClick={edit ? null : () => this.setActiveInput("password")}
                             value={input["password"] || ""}
                             onChange={e => this.onChangeInput(e)}
+                            disabled={edit}
                         /> */}
                         {/* <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
                             InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                             variant="outlined" margin="normal" fullWidth
                             name="confirmPassoword" label="Confirm Password" type="password"
-                            onClick={() => this.setActiveInput("confirmPassoword")}
+                            onClick={edit ? null : () => this.setActiveInput("confirmPassoword")}
                             value={input["confirmPassoword"] || ""}
                             onChange={e => this.onChangeInput(e)}
+                            disabled={edit}
                         /> */}
                         <TextField style={{ backgroundColor: "#f2f1ed", fontSize: "30px" }} autoComplete='off'
                             InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                             variant="outlined" margin="normal" fullWidth
                             name="displayName" label="Display Name"
-                            onClick={() => this.setActiveInput("displayName")}
+                            onClick={edit ? null : () => this.setActiveInput("displayName")}
                             value={input["displayName"] || ""}
                             onChange={e => this.onChangeInput(e)}
+                            disabled={edit}
                         />
                         <TextField style={{ backgroundColor: "#f2f1ed", fontSize: "30px" }} autoComplete='off'
                             InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                             variant="outlined" margin="normal" fullWidth
                             name="email" label="Email"
-                            onClick={() => this.setActiveInput("email")}
+                            onClick={edit ? null : () => this.setActiveInput("email")}
                             value={input["email"] || ""}
                             onChange={e => this.onChangeInput(e)}
+                            disabled={edit}
                         />
                         <TextField style={{ backgroundColor: "#f2f1ed" }} autoComplete='off'
                             InputProps={{ style: { fontSize: mainFontSize } }} InputLabelProps={{ style: { fontSize: mainFontSize } }}
                             variant="outlined" margin="normal" fullWidth
                             name="nric" label="NRIC"
-                            onClick={() => this.setActiveInput("nric")}
+                            onClick={edit ? null : () => this.setActiveInput("nric")}
                             value={input["nric"] || ""}
                             onChange={e => this.onChangeInput(e)}
+                            disabled={edit}
                         />
                         <MuiPickersUtilsProvider utils={DateFnsUtils}>
                             <DatePicker
@@ -292,9 +314,10 @@ class Register extends React.Component {
                                 margin="normal"
                                 inputVariant="outlined"
                                 variant="outlined"
-                                value={this.state.selectedDate} onChange={this.handleDateChange} />
+                                value={this.state.selectedDate} onChange={this.handleDateChange}
+                                disabled={edit} />
                         </MuiPickersUtilsProvider>
-                        <Typography variant='h3' color='primary' gutterBottom>
+                        <Typography variant='h5' gutterBottom>
                             Gender
                                 </Typography>
                         <Select className={classes.select}
@@ -311,18 +334,42 @@ class Register extends React.Component {
                                     fontSize: mainFontSize,
                                 })
                             }}
+                            isDisabled={edit}
                         />
+                        <div style={{textAlign: "center"}}>
+                            <Typography style={{ fontSize: 50, marginTop: 20 }} color="primary">
+                                Credit: {this.state.input.credit}
+                            </Typography>
+                        </div>
+                        {this.state.edit ?
+                            <React.Fragment>
+                                <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                                    style={{ fontSize: mainFontSize }} onClick={() => this.setState({ edit: false })}
+                                >
+                                    Edit
+                            </Button>
+                                <ColorButton variant="contained" fullWidth className={classes.cancel}
+                                    onClick={() => { this.props.history.push('/selectservice') }} style={{ fontSize: mainFontSize }}
+                                >
+                                    Check In
+                                </ColorButton>
+                            </React.Fragment>
+                            :
+                            <React.Fragment>
+                                <Button variant="contained" color="primary" fullWidth className={classes.submit}
+                                    style={{ fontSize: mainFontSize }} onClick={this.update}
+                                >
+                                    Update
+                            </Button>
+                                <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
+                                    style={{ fontSize: mainFontSize }} onClick={() => this.setState({ edit: true })}
+                                >
+                                    Cancel
+                            </Button>
+                            </React.Fragment>
+                        }
 
-                        <Button variant="contained" color="primary" fullWidth className={classes.submit}
-                            style={{ fontSize: mainFontSize }} onClick={this.submit}
-                        >
-                            Register
-                                </Button>
-                        <Button variant="contained" color="secondary" fullWidth className={classes.cancel}
-                            onClick={() => { window.history.back(); }} style={{ fontSize: mainFontSize }}
-                        >
-                            Cancel
-                                </Button>
+
                     </form>
                 </Container>
                 <Dialog
@@ -330,11 +377,11 @@ class Register extends React.Component {
                     maxWidth="xl"
                     style={{ fontSize: mainFontSize }}
                     open={this.state.keyboardOpen}
-                    onEnter={() => {
-                        //clear the display value when open
-                        var value = this.refs.displayValue;
-                        value.children[0].children[0].value = '';
-                    }}
+                    // onEnter={() => {
+                    //     //clear the display value when open
+                    //     var value = this.refs.displayValue;
+                    //     value.children[0].children[0].value = '';
+                    // }}
                     onClose={this.handleKeyboardClose}
                     TransitionComponent={Transition}
                     keepMounted
@@ -384,4 +431,15 @@ class Register extends React.Component {
     }
 }
 
-export default withStyles(styles)(Register);
+const ColorButton = withStyles(theme => ({
+    root: {
+        color: theme.palette.getContrastText(green[600]),
+        backgroundColor: green[600],
+        '&:hover': {
+            backgroundColor: green[700],
+        },
+        marginTop: 30
+    },
+}))(Button);
+
+export default withStyles(styles)(ClientDetails);

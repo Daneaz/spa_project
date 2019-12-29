@@ -55,8 +55,9 @@ router.post('/clients', async (reqe, res, next) => {
         newClient.createdBy = staff._id;
         newClient.updatedBy = staff._id;
 
-        //load fields by biz logic
-        newClient.password = auth.hash(rawNewClient.password);
+        // password optional
+        if (rawNewClient.password)
+            newClient.password = auth.hash(rawNewClient.password);
 
         //save client 
         let doc = await newClient.save();
@@ -113,8 +114,9 @@ router.patch('/clients/:id', async (reqe, res, next) => {
         newClient.nric = rawNewClient.nric || newClient.nric;
         newClient.birthday = rawNewClient.birthday || newClient.birthday;
 
-        //load fields by biz logic
-        if (rawNewClient.password) { newClient.password = auth.hash(rawNewClient.password); }
+        // password optional
+        if (rawNewClient.password)
+            newClient.password = auth.hash(rawNewClient.password);
 
         //save user 
         let doc = await newClient.save();

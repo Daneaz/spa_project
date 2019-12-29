@@ -41,8 +41,9 @@ import MobileLogin from './Container/Kiosk/mobileLogin';
 import Register from './Container/Kiosk/register';
 import Snapshot from './Container/Kiosk/snapshot';
 import SnapshotManual from './Container/Kiosk/snapshotManual';
-
-
+import ClientMenu from './Container/Kiosk/clientMenu';
+import SelectService from './Container/Kiosk/selectservice';
+import ClientDetails from './Container/Kiosk/clientDetails';
 function PrivateRoute({ component: Component, ...rest }) {
     return (
         <Route
@@ -78,8 +79,11 @@ function Routers() {
                     <Route exact path="/register" component={Register} />
                     <Route exact path="/snapshot" component={Snapshot} />
                     <Route exact path="/snapshotmanual" component={SnapshotManual} />
+                    <Route exact path="/clientmenu" component={ClientMenu} />
+                    <Route exact path="/clientdetails" component={ClientDetails} />
+                    <Route exact path="/selectservice" component={SelectService} />
                     
-
+                    
                     <Route path="/login" component={Login} />
                     <Route exact path="/" component={Start} />
                     <PrivateRoute exact path="/dashboard" component={Dashboard} />
